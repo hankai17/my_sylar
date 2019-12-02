@@ -20,6 +20,7 @@ namespace slylar {
             ERROR   = 4,
             FATAL   = 5
         };
+       void ToString(LogLevel::level) {}
     };
 
     //(sylar::LogEvent::ptr(new sylar::LogEvent(logger, level, \
@@ -56,9 +57,16 @@ namespace slylar {
            init();
         }
 
+        class FormatItem {
+        public:
+            typedef std::shared_ptr<FormatItem> ptr;
+            virtual ~FormatItem() {};
+            virtual void format(std::ostream& os, std::shard_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event);
+        };
+
     private:
         std::string m_pattern;
-
+        std::vector<FormatItem::ptr> m_items;
     };
 
     class LogAppender { // Where to log
@@ -85,6 +93,7 @@ namespace slylar {
         Logger(const std::string& name = "root");
         //void log(LogLevel::Level level, const std::string& filename, uint32_t line_no, uint64_t m_time); // How to set formatter?  so ugly so enclosure a class
         void log(LogLevel::Level level, LogEvent::ptr event); // user how to use it. //Why ptr
+        std::string getName() const { return m_name; }
 
     private:
         std::string                 m_name;
