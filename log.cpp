@@ -194,7 +194,7 @@ namespace sylar {
             }
         }
 
-        //register map:
+        // register factory map
         static std::map<std::string, std::function<FormatItem::ptr(const std::string& str)> > s_format_items = {
 #define XX(str, C) \
         {#str, [](const std::string& fmt) {return FormatItem::ptr(new C(fmt))};}
