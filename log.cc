@@ -3,16 +3,37 @@
 //
 
 #include <cstdarg>
-#include "log.h"
+#include <string>
+#include <map>
+#include "log.hh"
 
 namespace sylar {
-    LogEvent::LogEvent(const char* file, uint64_t time, uint32_t line,
+    const char* LogLevel::ToString(LogLevel::Level level) {
+        switch (level) {
+#define XX(name) \
+            case LogLevel::name: \
+                return #name; \
+                break;
+                XX(DEBUG);
+            XX(INFO);
+            XX(WARN);
+            XX(ERROR);
+            XX(FATAL);
+#undef XX
+            default:
+                return "UNKNOWN";
+        }
+        return "UNKNOWN";
+    }
+
+    LogEvent::LogEvent(uint64_t time, LogLevel::Level level, const char* file, uint32_t line,
                        uint32_t tid, uint32_t fid)
-            : m_file(file),
-              m_time(time),
-              m_line(line),
-              m_threadId(tid),
-              m_fiberId(fid) {
+            :m_time(time),
+             m_level(level),
+             m_file(file),
+             m_line(line),
+             m_threadId(tid),
+             m_fiberId(fid) {
     }
 
     void LogEvent::format(const char* fmt, ...) {
@@ -145,13 +166,11 @@ namespace sylar {
             SUC  = 4
         };
 
-        std::string item = '';
-        std::string format = '';
+        std::string item;
+        std::string format;
         char* format_s = nullptr;
         char* format_e = nullptr;
-        int type = 0;
         parse_stat curr_state = INIT;
-        char word = '';
 
         for (size_t i = 0; i < m_pattern.size(); i++) { //%d{%Y-%m-%d %H:%M:%S}%T%t%T%F%T[%p]%T[%c]%T%f:%l%T%m%n
             switch(curr_state) {
@@ -159,13 +178,15 @@ namespace sylar {
                     if (m_pattern[i] == '%') {
                         curr_state = ITEM;
                         continue;
+                    } else if (m_pattern[i] == '[' || m_pattern[i] == ':') { // for special char
+                        curr_state = BAD;
                     } else {
                         curr_state = INIT;
                         continue;
                     }
                 case ITEM:
                     if (m_pattern[i] /*&& not space*/) { //TODO check vail
-                        if (item == '') {
+                        if (item == "") {
                             item = m_pattern[i];
                         }
 
@@ -174,7 +195,7 @@ namespace sylar {
                             format_s = &m_pattern[i];
                         }
 
-                        if ( i + 1 < m_pattern.size() && m_pattern[i + 1] == '%') {
+                        if ( i + 1 < m_pattern.size() && m_pattern[i + 1] != '{') {
                             curr_state = SUC;
                         }
                         continue;
@@ -191,6 +212,15 @@ namespace sylar {
                 case SUC:
                     vec.push_back(std::make_tuple(item, format, 1));
                     curr_state = INIT;
+                    item = "";
+                    format = "";
+                    break;
+                case BAD:
+                    vec.push_back(std::make_tuple(item, format, 0));
+                    curr_state = INIT;
+                    item = "";
+                    format = "";
+                    break;
             }
         }
 
@@ -213,7 +243,7 @@ namespace sylar {
 
         for (auto& i : vec) {
             if (std::get<2>(i) == 0) {
-                m_items.push_back(FormatItem::ptr(new StringFormatItem(std::get<0>(i)))); // "[" //TODO
+                m_items.push_back(FormatItem::ptr(new StringFormatItem(std::get<0>(i)))); // "["
             } else {
                 auto it = s_format_items.find(std::get<0>(i));
                 if (it != s_format_items.end()) {
@@ -225,9 +255,61 @@ namespace sylar {
         }
     }
 
-    Logger(const std::string& name)
+    std::string LogFormatter::format(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) {
+        std::ostream os;
+        for (auto&i in m_items) {
+            i->format(os, logger, level, event);
+        }
+        return ss.str();
+    }
+
+    void StdoutLogAppender::log(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) {
+        if (level >= m_level) {
+            std::cout <<  m_formatter->format(logger, level, event);
+        }
+    }
+
+    void FileLogAppender::log(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) {
+        if (level >= m_level) {
+            m_filestream << m_formatter->format(logger, level, event);
+        }
+    }
+
+    bool FileLogAppender::reopen() {
+        if (m_filestream) {
+            m_filestream.close();
+        }
+        m_filestream.open(m_filename, std::ios::app);
+        return !!m_filestream;
+    }
+
+    Logger::Logger(const std::string& name)
             : m_name(name),
               m_leven(LogLevel::DEBUG) {
-        m_formatter
+        m_formatter.reset(new LogFormatter("%d{%Y-%m-%d %H:%M:%S}%T%t%T%F%T[%p]%T[%c]%T%f:%l%T%m%n"));
     }
+
+    Logger::log(LogLevel::Level level, LogEvent::ptr event) {
+    if (level >= m_level) {
+    for (auto&i in m_appenders) {
+    i->log(this, level, event);
+}
+}
+}
+
+void Logger::addAppender(LogAppender::ptr appender) {
+    if (!appender->getFormatter()) {
+        appender->setFormatter(m_formatter);
+    }
+    m_appenders.push_back(appender);
+}
+
+void Logger::delAppender(LogAppender::ptr appender) {
+    for (auto it = m_appenders.begin(); it != m_appenders.end(); it++) {
+        if (*it == appender) {
+            m_appenders.earse(it);
+            break;
+        }
+    }
+}
 }
