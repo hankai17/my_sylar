@@ -5,17 +5,17 @@
 #ifndef _LOG_HH_
 #define _LOG_HH_
 
-#include <memory>
 #include <string>
 #include <stdint.h>
-#include <stdarg.h>
+#include <memory>
 #include <list>
 #include <sstream>
 #include <fstream>
 #include <vector>
+#include <stdarg.h>
 #include <map>
 
-namespace slylar {
+namespace sylar {
 
     class Logger;
 
@@ -29,16 +29,16 @@ namespace slylar {
             ERROR   = 4,
             FATAL   = 5
         };
-       const char* ToString(LogLevel::Level level);
+       static const char* ToString(LogLevel::Level level);
     };
 
     class LogEvent {
     public:
         typedef std::shared_ptr<LogEvent> ptr;
-        LogEvent(uint64_t time, LogLevel::Level level, char* file, uint32_t line, uint32_t tid, uint32_t fid);
+        LogEvent(uint64_t time, LogLevel::Level level, const char* file, uint32_t line, uint32_t tid, uint32_t fid);
         uint64_t getTime() const { return m_time; }
         LogLevel::Level getLevel() const { return m_level; }
-        const char* getFile() const { return filename; }
+        const char* getFile() const { return m_file; }
         uint32_t getLine() const { return m_line; }
         uint32_t getThreadId() const { return m_threadId; }
         uint32_t getFiberId() const { return m_fiberId; }
@@ -48,31 +48,29 @@ namespace slylar {
         void format(const char* fmt, ...); // Init ss
         void format(const char* fmt, va_list al);
     private:
-        const char* filename = nullptr; // Why not string // Below vaule all from para
         uint64_t m_time         = 0;
+        LogLevel::Level         m_level;
+        const char* m_file      = nullptr; // Why not string // Below vaule all from para
         uint32_t m_line         = 0;
         uint32_t m_threadId     = 0;
         uint32_t m_fiberId      = 0;
         std::stringstream       m_ss; // Why need this? We already had formatter
-        LogLevel::Level         m_level;
     };
 
     class LogFormatter { // This class used for log4j config
     public:
         typedef std::shared_ptr<LogFormatter> ptr;
-        LogFormatter(std::string& pattern)
-        : m_pattern(pattern) {
-           init(); // Parse log4j config then put every parsed item into m_items
-        }
-        void init();
+        LogFormatter(const std::string& pattern);
         //std::string format(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event); // Out put log // Why not ???
         std::string format(std::shared_ptr<Logger> logger, LogLevel::Level level, std::shared_ptr<LogEvent> event); // Out put log
+    public:
         class FormatItem {
         public:
             typedef std::shared_ptr<FormatItem> ptr;
             virtual ~FormatItem() {};
             virtual void format(std::ostream& os, std::shared_ptr<Logger> logger, LogLevel::Level level, std::shared_ptr<LogEvent> event);
         };
+        void init();
 
     private:
         std::string m_pattern;
@@ -88,7 +86,9 @@ namespace slylar {
         void setLevel(LogLevel::Level l) { m_level = l; }
         LogFormatter::ptr getFormatter() const { return m_formatter; }
         LogLevel::Level getLevel() const { return m_level; }
-    private:
+        virtual void log(std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event);
+
+    protected:
         LogLevel::Level     m_level;
         LogFormatter::ptr   m_formatter;
     };
