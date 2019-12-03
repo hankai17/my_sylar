@@ -58,7 +58,7 @@ namespace sylar {
     class DataTimeFormatItem : public FormatItem {
     public:
         DataTimeFormatItem(const string& str = "%Y-%m-%d %H:%M:%S")
-        : m_format(str) {
+                : m_format(str) {
             if (m_format.empty()) {
                 m_format = "%Y-%m-%d %H:%M:%S";
             }
@@ -126,7 +126,7 @@ namespace sylar {
     class StringFormatItem : public FormatItem {
     public:
         StringFormatItem(const string& str)
-        : m_string(str) {}
+                : m_string(str) {}
         void format(std::ostream &os, Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) {
             os << m_string;
         }
@@ -157,7 +157,7 @@ namespace sylar {
             switch(curr_state) {
                 case INIT:
                     if (m_pattern[i] == '%') {
-                       curr_state = ITEM;
+                        curr_state = ITEM;
                         continue;
                     } else {
                         curr_state = INIT;
@@ -177,7 +177,7 @@ namespace sylar {
                         if ( i + 1 < m_pattern.size() && m_pattern[i + 1] == '%') {
                             curr_state = SUC;
                         }
-                       continue;
+                        continue;
                     }
                     curr_state = BAD;
                     break;
@@ -198,32 +198,31 @@ namespace sylar {
         static std::map<std::string, std::function<FormatItem::ptr(const std::string& str)> > s_format_items = {
 #define XX(str, C) \
         {#str, [](const std::string& fmt) {return FormatItem::ptr(new C(fmt))};}
-        XX(m, MessageFormatItem),
-        XX(p, LevelFormatItem),
-        XX(c, NameFormatItem),
-        XX(t, ThreadIdFormatItem),
-        XX(n, NewLineFormatItem),
-        XX(d, DateTimeFormatItem),
-        XX(f, FilenameFormatItem),
-        XX(l, LineFormatItem),
-        XX(T, TabFormatItem),
-        XX(F, FiberIdFormatItem),
+                XX(m, MessageFormatItem),
+                XX(p, LevelFormatItem),
+                XX(c, NameFormatItem),
+                XX(t, ThreadIdFormatItem),
+                XX(n, NewLineFormatItem),
+                XX(d, DateTimeFormatItem),
+                XX(f, FilenameFormatItem),
+                XX(l, LineFormatItem),
+                XX(T, TabFormatItem),
+                XX(F, FiberIdFormatItem),
 #undef XX
         };
 
-    for (auto& i : vec) {
-        if (std::get<2>(i) == 0) {
-            m_items.push_back(FormatItem::ptr(new StringFormatItem(std::get<0>(i)))); // "[" //TODO
-        } else {
-            auto it = s_format_items.find(std::get<0>(i));
-            if (it != s_format_items.end()) {
-                m_items.push_back(it->second(std::get<1>(i)));
+        for (auto& i : vec) {
+            if (std::get<2>(i) == 0) {
+                m_items.push_back(FormatItem::ptr(new StringFormatItem(std::get<0>(i)))); // "[" //TODO
             } else {
-                m_items.push_back(FormatItem::ptr(new StringFormatItem("<<error format %" + std::get<0>(i) + ">>")));
+                auto it = s_format_items.find(std::get<0>(i));
+                if (it != s_format_items.end()) {
+                    m_items.push_back(it->second(std::get<1>(i)));
+                } else {
+                    m_items.push_back(FormatItem::ptr(new StringFormatItem("<<error format %" + std::get<0>(i) + ">>")));
+                }
             }
         }
-    }
-
     }
 
     Logger(const std::string& name)
