@@ -199,10 +199,20 @@ namespace sylar {
     }
 
     void Logger::delAppender(LogAppender::ptr appender) {
+        /*
         for (auto it = m_appenders.begin(); it != m_appenders.end(); it++) {
             if (*it == appender) {
                 m_appenders.erase(it);
                 break;
+            }
+        }
+         */
+        for (auto it = m_appenders.begin(); it != m_appenders.end();) {
+            if (*it == appender) {
+                m_appenders.erase(it++);
+                break;
+            } else {
+                it++;
             }
         }
     }
@@ -215,20 +225,22 @@ namespace sylar {
 
     void Logger::log(LogLevel::Level level, LogEvent::ptr event) {
         if (level >= m_level) {
+            std::cout<<"m_appenders.size() = "<<m_appenders.size()<<std::endl;
             for (auto&i : m_appenders) {
-                i->log(nullptr, level, event);
+                //i->log(nullptr, level, event);
+                i->log(Logger::ptr(this), level, event);
+                break;
             }
         }
     }
 
     void LogFormatter::init() {
-        std::vector<std::tuple<std::string, std::string, int> > vec; // str[1] {format}
-        enum parse_stat {
+        std::vector<std::tuple<std::string, std::string, int> > vec;
+        enum parse_stat { // Do not design deeply
             INIT = 0,
             ITEM = 1,
             FORM = 2,
-            BAD  = 3,
-            SUC  = 4
+            NORM = 3,
         };
 
         std::string item;
@@ -238,61 +250,67 @@ namespace sylar {
         parse_stat curr_state = INIT;
 
         for (size_t i = 0; i < m_pattern.size(); i++) { //%d{%Y-%m-%d %H:%M:%S}%T%t%T%F%T[%p]%T[%c]%T%f:%l%T%m%n
+            //std::cout<<curr_state<<" "<< m_pattern[i]<<std::endl;
             switch(curr_state) {
                 case INIT:
                     if (m_pattern[i] == '%') {
                         curr_state = ITEM;
-                        continue;
-                    } else if (m_pattern[i] == '[' || m_pattern[i] == ':') { // for special char
-                        curr_state = BAD;
                     } else {
                         curr_state = INIT;
-                        continue;
                     }
+                    break;
                 case ITEM:
                     if (m_pattern[i] /*&& not space*/) { //TODO check vail
                         if (item == "") {
                             item = m_pattern[i];
+                            if ( i + 1 < m_pattern.size() && m_pattern[i + 1] != '{') {
+                                vec.push_back(std::make_tuple(item, format, 1));
+                                item = "";
+                                format = "";
+                                curr_state = INIT;
+                            } else if (i + 1 < m_pattern.size() && m_pattern[i + 1] == '{') {
+                                format_s = &m_pattern[i + 1];
+                                curr_state =  FORM;
+                            } else if ( i == m_pattern.size() - 1) {
+                                vec.push_back(std::make_tuple(item, format, 1));
+                                item = "";
+                                format = "";
+                                curr_state = INIT;
+                            }
+                            if (i + 1 < m_pattern.size() &&
+                                (m_pattern[i + 1] == '[' || m_pattern[i + 1] == ']' || m_pattern[i + 1] == ':') ) { //special str: []
+                                curr_state = NORM;
+                            }
                         }
-
-                        if (m_pattern[i] == '{') {
-                            curr_state = FORM;
-                            format_s = &m_pattern[i];
-                        }
-
-                        if ( i + 1 < m_pattern.size() && m_pattern[i + 1] != '{') {
-                            curr_state = SUC;
-                        }
-                        continue;
+                        break;
                     }
-                    curr_state = BAD;
                     break;
                 case FORM:
                     if (m_pattern[i] == '}') {
                         format_e = &m_pattern[i];
-                        format = std::string(format_s + 1, format_s - format_e + 1);
-                        curr_state = SUC;
+                        format = std::string(format_s + 1, format_e - format_s - 1);
+                        vec.push_back(std::make_tuple(item, format, 1));
+                        item = "";
+                        format = "";
+                        curr_state = INIT;
                     }
-                    continue;
-                case SUC:
-                    vec.push_back(std::make_tuple(item, format, 1));
-                    curr_state = INIT;
-                    item = "";
-                    format = "";
                     break;
-                case BAD:
-                    vec.push_back(std::make_tuple(item, format, 0));
-                    curr_state = INIT;
+                case NORM:
+                    // special char
+                    vec.push_back(std::make_tuple(std::string(&m_pattern[i], 1), format, 0));
                     item = "";
                     format = "";
+                    curr_state = INIT;
+                    break;
+                default:
                     break;
             }
         }
 
         // register factory map
-        static std::map<std::string, std::function<LogFormatter::FormatItem::ptr(const std::string& str)> > s_format_items = {
+        static std::map<std::string, std::function<FormatItem::ptr(const std::string& str)> > s_format_items = {
 #define XX(str, C) \
-        {#str, [](const std::string& fmt) { return LogFormatter::FormatItem::ptr (new C(fmt)); }}
+        {#str, [](const std::string& fmt) { return FormatItem::ptr (new C(fmt)); }}
 
                 XX(m, MessageFormatItem),
                 XX(p, LevelFormatItem),
@@ -308,6 +326,7 @@ namespace sylar {
         };
 
         for (auto& i : vec) {
+            //std::cout << std::get<0>(i) << std::endl;
             if (std::get<2>(i) == 0) {
                 m_items.push_back(FormatItem::ptr(new StringFormatItem(std::get<0>(i)))); // "["
             } else {

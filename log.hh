@@ -68,7 +68,7 @@ namespace sylar {
         public:
             typedef std::shared_ptr<FormatItem> ptr;
             virtual ~FormatItem() {};
-            virtual void format(std::ostream& os, std::shared_ptr<Logger> logger, LogLevel::Level level, std::shared_ptr<LogEvent> event);
+            virtual void format(std::ostream& os, std::shared_ptr<Logger> logger, LogLevel::Level level, std::shared_ptr<LogEvent> event) = 0; // Pure virtual func
         };
         void init();
 
@@ -86,7 +86,7 @@ namespace sylar {
         void setLevel(LogLevel::Level l) { m_level = l; }
         LogFormatter::ptr getFormatter() const { return m_formatter; }
         LogLevel::Level getLevel() const { return m_level; }
-        virtual void log(std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event);
+        virtual void log(std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event) = 0;
 
     protected:
         LogLevel::Level     m_level;
@@ -140,4 +140,8 @@ logger
   |
   +--- appender:  How to use?
 
+How to use?
+1. alloc event
+2. alloc appender to init logger
+logger->log(level, event)
 */
