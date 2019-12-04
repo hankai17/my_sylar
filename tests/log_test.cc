@@ -10,10 +10,22 @@ int main(int argc, char** argv) {
     sylar::LogAppender::ptr apr(new sylar::StdoutLogAppender);
     apr->setLevel(sylar::LogLevel::DEBUG);
     logger->addAppender(apr);
-
     logger->log(sylar::LogLevel::DEBUG, event);
-
     logger->delAppender(apr);
+
+    sylar::LogAppender::ptr apr1(new sylar::FileLogAppender("./1.log"));
+    apr1->setLevel(sylar::LogLevel::DEBUG);
+    logger->addAppender(apr1);
+    logger->log(sylar::LogLevel::DEBUG, event);
+    logger->delAppender(apr1);
+
+    sylar::LogAppender::ptr apr2(new sylar::FileLogAppender("./1.log"));
+    apr2->setLevel(sylar::LogLevel::DEBUG);
+    sylar::LogFormatter::ptr lf(new sylar::LogFormatter("%d%T%p%T%m%n")); // ofstream so strange!!!
+    apr2->setFormatter(lf);
+    logger->addAppender(apr2);
+    logger->log(sylar::LogLevel::DEBUG, event);
+    logger->delAppender(apr2);
 
     return 0;
 }

@@ -177,6 +177,11 @@ namespace sylar {
         }
     }
 
+    FileLogAppender::FileLogAppender(const std::string& filename)
+    :m_filename(filename) {
+       reopen();
+    }
+
     void FileLogAppender::log(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) {
         if (level >= m_level) {
             m_filestream << m_formatter->format(logger, level, event);
@@ -199,14 +204,13 @@ namespace sylar {
     }
 
     void Logger::delAppender(LogAppender::ptr appender) {
-        /*
         for (auto it = m_appenders.begin(); it != m_appenders.end(); it++) {
             if (*it == appender) {
                 m_appenders.erase(it);
                 break;
             }
         }
-         */
+        /*
         for (auto it = m_appenders.begin(); it != m_appenders.end();) {
             if (*it == appender) {
                 m_appenders.erase(it++);
@@ -215,6 +219,7 @@ namespace sylar {
                 it++;
             }
         }
+         */
     }
 
     Logger::Logger(const std::string& name)
@@ -225,11 +230,9 @@ namespace sylar {
 
     void Logger::log(LogLevel::Level level, LogEvent::ptr event) {
         if (level >= m_level) {
-            std::cout<<"m_appenders.size() = "<<m_appenders.size()<<std::endl;
             for (auto&i : m_appenders) {
-                //i->log(nullptr, level, event);
-                i->log(Logger::ptr(this), level, event);
-                break;
+                //i->log(Logger::ptr(this), level, event);
+                i->log(std::make_shared<Logger>(*this), level, event);
             }
         }
     }
