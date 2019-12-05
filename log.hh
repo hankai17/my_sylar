@@ -96,7 +96,6 @@ namespace sylar {
     class Logger { // User normal use. Publish it
     public:
         typedef std::shared_ptr<Logger> ptr;
-        Logger(const std::string& name = "root");
         //void log(LogLevel::Level level, const std::string& filename, uint32_t line_no, uint64_t m_time); // How to set formatter?  so ugly so enclosure a class
         void log(LogLevel::Level level, LogEvent::ptr event); // user how to use it. //Why ptr
         std::string getName() const { return m_name; }
@@ -104,11 +103,18 @@ namespace sylar {
         void addAppender(LogAppender::ptr appender);
         void delAppender(LogAppender::ptr appender);
 
+        static Logger::ptr getLoggerInstance() { return instance; } // not const
+
+    private:
+        Logger(const std::string& name = "root");
+        //TODO garbage recollect, refer designm
+
     private:
         std::string                 m_name;
         LogLevel::Level             m_level;
         std::list<LogAppender::ptr> m_appenders; // Use ptr
         LogFormatter::ptr           m_formatter;
+        static Logger::ptr          instance;
     };
 
     class StdoutLogAppender : public LogAppender {

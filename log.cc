@@ -228,6 +228,8 @@ namespace sylar {
         m_formatter.reset(new LogFormatter("%d{%Y-%m-%d %H:%M:%S}%T%t%T%F%T[%p]%T[%c]%T%f:%l%T%m%n"));
     }
 
+    Logger::ptr Logger::instance(new(Logger)); // why not new logger()
+
     void Logger::log(LogLevel::Level level, LogEvent::ptr event) {
         if (level >= m_level) {
             for (auto&i : m_appenders) {
