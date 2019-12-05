@@ -28,5 +28,9 @@ int main(int argc, char** argv) {
     logger->log(sylar::LogLevel::DEBUG, event);
     logger->delAppender(apr2);
 
+
+    SYLAR_LOG_LEVEL(logger, sylar::LogLevel::DEBUG) << "hello mike"; // just flush into event's ss
+    SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel::DEBUG, "hello %s", "dog"); // same as up
+
     return 0;
 }

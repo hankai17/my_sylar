@@ -14,6 +14,15 @@
 #include <vector>
 #include <stdarg.h>
 #include <map>
+#include "util.hh"
+
+#define SYLAR_LOG_LEVEL(logger, level) \
+    if (logger->getLevel() <= level) \
+        sylar::LogEvent(time(0), level, __FILE__, __LINE__, sylar::GetThreadId(), sylar::GetFiberId()).getSS()
+
+#define SYLAR_LOG_FMT_LEVEL(logger, level, fmt, ...) \
+    if (logger->getLevel() <= level) \
+        sylar::LogEvent(time(0), level, __FILE__, __LINE__, sylar::GetThreadId(), sylar::GetFiberId()).format(fmt, __VA_ARGS__)
 
 namespace sylar {
 
@@ -99,6 +108,7 @@ namespace sylar {
         //void log(LogLevel::Level level, const std::string& filename, uint32_t line_no, uint64_t m_time); // How to set formatter?  so ugly so enclosure a class
         void log(LogLevel::Level level, LogEvent::ptr event); // user how to use it. //Why ptr
         std::string getName() const { return m_name; }
+        LogLevel::Level getLevel() const { return m_level; }
 
         void addAppender(LogAppender::ptr appender);
         void delAppender(LogAppender::ptr appender);
