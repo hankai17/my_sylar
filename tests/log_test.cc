@@ -27,10 +27,17 @@ int main(int argc, char** argv) {
     logger->addAppender(apr2);
     logger->log(sylar::LogLevel::DEBUG, event);
     logger->delAppender(apr2);
+    // where to write then what formatter; hand real log event to logger
 
+    sylar::LogAppender::ptr apr3(new sylar::StdoutLogAppender);
+    apr3->setLevel(sylar::LogLevel::DEBUG);
+    logger->addAppender(apr3);
 
-    SYLAR_LOG_LEVEL(logger, sylar::LogLevel::DEBUG) << "hello mike"; // just flush into event's ss
-    SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel::DEBUG, "hello %s", "dog"); // same as up
+    SYLAR_LOG_LEVEL(logger, sylar::LogLevel::DEBUG) << "hello mike";
+    SYLAR_LOG_LEVEL(logger, sylar::LogLevel::DEBUG) << "hello mike";
+    SYLAR_LOG_LEVEL(logger, sylar::LogLevel::DEBUG) << "hello mike";
+    SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel::DEBUG, "hello %s", "dog");
 
+    logger->delAppender(apr3);
     return 0;
 }

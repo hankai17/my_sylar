@@ -18,11 +18,13 @@
 
 #define SYLAR_LOG_LEVEL(logger, level) \
     if (logger->getLevel() <= level) \
-        sylar::LogEvent(time(0), level, __FILE__, __LINE__, sylar::GetThreadId(), sylar::GetFiberId()).getSS()
+        sylar::LogEventWrap(logger, \
+                sylar::LogEvent::ptr(new sylar::LogEvent(time(0), level, __FILE__, __LINE__, sylar::GetThreadId(), sylar::GetFiberId()))).getSS()
 
 #define SYLAR_LOG_FMT_LEVEL(logger, level, fmt, ...) \
     if (logger->getLevel() <= level) \
-        sylar::LogEvent(time(0), level, __FILE__, __LINE__, sylar::GetThreadId(), sylar::GetFiberId()).format(fmt, __VA_ARGS__)
+        sylar::LogEventWrap(logger, \
+        sylar::LogEvent::ptr(new sylar::LogEvent(time(0), level, __FILE__, __LINE__, sylar::GetThreadId(), sylar::GetFiberId()))).getLogEvent()->format(fmt, __VA_ARGS__)
 
 namespace sylar {
 
@@ -130,14 +132,14 @@ namespace sylar {
     class StdoutLogAppender : public LogAppender {
     public:
         typedef std::shared_ptr<StdoutLogAppender> ptr;
-        void log(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event);
+        void log(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override;
     };
 
     class FileLogAppender : public LogAppender {
     public:
         typedef std::shared_ptr<FileLogAppender> ptr;
         FileLogAppender(const std::string& filename);
-        void log(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event);
+        void log(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override;
         bool reopen();
 
     private:
@@ -145,6 +147,28 @@ namespace sylar {
         std::ofstream   m_filestream;
     };
 
+    class LogEventWrap { // a middle layer used to event and logger
+    public:
+        typedef std::shared_ptr<LogEventWrap> ptr;
+        LogEventWrap(Logger::ptr logger, LogEvent::ptr event);
+        LogEvent::ptr getLogEvent() const { return m_event; }
+        std::stringstream& getSS() const { return m_event->getSS(); }
+        ~LogEventWrap();
+
+    private:
+        Logger::ptr     m_logger;
+        LogEvent::ptr   m_event;
+    };
+
+    class LoggerManager { // design deeply
+    public:
+        typedef std::shared_ptr<LoggerManager> ptr;
+        LoggerManager();
+        Logger::ptr getLogger() const { return m_logger; }
+
+    private:
+        Logger::ptr m_logger;
+    };
 }
 
 #endif

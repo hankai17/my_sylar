@@ -178,8 +178,8 @@ namespace sylar {
     }
 
     FileLogAppender::FileLogAppender(const std::string& filename)
-    :m_filename(filename) {
-       reopen();
+            :m_filename(filename) {
+        reopen();
     }
 
     void FileLogAppender::log(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) {
@@ -343,5 +343,19 @@ namespace sylar {
                 }
             }
         }
+    }
+
+    LogEventWrap::LogEventWrap(sylar::Logger::ptr logger, sylar::LogEvent::ptr event)
+            :m_logger(logger),
+             m_event(event) {
+    }
+
+    LogEventWrap::~LogEventWrap() {
+        m_logger->log(m_logger->getLevel(), m_event);
+    }
+
+    LoggerManager::LoggerManager() {
+        m_logger =  Logger::getLoggerInstance();
+        m_logger->addAppender(LogAppender::ptr(new StdoutLogAppender)); // user default use stdout
     }
 }
