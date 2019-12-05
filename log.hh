@@ -21,10 +21,20 @@
         sylar::LogEventWrap(logger, \
                 sylar::LogEvent::ptr(new sylar::LogEvent(time(0), level, __FILE__, __LINE__, sylar::GetThreadId(), sylar::GetFiberId()))).getSS()
 
+#define SYLAR_LOG_DEBUG(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::DEBUG)
+#define SYLAR_LOG_INFO(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::INFO)
+#define SYLAR_LOG_WARN(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::WARN)
+#define SYLAR_LOG_ERROR(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::ERROR)
+
 #define SYLAR_LOG_FMT_LEVEL(logger, level, fmt, ...) \
     if (logger->getLevel() <= level) \
         sylar::LogEventWrap(logger, \
         sylar::LogEvent::ptr(new sylar::LogEvent(time(0), level, __FILE__, __LINE__, sylar::GetThreadId(), sylar::GetFiberId()))).getLogEvent()->format(fmt, __VA_ARGS__)
+
+#define SYLAR_LOG_FMT_DEBUG(logger, fmt, ...) SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel:DEBUG, fmt, ...)
+#define SYLAR_LOG_FMT_INFO(logger, fmt, ...) SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel:INFO, fmt, ...)
+#define SYLAR_LOG_FMT_WARN(logger, fmt, ...) SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel:WARN, fmt, ...)
+#define SYLAR_LOG_FMT_ERROR(logger, fmt, ...) SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel:ERROR, fmt, ...)
 
 namespace sylar {
 
