@@ -15,6 +15,7 @@ include_directories("./"
 set(LIB_SRC
         log.cc
         util.cc
+        config.cc
         )
 
 add_library(${PROJECT_NAME} SHARED ${LIB_SRC})
