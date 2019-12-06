@@ -36,6 +36,8 @@
 #define SYLAR_LOG_FMT_WARN(logger, fmt, ...) SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel:WARN, fmt, ...)
 #define SYLAR_LOG_FMT_ERROR(logger, fmt, ...) SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel:ERROR, fmt, ...)
 
+#define SYLAR_LOG_ROOT() sylar::Logger::getLoggerInstance(); // not thread safe
+
 namespace sylar {
 
     class Logger;
