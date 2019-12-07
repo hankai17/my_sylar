@@ -7,7 +7,7 @@ sylar::ConfigVar<int>::ptr g_int_value_config =
 sylar::ConfigVar<float>::ptr g_float_value_config =
         sylar::Config::Lookup("system.value", (float)8080.0, "system value"); // Just like ats, every config is a obj
 
-void print_yaml(const YAML::Node& node) {
+void print_yaml(const YAML::Node& node) { // yaml 0.6.3
     if (node.IsScalar()) {
         //SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << node.Scalar();
     } else if (node.IsMap()) {
