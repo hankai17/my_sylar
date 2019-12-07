@@ -199,6 +199,7 @@ namespace sylar {
     void Logger::addAppender(LogAppender::ptr appender) {
         if (!appender->getFormatter()) {
             appender->setFormatter(m_formatter);
+            appender->setLevel(m_level);
         }
         m_appenders.push_back(appender);
     }

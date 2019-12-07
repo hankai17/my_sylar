@@ -1,7 +1,7 @@
 #include <iostream>
 #include "log.hh"
 
-int main(int argc, char** argv) {
+int main1(int argc, char** argv) {
     //sylar::Logger::ptr logger(new sylar::Logger);
     sylar::Logger::ptr logger = sylar::Logger::getLoggerInstance();
 
@@ -39,5 +39,12 @@ int main(int argc, char** argv) {
     SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel::DEBUG, "hello %s", "dog");
 
     logger->delAppender(apr3);
+    return 0;
+}
+
+int main() {
+    sylar::Logger::ptr logger = SYLAR_LOG_ROOT();
+    logger->addAppender(sylar::LogAppender::ptr(new sylar::StdoutLogAppender));
+    SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << "hello world";
     return 0;
 }
