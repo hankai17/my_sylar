@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
 #include <map>
+#include <vector>
 #include <yaml-cpp/yaml.h>
 #include "log.hh"
 
@@ -29,7 +30,46 @@ namespace sylar {
         std::string     m_desc;
     };
 
+    template <typename F, typename T>
+    class Lexicalcast { // gerernal
+    public:
+        T operator() (const F& v) {
+            return boost::lexical_cast<T>(v);
+        }
+    };
+
     template <typename T>
+    class Lexicalcast<std::string, std::vector<T> > { // below all special lexicalcast
+    public:
+        std::vector<T> operator() (const std::string& v) { //string ---> vector
+            YAML::Node node = YAML::Load(v);
+            typename std::vector<T> vec;
+            std::stringstream ss;
+            for (const auto& i : node) {
+                ss.str("");
+                ss << i;
+                vec.push_back(Lexicalcast<std::string, T>()(ss.str()));
+            }
+            return vec;
+        }
+    };
+
+    template <typename T>
+    class Lexicalcast<std::vector<T>, std::string> {
+    public:
+        std::string operator() (std::vector<T>& v) {
+            YAML::Node node;
+            for (const auto&i : v) {
+                node.push_back(YAML::Load(Lexicalcast<T, std::string>()(i)));
+            }
+            std::stringstream ss;
+            ss << node;
+            return ss.str();
+        }
+    };
+
+    template <typename T, class FromStr = Lexicalcast<std::string, T>,
+                class ToStr = Lexicalcast<T, std::string> >
     class ConfigVar : public ConfigVarBase {
     public:
         typedef std::shared_ptr<ConfigVar> ptr;
@@ -40,7 +80,8 @@ namespace sylar {
 
         std::string toString() override {
             try {
-                return boost::lexical_cast<std::string>(m_val);
+                //return boost::lexical_cast<std::string>(m_val);
+                return ToStr()(m_val);
             } catch (std::exception& e) {
                 SYLAR_LOG_ERROR(SYLAR_LOG_ROOT()) << "Configvar toString() exception " << e.what() << " " <<
                                                   typeid(m_val).name();
@@ -50,7 +91,8 @@ namespace sylar {
 
         bool fromString(const std::string& val) override {
             try {
-                m_val = boost::lexical_cast<T>(val);
+                //m_val = boost::lexical_cast<T>(val);
+                m_val = FromStr()(val);
             } catch (std::exception& e) {
                 SYLAR_LOG_ERROR(SYLAR_LOG_ROOT()) << "Configvar fromeString() exception " << e.what() << " " <<
                                                   typeid(m_val).name();
