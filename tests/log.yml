@@ -18,6 +18,16 @@ system:
   port: 9900
   value: 15
   int_vec: [1, 2, 3, 4]
+  int_lst: [1, 1, 1, 1, 1]
+  int_set: [10, 11, 12, 13, 14]
+  int_map:
+    1: 9
+    2: 9
+    3: 3 #must has a space!
+    4: 4
+  int_unor_map:
+    k: 1
+
 
 
 #https://www.toyaml.com/index.html  convert yaml
