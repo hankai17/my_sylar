@@ -15,8 +15,8 @@ sylar::ConfigVar<std::set<int> >::ptr g_set_value_config =
         sylar::Config::Lookup("system.int_set", std::set<int> {1, 2, 5, 1}, "set value");
 sylar::ConfigVar<std::map<std::string, int> >::ptr g_map_value_config =
         sylar::Config::Lookup("system.int_map", std::map<std::string, int> {{"1",1}, {"2",2}, {"3",3}}, "map value");
-//sylar::ConfigVar<std::map<std::string, std::vector<int>> >::ptr g_map_value_config1 =
- //       sylar::Config::Lookup("system.int_map1", std::map<std::string, std::vector<int> > {{"1",{1}}, {"2",{2,2}}, {"3",{3,3,3}}}, "map value");
+sylar::ConfigVar<std::map<std::string, std::vector<int>> >::ptr g_map_value_config1 =
+        sylar::Config::Lookup("system.int_map1", std::map<std::string, std::vector<int> > {{"1",{1}}, {"2",{2,2}}, {"3",{3,3,3}}}, "map value");
 sylar::ConfigVar<std::unordered_map<std::string, int> >::ptr g_unor_map_value_config =
         sylar::Config::Lookup("system.int_unor_map", std::unordered_map<std::string, int> {{"1",1}, {"2",2}, {"3",3}}, "unormap value");
 
@@ -79,7 +79,7 @@ void test_config1() {
     XX(g_lst_value_config, lst_int, before);
     XX(g_set_value_config, set_int, before);
     XXM(g_map_value_config, map_int, before);
-    //XXM1(g_map_value_config1, map1_int, before);
+    XXM1(g_map_value_config1, map1_int, before);
     XXM(g_unor_map_value_config, unor_map_int, before);
     YAML::Node root = YAML::LoadFile("/root/CLionProjects/my_sylar/tests/log.yml");
     sylar::Config::loadFromYaml(root);
@@ -87,7 +87,7 @@ void test_config1() {
     XX(g_vec_value_config, vec_int, after);
     XX(g_set_value_config, set_int, after);
     XXM(g_map_value_config, map_int, after);
-    //XXM1(g_map_value_config1, map_int, after);
+    XXM1(g_map_value_config1, map1_int, after);
     XXM(g_unor_map_value_config, unor_map_int, after);
 }
 

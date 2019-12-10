@@ -63,7 +63,8 @@ namespace sylar {
     template <typename T>
     class Lexicalcast<std::vector<T>, std::string> {
     public:
-        std::string operator() (std::vector<T>& v) {
+        //std::string operator() (std::vector<T>& v) { !!!!!!!!! fuck
+            std::string operator() (const std::vector<T>& v) {
             YAML::Node node;
             for (const auto&i : v) {
                 node.push_back(YAML::Load(Lexicalcast<T, std::string>()(i)));
@@ -189,7 +190,7 @@ namespace sylar {
             std::stringstream  ss;
             for (const auto& i : val) {
                 //node[i.first] = i.second;
-                node[i.first] = YAML::Load(Lexicalcast<T, std::string>()(i.second));
+                node[i.first] = YAML::Load(Lexicalcast<T, std::string>()(i.second)); // T must base type. If T is vector it will wrong // fool
             }
             ss << node;
             return ss.str();
