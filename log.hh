@@ -10,6 +10,7 @@
 #include <memory>
 #include <list>
 #include <sstream>
+#include <string>
 #include <fstream>
 #include <vector>
 #include <stdarg.h>
@@ -54,6 +55,7 @@ namespace sylar {
             FATAL   = 5
         };
        static const char* ToString(LogLevel::Level level);
+       static LogLevel::Level FromString(const std::string& val);
     };
 
     class LogEvent {
@@ -88,7 +90,7 @@ namespace sylar {
         //std::string format(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event); // Out put log // Why not ???
         std::string format(std::shared_ptr<Logger> logger, LogLevel::Level level, std::shared_ptr<LogEvent> event); // Out put log
         std::string getFormatter() const { return m_pattern; }
-        std::string toYamlString() {}
+        std::string toYamlString();
     public:
         class FormatItem {
         public:
@@ -155,10 +157,11 @@ namespace sylar {
     public:
         typedef std::shared_ptr<StdoutLogAppender> ptr;
         void log(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override;
-        void std::string toYamlString() override;
-        std::string getType() override { return "StdoutLogAppender"; };
-        std::string getFile() override { return ""; }
-        void setType() override { m_type = "StdoutLogAppender"; }
+        std::string toYamlString() override;
+        std::string getType() override; //{ return "StdoutLogAppender"; }
+        std::string getFile() override; // { return ""; }
+        void setType(const std::string& val) override; // { m_type = "StdoutLogAppender"; }
+        void setFile(const std::string& val) override; // {}
     };
 
     class FileLogAppender : public LogAppender {
@@ -166,11 +169,13 @@ namespace sylar {
         typedef std::shared_ptr<FileLogAppender> ptr;
         FileLogAppender(const std::string& filename);
         void log(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override;
-        void std::string toYamlString() override;
+        std::string toYamlString() override;
         bool reopen();
         std::string getFilename() const { return m_filename; }
         std::string getType() override { return "FileLogAppender"; };
         std::string getFile() override { return m_filename; }
+        void setType(const std::string& val) override { m_type = "FileLogAppender"; }
+        void setFile(const std::string& val) override { m_filename = val; }
 
     private:
         std::string     m_filename;
@@ -213,7 +218,7 @@ namespace sylar {
             ss << "[name=" << m_log_name
             << " level=" << m_level
             << " formatter=" << m_formatter
-            << " appender=" << ss1;
+            << " appender=" << ss1.str();
             return ss.str();
         }
         std::string getLogName() const { return m_log_name; }
@@ -222,8 +227,7 @@ namespace sylar {
         void setLogLevel(const LogLevel::Level& level) { m_level = level; }
         std::string getFormatter() const { return m_formatter; }
         void setLogFormatter(const std::string& formatter) { m_formatter = formatter; }
-        std::vector<LogAppender::ptr> getAppenders() cosnt { return m_appenders; }
-
+        std::vector<LogAppender::ptr> getAppenders() const { return m_appenders; }
 
     private:
         std::string         m_log_name;

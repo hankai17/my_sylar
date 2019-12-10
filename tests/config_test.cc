@@ -196,7 +196,9 @@ void test_class() {
 }
 
 void test_log() {
-    YAML::Node root = YAML::LoadFile("/root/CLionProjects/my_sylar/tests/base_log.yml");
+    //sylar::ConfigVar<std::vector<sylar::LoggerConfig>>::ptr g_log = sylar::Config::Lookup("logs", std::vector<sylar::LoggerConfig>{}, "system log");
+    //YAML::Node root = YAML::LoadFile("/root/CLionProjects/my_sylar/tests/base_log.yml");
+    //SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << g_log->toString();
 
 }
 
@@ -206,7 +208,8 @@ int main(int argc, char** argv) {
     //test_yaml();
     //test_config();
     //test_config1();
-    test_class();
+    //test_class();
+    test_log();
     return 0;
 }
 
