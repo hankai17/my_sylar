@@ -152,19 +152,47 @@ namespace sylar {
 
 sylar::ConfigVar<sylar::Person>::ptr g_person_value_config =
         sylar::Config::Lookup("system.person", sylar::Person(), "system person");
+sylar::ConfigVar<std::map<std::string, sylar::Person> >::ptr g_pmap_value_config =
+        sylar::Config::Lookup("system.person_map", std::map<std::string, sylar::Person> {}, "system person map");
+sylar::ConfigVar<std::map<std::string, std::vector<sylar::Person> > >::ptr g_pmapvec_value_config =
+        sylar::Config::Lookup("system.person_map_vec", std::map<std::string, std::vector<sylar::Person> > {}, "system person map vec");
 
 #define XXC(g_var, name, prefix) \
 { \
     const auto& v = g_var->getValue(); \
     SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << #prefix " " #name " m_val: " << v.toString(); \
     SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << #prefix " " #name " m_val: " << g_var->toString(); \
-} \
+}
+
+#define XXCM(g_var, name, prefix) \
+{ \
+    const auto& v = g_var->getValue(); \
+    for (const auto& i : v) { \
+        SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << #prefix " " #name " m_val: " << i.first << " " << i.second.toString(); \
+    } \
+    SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << #prefix " " #name " m_val: " << g_var->toString(); \
+}
+
+#define XXCMV(g_var, name, prefix) \
+{ \
+    const auto& v = g_var->getValue(); \
+    for (const auto& i : v) { \
+        for (const auto& j : i.second) { \
+            SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << #prefix " " #name " m_val: " << i.first << " " << j.toString(); \
+        } \
+    } \
+    SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << #prefix " " #name " m_val: " << g_var->toString(); \
+}
 
 void test_class() {
     XXC(g_person_value_config, system.person, before);
+    XXCM(g_pmap_value_config, system.person_map, before);
+    XXCMV(g_pmapvec_value_config, system.person_map_vec, before);
     YAML::Node root = YAML::LoadFile("/root/CLionProjects/my_sylar/tests/log.yml");
     sylar::Config::loadFromYaml(root);
     XXC(g_person_value_config, system.person, after);
+    XXCM(g_pmap_value_config, system.person_map, after);
+    XXCMV(g_pmapvec_value_config, system.person_map_vec, after);
 }
 
 int main(int argc, char** argv) {

@@ -33,7 +33,7 @@ namespace sylar {
             if (key.empty()) {
                 continue;
             }
-            SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << "key: " << key;
+            //SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << "key: " << key;
 
             std::transform(key.begin(), key.end(), key.begin(), ::tolower);
             ConfigVarBase::ptr var = LookupBase(key);
@@ -48,9 +48,8 @@ namespace sylar {
                     var->fromString(ss.str());
                 }
             } else {
-                SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << "not exists this key: " << key << " string: " << i.second;
+                //SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << "not exists this key: " << key << " string: " << i.second;
             }
         }
     }
-
 }

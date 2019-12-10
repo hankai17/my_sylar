@@ -38,6 +38,31 @@ system:
     name: mike
     age: 18
     sex: true  #not sex: 1
+  person_map:
+    mike1:
+      name: dog
+      age: 18
+      sex: false
+    mike2:
+      name: dog
+      age: 19
+      sex: true
+  person_map_vec:
+    k1:
+      - name: dog
+        age: 20
+        sex: true
+      - name: dog
+        age: 21
+        sex: false
+    k3:
+      - name: dog
+        age: 39
+        sex: false
+      - name: dog
+        age: 40
+        sex: true
+
 
 
 #https://www.toyaml.com/index.html  convert yaml
