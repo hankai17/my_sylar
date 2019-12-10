@@ -171,10 +171,20 @@ namespace sylar {
         init();
     }
 
-    void StdoutLogAppender::log(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) {
-        if (level >= m_level) {
-            std::cout <<  m_formatter->format(logger, level, event);
-        }
+    std::string LogFormatter::toYamlString() {
+        YAML::Node node;
+        node["formatter"] = getFormatter();
+        std::stringstream ss;
+        ss << node;
+        return ss.str();
+    }
+
+    std::string StdoutLogAppender::toYamlString() {
+        YAML::Node node;
+        node["type"] = "StdoutLogAppender";
+        std::stringstream ss;
+        ss << node;
+        return ss.str();
     }
 
     FileLogAppender::FileLogAppender(const std::string& filename)
@@ -194,6 +204,15 @@ namespace sylar {
         }
         m_filestream.open(m_filename, std::ios::app);
         return !!m_filestream;
+    }
+
+    std::string FileLogAppender::toYamlString() {
+        YAML::Node node;
+        node["type"] = "FileLogAppender";
+        node["file"] = getFilename();
+        std::stringstream ss;
+        ss << node;
+        return ss.str();
     }
 
     void Logger::addAppender(LogAppender::ptr appender) {
@@ -359,4 +378,48 @@ namespace sylar {
         m_logger =  Logger::getLoggerInstance();
         m_logger->addAppender(LogAppender::ptr(new StdoutLogAppender)); // user default use stdout
     }
+
+    template <typename T>
+    class Lexicalcast<std::vector<LoggerConfig>, std::string> {
+    public:
+        std::string operator() (const std::vector<LoggerConfig>& val) {
+            YAML::Node node;
+            std::stringstream ss;
+            for (auto& i : val) { //i is LoggerConfig
+                node["name"] = i.getLogName();
+                node["level"] = i.getLogLevel();
+                node["formatter"] = i.getFormatter();
+
+                for (const auto& j : i.getAppenders()) {
+                    YAML::Node node1;
+                    node1["appender"]["type"] = j->getType();
+                    node1["appender"]["file"] = j->getFile();
+                    node.push_back(node1);
+                }
+                ss << node;
+            }
+            return ss.str();
+        }
+    };
+
+    template <typename T>
+    class Lexicalcast<std::string, std::vector<LoggerConfig> > {
+    public:
+        std::set<LoggerConfig> operator() (const std::string& val) {
+            YAML::Node node = YAML::Load(val);
+            LoggerConfig lc;
+            for (const auto& i : node) { // I do not know node's shape
+                lc.setLogName(i["name"].as<std::string>());
+                lc.setLogLevel(i["level"].as<LogLevel::Level>());
+                lc.setLogFormatter(i["formatter"].as<std::string>());
+                
+                for (const auto& j : i["appender"]) {
+                   if (j["type"] == "StdoutLogAppender" ) {
+                       StdoutLogAppender sap;
+                       sap.set
+                   }
+                }
+            }
+        }
+    };
 }

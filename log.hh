@@ -14,6 +14,7 @@
 #include <vector>
 #include <stdarg.h>
 #include <map>
+#include <yaml-cpp/yaml.h>
 #include "util.hh"
 
 #define SYLAR_LOG_LEVEL(logger, level) \
@@ -86,6 +87,8 @@ namespace sylar {
         LogFormatter(const std::string& pattern);
         //std::string format(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event); // Out put log // Why not ???
         std::string format(std::shared_ptr<Logger> logger, LogLevel::Level level, std::shared_ptr<LogEvent> event); // Out put log
+        std::string getFormatter() const { return m_pattern; }
+        std::string toYamlString() {}
     public:
         class FormatItem {
         public:
@@ -110,10 +113,17 @@ namespace sylar {
         LogFormatter::ptr getFormatter() const { return m_formatter; }
         LogLevel::Level getLevel() const { return m_level; }
         virtual void log(std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event) = 0;
+        virtual std::string toYamlString() = 0;
+        virtual std::string getType() = 0;
+        virtual std::string getFile() = 0;
+        virtual void setType(const std::string& type) = 0;
+        virtual void setFile(const std::string& file) = 0;
 
     protected:
         LogLevel::Level     m_level;
         LogFormatter::ptr   m_formatter;
+        std::string         m_type;
+        std::string         m_file;
     };
 
     class Logger { // User normal use. Publish it
@@ -145,6 +155,10 @@ namespace sylar {
     public:
         typedef std::shared_ptr<StdoutLogAppender> ptr;
         void log(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override;
+        void std::string toYamlString() override;
+        std::string getType() override { return "StdoutLogAppender"; };
+        std::string getFile() override { return ""; }
+        void setType() override { m_type = "StdoutLogAppender"; }
     };
 
     class FileLogAppender : public LogAppender {
@@ -152,7 +166,11 @@ namespace sylar {
         typedef std::shared_ptr<FileLogAppender> ptr;
         FileLogAppender(const std::string& filename);
         void log(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override;
+        void std::string toYamlString() override;
         bool reopen();
+        std::string getFilename() const { return m_filename; }
+        std::string getType() override { return "FileLogAppender"; };
+        std::string getFile() override { return m_filename; }
 
     private:
         std::string     m_filename;
@@ -180,6 +198,38 @@ namespace sylar {
 
     private:
         Logger::ptr m_logger;
+    };
+
+    class LoggerConfig {
+    public:
+        typedef std::shared_ptr<LoggerConfig> ptr;
+
+        std::string toString() const { // toString should add to concrete class
+            std::stringstream ss1;
+            for (const auto& i : m_appenders) {
+                ss1 << i->toYamlString();
+            }
+            std::stringstream ss;
+            ss << "[name=" << m_log_name
+            << " level=" << m_level
+            << " formatter=" << m_formatter
+            << " appender=" << ss1;
+            return ss.str();
+        }
+        std::string getLogName() const { return m_log_name; }
+        void setLogName(const std::string& log_name) { m_log_name = log_name; }
+        LogLevel::Level getLogLevel() const { return m_level; }
+        void setLogLevel(const LogLevel::Level& level) { m_level = level; }
+        std::string getFormatter() const { return m_formatter; }
+        void setLogFormatter(const std::string& formatter) { m_formatter = formatter; }
+        std::vector<LogAppender::ptr> getAppenders() cosnt { return m_appenders; }
+
+
+    private:
+        std::string         m_log_name;
+        LogLevel::Level     m_level;
+        std::string         m_formatter;
+        std::vector<LogAppender::ptr>   m_appenders;
     };
 }
 

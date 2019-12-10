@@ -195,9 +195,14 @@ void test_class() {
     XXCMV(g_pmapvec_value_config, system.person_map_vec, after);
 }
 
+void test_log() {
+    YAML::Node root = YAML::LoadFile("/root/CLionProjects/my_sylar/tests/base_log.yml");
+
+}
+
 int main(int argc, char** argv) {
     sylar::Logger::ptr logger = sylar::Logger::getLoggerInstance();
-    logger->addAppender(sylar::LogAppender::ptr(new sylar::StdoutLogAppender));
+    logger->addAppender(sylar::LogAppender::ptr(new sylar::StdoutLogAppender)); // That should be replace by a class & this class communicate with config
     //test_yaml();
     //test_config();
     //test_config1();
