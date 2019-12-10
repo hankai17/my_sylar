@@ -10,6 +10,7 @@
 #include <unordered_set>
 #include <map>
 #include <unordered_map>
+#include <functional>
 
 #include <yaml-cpp/yaml.h>
 #include "log.hh"

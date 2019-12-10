@@ -27,7 +27,14 @@ system:
     4: 4
   int_unor_map:
     k: 1
+  vec_unor_map: #TODO
+    k: [1, 2, 3]
 
+#yaml has a big power that can convert yaml string(just like upper) ---to---> program's value/obj/class/struct
 
+  person:
+    name: mike
+    age: 18
+    sex: true  #not sex: 1
 
 #https://www.toyaml.com/index.html  convert yaml

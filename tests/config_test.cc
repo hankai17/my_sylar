@@ -99,11 +99,83 @@ void test_config() {
     SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << g_float_value_config->getValue();
 }
 
+namespace sylar {
+    class Person {
+    public:
+        std::string m_name;
+        int         m_age;
+        bool        m_sex;
+
+        std::string toString() const {
+            std::stringstream ss;
+            ss << "[Person name=" << m_name
+               << " age=" << m_age
+               << " sex=" << m_sex
+               << "]";
+            return ss.str();
+        }
+
+        bool operator==(const Person &oth) const {
+            return m_name == oth.m_name
+                   && m_age == oth.m_age
+                   && m_sex == oth.m_sex;
+        }
+    };
+
+    template <>
+    class Lexicalcast<std::string, Person> {
+    public:
+        Person operator() (const std::string& val) {
+           YAML::Node node = YAML::Load(val);
+            Person p;
+            p.m_name = node["name"].as<std::string>();
+            p.m_age  = node["age"].as<int>();
+            p.m_sex  = node["sex"].as<bool>();
+            return p;
+        }
+    };
+
+    template<>
+    class Lexicalcast<Person, std::string> {
+    public:
+        std::string operator() (const Person& val) {
+            YAML::Node node;
+            node["name"] = val.m_name;
+            node["age"]  = val.m_age;
+            node["sex"]  = val.m_sex;
+            std::stringstream ss;
+            ss << node;
+            return ss.str();
+        }
+    };
+}
+
+sylar::ConfigVar<sylar::Person>::ptr g_person_value_config =
+        sylar::Config::Lookup("system.person", sylar::Person(), "system person");
+
+#define XXC(g_var, name, prefix) \
+{ \
+    const auto& v = g_var->getValue(); \
+    SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << #prefix " " #name " m_val: " << v.toString(); \
+    SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << #prefix " " #name " m_val: " << g_var->toString(); \
+} \
+
+void test_class() {
+    XXC(g_person_value_config, system.person, before);
+    YAML::Node root = YAML::LoadFile("/root/CLionProjects/my_sylar/tests/log.yml");
+    sylar::Config::loadFromYaml(root);
+    XXC(g_person_value_config, system.person, after);
+}
+
 int main(int argc, char** argv) {
     sylar::Logger::ptr logger = sylar::Logger::getLoggerInstance();
     logger->addAppender(sylar::LogAppender::ptr(new sylar::StdoutLogAppender));
     //test_yaml();
     //test_config();
-    test_config1();
+    //test_config1();
+    test_class();
     return 0;
 }
+
+// Premise: Firstly MUST define global ConfigVar
+// Secondly read yaml

@@ -47,6 +47,8 @@ namespace sylar {
                     SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << "key: " << key << " string: " << ss.str();
                     var->fromString(ss.str());
                 }
+            } else {
+                SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << "not exists this key: " << key << " string: " << i.second;
             }
         }
     }
