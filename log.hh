@@ -221,13 +221,15 @@ namespace sylar {
             << " appender=" << ss1.str();
             return ss.str();
         }
+
         std::string getLogName() const { return m_log_name; }
         void setLogName(const std::string& log_name) { m_log_name = log_name; }
         LogLevel::Level getLogLevel() const { return m_level; }
         void setLogLevel(const LogLevel::Level& level) { m_level = level; }
         std::string getFormatter() const { return m_formatter; }
         void setLogFormatter(const std::string& formatter) { m_formatter = formatter; }
-        std::vector<LogAppender::ptr> getAppenders() const { return m_appenders; }
+        const std::vector<LogAppender::ptr>& getAppenders() const { return m_appenders; } // otherwise cant not insert! // this func can not insert
+        void pushAppender(LogAppender::ptr p) { m_appenders.push_back(p); }
 
     private:
         std::string         m_log_name;

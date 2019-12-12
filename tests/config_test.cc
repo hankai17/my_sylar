@@ -2,6 +2,7 @@
 #include "log.hh"
 #include <yaml-cpp/yaml.h>
 #include <vector>
+#include <iostream>
 
 sylar::ConfigVar<int>::ptr g_int_value_config =
         sylar::Config::Lookup("system.port", (int)8080, "system port");
@@ -195,11 +196,22 @@ void test_class() {
     XXCMV(g_pmapvec_value_config, system.person_map_vec, after);
 }
 
-void test_log() {
-    //sylar::ConfigVar<std::vector<sylar::LoggerConfig>>::ptr g_log = sylar::Config::Lookup("logs", std::vector<sylar::LoggerConfig>{}, "system log");
-    //YAML::Node root = YAML::LoadFile("/root/CLionProjects/my_sylar/tests/base_log.yml");
-    //SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << g_log->toString();
+//extern sylar::ConfigVar<std::vector<sylar::LoggerConfig> >::ptr g_log;
 
+void test_log() {
+    sylar::ConfigVar<std::vector<sylar::LoggerConfig> >::ptr g_log =
+            sylar::Config::Lookup("logs", std::vector<sylar::LoggerConfig>{}, "system log"); // What map's key make up what 'typename T'
+    YAML::Node root = YAML::LoadFile("/root/CLionProjects/my_sylar/tests/base_log.yml");
+    SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << root;
+    sylar::Config::loadFromYaml(root);
+    const auto& items = g_log->getValue(); // vector<LoggerConfig>
+    for ( auto i : items) {
+        //SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << i.toString();
+        SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << i.getLogName();
+        SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << i.getLogLevel();
+        SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << i.getFormatter();
+    }
+    //SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << g_log->toString();
 }
 
 int main(int argc, char** argv) {

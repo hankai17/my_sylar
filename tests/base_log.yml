@@ -1,6 +1,6 @@
 logs:
-  - name: root
-    level: info
+  - name: root1
+    level: INFO
     formatter: '%d%T%m%n'
     appender:
       - type: FileLogAppender
@@ -11,5 +11,5 @@ logs:
     formatter: '%d%T%m%n'
     appender:
       - type: FileLogAppender
-        path: log.txt
+        file: log.txt
       - type: StdoutLogAppender

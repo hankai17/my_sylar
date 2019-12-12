@@ -30,7 +30,7 @@ namespace sylar {
         return "UNKNOWN";
     }
 
-    LogLevel::Level FromString(const std::string& val) {
+    LogLevel::Level LogLevel::FromString(const std::string& val) { // !!!
 #define XX(level, v) \
     if (val == #v) { \
         return LogLevel::level; \
@@ -401,56 +401,7 @@ namespace sylar {
         m_logger->addAppender(LogAppender::ptr(new StdoutLogAppender)); // user default use stdout
     }
 
-    template <> //template <typename T>
-    class Lexicalcast<std::vector<LoggerConfig>, std::string> {
-    public:
-        std::string operator() (const std::vector<LoggerConfig>& val) {
-            YAML::Node node;
-            std::stringstream ss;
-            for (auto& i : val) { //i is LoggerConfig
-                node["name"] = i.getLogName();
-                node["level"] = LogLevel::ToString(i.getLogLevel());
-                node["formatter"] = i.getFormatter();
+    //sylar::ConfigVar<std::vector<sylar::LoggerConfig> >::ptr g_log =
+     //       sylar::Config::Lookup("logs", std::vector<sylar::LoggerConfig>{}, "system log"); // What map's key make up what 'typename T'
 
-                for (const auto& j : i.getAppenders()) {
-                    YAML::Node node1;
-                    node1["appender"]["type"] = j->getType();
-                    node1["appender"]["file"] = j->getFile();
-                    node.push_back(node1);
-                }
-                ss << node;
-            }
-            return ss.str();
-        }
-    };
-
-    template <> //template <typename T>
-    class Lexicalcast<std::string, std::vector<LoggerConfig> > {
-    public:
-        std::vector<LoggerConfig> operator() (const std::string& val) {
-            YAML::Node node = YAML::Load(val);
-            LoggerConfig lc;
-            std::vector<LoggerConfig> vec;
-            for (const auto& i : node) { // I do not know node's shape
-                lc.setLogName(i["name"].as<std::string>());
-                lc.setLogLevel(LogLevel::FromString(i["level"].as<std::string>()));
-                lc.setLogFormatter(i["formatter"].as<std::string>());
-
-                for (const auto& j : i["appender"]) {
-                    if (j["type"].Scalar() == "StdoutLogAppender" ) {
-                        StdoutLogAppender::ptr sap(new StdoutLogAppender);
-                        sap->setType("StdoutLogAppender");
-                        lc.getAppenders().push_back(sap);
-                    } else { // TODO
-                        FileLogAppender::ptr fap(new FileLogAppender(j["file"].Scalar()));
-                        fap->setType("FileLogAppender");
-                        fap->setFile(j["file"].Scalar());
-                        lc.getAppenders().push_back(fap);
-                    }
-                }
-                vec.push_back(lc);
-            }
-            return vec;
-        }
-    };
 }

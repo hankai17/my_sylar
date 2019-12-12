@@ -14,6 +14,7 @@
 
 #include <yaml-cpp/yaml.h>
 #include "log.hh"
+#include <iostream>
 
 namespace sylar {
     class ConfigVarBase {
@@ -63,8 +64,8 @@ namespace sylar {
     template <typename T>
     class Lexicalcast<std::vector<T>, std::string> {
     public:
-        //std::string operator() (std::vector<T>& v) { !!!!!!!!! fuck
-            std::string operator() (const std::vector<T>& v) {
+        //std::string operator() (std::vector<T>& v)  !!!!!!!!! fuck
+        std::string operator() (const std::vector<T>& v) {
             YAML::Node node;
             for (const auto&i : v) {
                 node.push_back(YAML::Load(Lexicalcast<T, std::string>()(i)));
@@ -231,7 +232,7 @@ namespace sylar {
 
     template <typename T, class FromStr = Lexicalcast<std::string, T>,
                 class ToStr = Lexicalcast<T, std::string> >
-    class ConfigVar : public ConfigVarBase {
+    class ConfigVar : public ConfigVarBase { // T MUST provide func that string <==> T
     public:
         typedef std::shared_ptr<ConfigVar> ptr;
         ConfigVar(const std::string& name, const T& default_val, const std::string& desc = "") // all para after desc must must must have default value
@@ -266,6 +267,59 @@ namespace sylar {
         void setValue(const T& v) { m_val = v; }
     private:
         T      m_val; // not refer
+    };
+
+    template <> //template <typename T>
+    class Lexicalcast<std::vector<LoggerConfig>, std::string> {
+    public:
+        std::string operator() (const std::vector<LoggerConfig>& val) {
+            YAML::Node node;
+            std::stringstream ss; //i is LoggerConfig
+            for (auto& i : val) {
+                node["name"] = i.getLogName();
+                node["level"] = LogLevel::ToString(i.getLogLevel());
+                node["formatter"] = i.getFormatter();
+
+                for (const auto& j : i.getAppenders()) {
+                    YAML::Node node1;
+                    node1["appender"]["type"] = j->getType();
+                    node1["appender"]["file"] = j->getFile();
+                    node.push_back(node1);
+                }
+                ss << node;
+            }
+            return ss.str();
+        }
+    };
+
+    template <> //template <typename T>
+    class Lexicalcast<std::string, std::vector<LoggerConfig> > {
+    public:
+        std::vector<LoggerConfig> operator() (const std::string& val) {
+            YAML::Node node = YAML::Load(val);
+            LoggerConfig lc;
+            std::vector<LoggerConfig> vec; // I do not know node's shape // now I know it's a vec & i is LoggerConfig
+            for (const auto& i : node) {
+                lc.setLogName(i["name"].as<std::string>());
+                lc.setLogLevel(LogLevel::FromString(i["level"].as<std::string>()));
+                lc.setLogFormatter(i["formatter"].as<std::string>());
+
+                for (const auto& j : i["appender"]) {
+                    if (j["type"].as<std::string>() == "StdoutLogAppender" ) {
+                        StdoutLogAppender::ptr sap(new StdoutLogAppender);
+                        sap->setType("StdoutLogAppender");
+                        lc.pushAppender(sap);
+                    } else { // TODO
+                        FileLogAppender::ptr fap(new FileLogAppender(j["file"].as<std::string>()));
+                        fap->setType("FileLogAppender");
+                        fap->setFile(j["file"].as<std::string>());
+                        lc.pushAppender(fap);
+                    }
+                }
+                vec.push_back(lc);
+            }
+            return vec;
+        }
     };
 
     class Config {
