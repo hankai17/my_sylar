@@ -158,10 +158,10 @@ namespace sylar {
         typedef std::shared_ptr<StdoutLogAppender> ptr;
         void log(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override;
         std::string toYamlString() override;
-        std::string getType() override; //{ return "StdoutLogAppender"; }
-        std::string getFile() override; // { return ""; }
-        void setType(const std::string& val) override; // { m_type = "StdoutLogAppender"; }
-        void setFile(const std::string& val) override; // {}
+        std::string getType() override { return "StdoutLogAppender"; }
+        std::string getFile() override { return ""; }
+        void setType(const std::string& val) override { m_type = "StdoutLogAppender"; }
+        void setFile(const std::string& val) override {}
     };
 
     class FileLogAppender : public LogAppender {

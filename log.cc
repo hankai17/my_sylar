@@ -36,13 +36,13 @@ namespace sylar {
         return LogLevel::level; \
     }
 
-    XX(DEBUG, DEBUG);
-    XX(INFO, INFO);
-    XX(WARN, WARN);
-    XX(ERROR, ERROR);
-    XX(FATAL, FATAL);
+        XX(DEBUG, DEBUG);
+        XX(INFO, INFO);
+        XX(WARN, WARN);
+        XX(ERROR, ERROR);
+        XX(FATAL, FATAL);
 #undef XX
-    return LogLevel::UNKNOW;
+        return LogLevel::UNKNOW;
     }
 
     LogEvent::LogEvent(uint64_t time, LogLevel::Level level, const char* file, uint32_t line,
@@ -203,10 +203,11 @@ namespace sylar {
         return ss.str();
     }
 
-    std::string StdoutLogAppender::getType() { return "StdoutLogAppender"; }
-    std::string StdoutLogAppender::getFile() { return ""; }
-    void  StdoutLogAppender::setType(const std::string& val) { m_type = "StdoutLogAppender"; }
-    void StdoutLogAppender::setFile(const std::string& val) {}
+    void StdoutLogAppender::log(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) {
+        if (level >= m_level) {
+            std::cout << m_formatter->format(logger, level, event);
+        }
+    }
 
     FileLogAppender::FileLogAppender(const std::string& filename)
             :m_filename(filename) {
@@ -434,18 +435,18 @@ namespace sylar {
                 lc.setLogName(i["name"].as<std::string>());
                 lc.setLogLevel(LogLevel::FromString(i["level"].as<std::string>()));
                 lc.setLogFormatter(i["formatter"].as<std::string>());
-                
+
                 for (const auto& j : i["appender"]) {
-                   if (j["type"].Scalar() == "StdoutLogAppender" ) {
-                       StdoutLogAppender::ptr sap(new StdoutLogAppender);
-                       sap->setType("StdoutLogAppender");
-                       lc.getAppenders().push_back(sap);
-                   } else { // TODO
-                       FileLogAppender::ptr fap(new FileLogAppender(j["file"].Scalar()));
-                       fap->setType("FileLogAppender");
-                       fap->setFile(j["file"].Scalar());
-                       lc.getAppenders().push_back(fap);
-                   }
+                    if (j["type"].Scalar() == "StdoutLogAppender" ) {
+                        StdoutLogAppender::ptr sap(new StdoutLogAppender);
+                        sap->setType("StdoutLogAppender");
+                        lc.getAppenders().push_back(sap);
+                    } else { // TODO
+                        FileLogAppender::ptr fap(new FileLogAppender(j["file"].Scalar()));
+                        fap->setType("FileLogAppender");
+                        fap->setFile(j["file"].Scalar());
+                        lc.getAppenders().push_back(fap);
+                    }
                 }
                 vec.push_back(lc);
             }
