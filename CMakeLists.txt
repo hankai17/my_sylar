@@ -27,7 +27,7 @@ add_library(${PROJECT_NAME} SHARED ${LIB_SRC})
 
 add_executable(log_test tests/log_test.cc)
 add_dependencies(log_test ${PROJECT_NAME})
-target_link_libraries(log_test ${PROJECT_NAME})
+target_link_libraries(log_test ${PROJECT_NAME} ${YAMLCPP})
 
 add_executable(config_test tests/config_test.cc)
 add_dependencies(config_test ${PROJECT_NAME})

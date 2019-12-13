@@ -38,7 +38,8 @@
 #define SYLAR_LOG_FMT_WARN(logger, fmt, ...) SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel:WARN, fmt, ...)
 #define SYLAR_LOG_FMT_ERROR(logger, fmt, ...) SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel:ERROR, fmt, ...)
 
-#define SYLAR_LOG_ROOT() sylar::Logger::getLoggerInstance() // not thread safe
+#define SYLAR_LOG_ROOT() sylar::LoggerManager::getLogMgr()->getRoot()
+#define SYLAR_LOG_Name(name) sylar::LoggerManager::getLogMgr()->getLogger(name)
 
 namespace sylar {
 
@@ -138,19 +139,13 @@ namespace sylar {
 
         void addAppender(LogAppender::ptr appender);
         void delAppender(LogAppender::ptr appender);
-
-        static Logger::ptr getLoggerInstance() { return instance; } // not const
-
-    private:
         Logger(const std::string& name = "root");
-        //TODO garbage recollect, refer designm
 
     private:
         std::string                 m_name;
         LogLevel::Level             m_level;
         std::list<LogAppender::ptr> m_appenders; // Use ptr
         LogFormatter::ptr           m_formatter;
-        static Logger::ptr          instance;
     };
 
     class StdoutLogAppender : public LogAppender {
@@ -195,14 +190,18 @@ namespace sylar {
         LogEvent::ptr   m_event;
     };
 
-    class LoggerManager { // design deeply
+    class LoggerManager { // not design deeply // logger should not siglon logmanager should be siglon
     public:
         typedef std::shared_ptr<LoggerManager> ptr;
-        LoggerManager();
-        Logger::ptr getLogger() const { return m_logger; }
+        Logger::ptr getLogger(std::string& name);
+        Logger::ptr getRoot() const { return m_root; }
+        static LoggerManager::ptr getLogMgr() { return logMgr; }
 
     private:
-        Logger::ptr m_logger;
+        LoggerManager();
+        static LoggerManager::ptr           logMgr;
+        Logger::ptr                         m_root;
+        std::map<std::string, Logger::ptr>  m_loggers;
     };
 
     class LoggerConfig {

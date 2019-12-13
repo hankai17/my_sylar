@@ -275,8 +275,6 @@ namespace sylar {
         m_formatter.reset(new LogFormatter("%d{%Y-%m-%d %H:%M:%S}%T%t%T%F%T[%p]%T[%c]%T%f:%l%T%m%n"));
     }
 
-    Logger::ptr Logger::instance(new(Logger)); // why not new logger()
-
     void Logger::log(LogLevel::Level level, LogEvent::ptr event) {
         if (level >= m_level) {
             for (auto&i : m_appenders) {
@@ -401,9 +399,23 @@ namespace sylar {
         m_logger->log(m_logger->getLevel(), m_event);
     }
 
+    LoggerManager::ptr LoggerManager::logMgr(new LoggerManager);
+
     LoggerManager::LoggerManager() {
-        m_logger =  Logger::getLoggerInstance();
-        m_logger->addAppender(LogAppender::ptr(new StdoutLogAppender)); // user default use stdout
+        m_root.reset(new Logger("root"));
+        m_root->addAppender(LogAppender::ptr(new StdoutLogAppender));
+        m_loggers[m_root->getName()] = m_root;
+    }
+
+    Logger::ptr LoggerManager::getLogger(std::string& name) {
+        auto it = m_loggers.find(name);
+        if ( it != m_loggers.end()) {
+            return it->second;
+        }
+        //return nullptr;
+        Logger::ptr logger(new Logger(name));
+        m_loggers[name] = logger;
+        return logger;
     }
 
     //sylar::ConfigVar<std::vector<sylar::LoggerConfig> >::ptr g_log =

@@ -211,8 +211,9 @@ void test_log() {
 }
 
 int main(int argc, char** argv) {
-    sylar::Logger::ptr logger = sylar::Logger::getLoggerInstance();
-    logger->addAppender(sylar::LogAppender::ptr(new sylar::StdoutLogAppender)); // That should be replace by a class & this class communicate with config
+    //sylar::Logger::ptr logger = sylar::Logger::getLoggerInstance();
+    //logger->addAppender(sylar::LogAppender::ptr(new sylar::StdoutLogAppender)); // That should be replace by a class & this class communicate with config
+
     //test_yaml();
     //test_config();
     //test_config1();

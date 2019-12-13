@@ -1,6 +1,7 @@
 #include <iostream>
 #include "log.hh"
 
+/*
 int main1(int argc, char** argv) {
     //sylar::Logger::ptr logger(new sylar::Logger);
     sylar::Logger::ptr logger = sylar::Logger::getLoggerInstance();
@@ -41,6 +42,7 @@ int main1(int argc, char** argv) {
     logger->delAppender(apr3);
     return 0;
 }
+ */
 
 int main() {
     sylar::Logger::ptr logger = SYLAR_LOG_ROOT();
