@@ -209,16 +209,16 @@ namespace sylar {
     public:
         typedef std::shared_ptr<LoggerConfig> ptr;
 
-        std::string toString() const { // toString should add to concrete class
-            std::stringstream ss1;
+        std::string toYamlString() const {
+            YAML::Node node;
+            node["name"] = m_log_name;
+            node["level"] = LogLevel::ToString(m_level);
+            node["formatter"] = m_formatter;
             for (const auto& i : m_appenders) {
-                ss1 << i->toYamlString();
+                node["appender"].push_back(YAML::Load(i->toYamlString())); // not node.push_back(YAML::Load(i->toYamlString))
             }
             std::stringstream ss;
-            ss << "[name=" << m_log_name
-            << " level=" << m_level
-            << " formatter=" << m_formatter
-            << " appender=" << ss1.str();
+            ss << node;
             return ss.str();
         }
 

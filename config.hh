@@ -297,26 +297,50 @@ namespace sylar {
     public:
         std::vector<LoggerConfig> operator() (const std::string& val) {
             YAML::Node node = YAML::Load(val);
-            LoggerConfig lc;
             std::vector<LoggerConfig> vec; // I do not know node's shape // now I know it's a vec & i is LoggerConfig
             for (const auto& i : node) {
-                lc.setLogName(i["name"].as<std::string>());
-                lc.setLogLevel(LogLevel::FromString(i["level"].as<std::string>()));
-                lc.setLogFormatter(i["formatter"].as<std::string>());
-
-                for (const auto& j : i["appender"]) {
-                    if (j["type"].as<std::string>() == "StdoutLogAppender" ) {
-                        StdoutLogAppender::ptr sap(new StdoutLogAppender);
-                        sap->setType("StdoutLogAppender");
-                        lc.pushAppender(sap);
-                    } else { // TODO
-                        FileLogAppender::ptr fap(new FileLogAppender(j["file"].as<std::string>()));
-                        fap->setType("FileLogAppender");
-                        fap->setFile(j["file"].as<std::string>());
-                        lc.pushAppender(fap);
-                    }
+                if (!i["name"].IsDefined()) {
+                    std::cout << "log config err, name is null" << std::endl;
+                    continue;
                 }
-                vec.push_back(lc);
+                LoggerConfig lc;
+                lc.setLogName(i["name"].as<std::string>());
+                lc.setLogLevel( i["level"].IsDefined() ? LogLevel::FromString(i["level"].as<std::string>()) : LogLevel::UNKNOW);
+                lc.setLogFormatter( i["formatter"].IsDefined() ? i["formatter"].as<std::string>() : "");
+
+                if (i["appender"].IsDefined()) {
+                    for (const auto &j : i["appender"]) {
+                        if (!j["type"].IsDefined()) {
+                            std::cout << "log config err, appender.type is null" << std::endl;
+                            continue;
+                        }
+
+                        switch (j["type"].as<std::string>()[0]) {
+                            case 'S': {
+                                StdoutLogAppender::ptr sap(new StdoutLogAppender);
+                                sap->setType("StdoutLogAppender");
+                                lc.pushAppender(sap);
+                                break;
+                            }
+                            case 'F': {
+                                if (!j["file"].IsDefined()) {
+                                    std::cout << "log config err, FileLogAppender.file is null" << std::endl;
+                                    continue;
+                                }
+                                FileLogAppender::ptr fap(new FileLogAppender(j["file"].as<std::string>()));
+                                fap->setType("FileLogAppender");
+                                fap->setFile(j["file"].as<std::string>());
+                                lc.pushAppender(fap);
+                                break;
+                            }
+                            default: {
+                                std::cout << "log config err, not support type: " << j["type"].as<std::string>() << std::endl;
+                                break;
+                            }
+                        }
+                    }
+                    vec.push_back(lc);
+                }
             }
             return vec;
         }

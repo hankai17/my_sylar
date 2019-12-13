@@ -41,6 +41,11 @@ namespace sylar {
         XX(WARN, WARN);
         XX(ERROR, ERROR);
         XX(FATAL, FATAL);
+        XX(DEBUG, debug);
+        XX(INFO, info);
+        XX(WARN, warn);
+        XX(ERROR, error);
+        XX(FATAL, fatal);
 #undef XX
         return LogLevel::UNKNOW;
     }

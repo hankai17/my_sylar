@@ -206,12 +206,8 @@ void test_log() {
     sylar::Config::loadFromYaml(root);
     const auto& items = g_log->getValue(); // vector<LoggerConfig>
     for ( auto i : items) {
-        //SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << i.toString();
-        SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << i.getLogName();
-        SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << i.getLogLevel();
-        SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << i.getFormatter();
+        SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << i.toYamlString();
     }
-    //SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << g_log->toString();
 }
 
 int main(int argc, char** argv) {

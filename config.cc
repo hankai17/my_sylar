@@ -40,11 +40,11 @@ namespace sylar {
             if (var) {
                 if (i.second.IsScalar()) {
                     var->fromString(i.second.Scalar());
-                    SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << "key: " << key << " string: " << i.second.Scalar();
+                    //SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << "key: " << key << " string: " << i.second.Scalar();
                 } else {
                     std::stringstream ss;
                     ss << i.second;
-                    SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << "key: " << key << " string: " << ss.str();
+                    //SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << "key: " << key << " string: " << ss.str();
                     var->fromString(ss.str());
                 }
             } else {
