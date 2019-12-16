@@ -48,6 +48,13 @@ namespace sylar {
 
         thread->m_semphore.notify(); // Why here
         thread->m_cb(); // Why use swap()
+
+        /*
+        std::function<void()> cb;
+        cb.swap(thread->m_cb);
+        thread->m_semphore.notify(); // Why here
+        cb();
+         */
         return 0;
     }
 
