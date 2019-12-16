@@ -23,5 +23,6 @@ int main() {
     for (const auto& i : {0, 1, 2, 3, 4}) {
         vec[i]->join();
     }
+
     return 0;
 }
