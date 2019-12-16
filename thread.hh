@@ -2,11 +2,13 @@
 #define __THREAD_HH__
 
 #include <memory>
+#include <string>
 #include <thread>
 #include <functional>
-#include <thread.h>
+#include <pthread.h>
 
 namespace sylar {
+
     class Thread {
     public:
         typedef std::shared_ptr<Thread> ptr;
@@ -14,7 +16,12 @@ namespace sylar {
         ~Thread();
 
         pid_t getId() const { return m_id; }
+        void setName(const std::string& name);
         const std::string& getName() const { return m_name; }
+        static void* run(void* arg); // Why static ?
+        static std::string& GetName(); // const { return t_thread_name; }
+        static Thread* GetThis();
+
         void join();
 
     private:

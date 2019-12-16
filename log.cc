@@ -399,7 +399,8 @@ namespace sylar {
         m_logger->log(m_logger->getLevel(), m_event);
     }
 
-    LoggerManager::ptr LoggerManager::logMgr(new LoggerManager);
+    //LoggerManager::ptr LoggerManager::logMgr(new LoggerManager);
+    LoggerManager* LoggerManager::logMgr = new LoggerManager;
 
     LoggerManager::LoggerManager() {
         m_root.reset(new Logger("root"));
@@ -407,7 +408,11 @@ namespace sylar {
         m_loggers[m_root->getName()] = m_root;
     }
 
-    Logger::ptr LoggerManager::getLogger(std::string& name) {
+    LoggerManager* LoggerManager::getLogMgr() {
+        return logMgr;
+    }
+
+    Logger::ptr LoggerManager::getLogger(const std::string& name) {
         auto it = m_loggers.find(name);
         if ( it != m_loggers.end()) {
             return it->second;

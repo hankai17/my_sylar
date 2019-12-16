@@ -39,7 +39,7 @@
 #define SYLAR_LOG_FMT_ERROR(logger, fmt, ...) SYLAR_LOG_FMT_LEVEL(logger, sylar::LogLevel:ERROR, fmt, ...)
 
 #define SYLAR_LOG_ROOT() sylar::LoggerManager::getLogMgr()->getRoot()
-#define SYLAR_LOG_Name(name) sylar::LoggerManager::getLogMgr()->getLogger(name)
+#define SYLAR_LOG_NAME(name) sylar::LoggerManager::getLogMgr()->getLogger(name)
 
 namespace sylar {
 
@@ -193,16 +193,17 @@ namespace sylar {
     class LoggerManager { // not design deeply // logger should not siglon logmanager should be siglon
     public:
         typedef std::shared_ptr<LoggerManager> ptr;
-        Logger::ptr getLogger(std::string& name);
+        Logger::ptr getLogger(const std::string& name);
         Logger::ptr getRoot() const { return m_root; }
-        static LoggerManager::ptr getLogMgr() { return logMgr; }
+        static LoggerManager* getLogMgr(); //{ return logMgr; }
 
     private:
         LoggerManager();
-        static LoggerManager::ptr           logMgr;
+        static LoggerManager*               logMgr;
         Logger::ptr                         m_root;
         std::map<std::string, Logger::ptr>  m_loggers;
     };
+    //LoggerManager* LoggerManager::logMgr = new LoggerManager;  // Why not here
 
     class LoggerConfig {
     public:
