@@ -427,4 +427,8 @@ namespace sylar {
     //sylar::ConfigVar<std::vector<sylar::LoggerConfig> >::ptr g_log =
      //       sylar::Config::Lookup("logs", std::vector<sylar::LoggerConfig>{}, "system log"); // What map's key make up what 'typename T'
 
+    //logMgr is logger's factory. This factory has a default root log. When load log config we should use this factory
+    //we should has a global logconfig that used to load log config //Only after load log config we can get more loggers
+    //1g_log 2loadfromyam
+
 }
