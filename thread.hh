@@ -6,8 +6,24 @@
 #include <thread>
 #include <functional>
 #include <pthread.h>
+#include <semaphore.h>
 
 namespace sylar {
+    class Semaphore {
+    public:
+        Semaphore(uint32_t count = 0);
+        ~Semaphore();
+
+        void wait();
+        void notify();
+
+    private:
+        Semaphore(const Semaphore&) = delete;
+        Semaphore& operator= (const Semaphore&) = delete;
+        Semaphore(const Semaphore&&) = delete;
+    private:
+        sem_t       m_semaphore;
+    };
 
     class Thread {
     public:
@@ -29,6 +45,7 @@ namespace sylar {
         std::function<void()>   m_cb;
         std::string             m_name;
         pthread_t               m_thread = 0;
+        Semaphore               m_semphore;
     };
 }
 

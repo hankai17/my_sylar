@@ -9,6 +9,28 @@ namespace sylar {
     //static sylar::Logger::ptr logger = SYLAR_LOG_NAME("root");
     //static sylar::Logger::ptr logger = SYLAR_LOG_ROOT(); // Why not here
 
+    Semaphore::Semaphore(uint32_t count) {
+        if (sem_init(&m_semaphore, 0, count)) {
+            throw std::logic_error("sem_init failed");
+        }
+    }
+
+    Semaphore::~Semaphore() {
+        sem_destroy(&m_semaphore);
+    }
+
+    void Semaphore::wait() {
+        if (sem_wait(&m_semaphore)) {
+            throw std::logic_error("sem_wait failed");
+        }
+    }
+
+    void Semaphore::notify() {
+        if (sem_post(&m_semaphore)) {
+            throw std::logic_error("sem_wait failed");
+        }
+    }
+
     std::string& Thread::GetName() {
         return t_thread_name;
     }
@@ -24,6 +46,7 @@ namespace sylar {
         thread->m_id = sylar::GetThreadId();
         pthread_setname_np(pthread_self(), thread->m_name.substr(0, 15).c_str());
 
+        thread->m_semphore.notify(); // Why here
         thread->m_cb(); // Why use swap()
         return 0;
     }
@@ -40,6 +63,7 @@ namespace sylar {
             << " name = " << name;
             throw std::logic_error("pthread create failed");
         }
+        m_semphore.wait();
     }
 
     void Thread::join() {
