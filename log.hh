@@ -17,6 +17,7 @@
 #include <map>
 #include <yaml-cpp/yaml.h>
 #include "util.hh"
+#include "thread.hh"
 
 #define SYLAR_LOG_LEVEL(logger, level) \
     if (logger->getLevel() <= level) \
@@ -132,6 +133,7 @@ namespace sylar {
     class Logger { // User normal use. Publish it
     public:
         typedef std::shared_ptr<Logger> ptr;
+        typedef sylar::Mutex MutexType;
         //void log(LogLevel::Level level, const std::string& filename, uint32_t line_no, uint64_t m_time); // How to set formatter?  so ugly so enclosure a class
         void log(LogLevel::Level level, LogEvent::ptr event); // user how to use it. //Why ptr
         std::string getName() const { return m_name; }
@@ -146,6 +148,7 @@ namespace sylar {
         LogLevel::Level             m_level;
         std::list<LogAppender::ptr> m_appenders; // Use ptr
         LogFormatter::ptr           m_formatter;
+        MutexType                   m_mutex;
     };
 
     class StdoutLogAppender : public LogAppender {

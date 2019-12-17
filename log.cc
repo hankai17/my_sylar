@@ -277,6 +277,7 @@ namespace sylar {
 
     void Logger::log(LogLevel::Level level, LogEvent::ptr event) {
         if (level >= m_level) {
+            MutexType::Lock lock(m_mutex);
             for (auto&i : m_appenders) {
                 //i->log(Logger::ptr(this), level, event);
                 i->log(std::make_shared<Logger>(*this), level, event);
