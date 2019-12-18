@@ -430,5 +430,6 @@ namespace sylar {
     //logMgr is logger's factory. This factory has a default root log. When load log config we should use this factory
     //we should has a global logconfig that used to load log config //Only after load log config we can get more loggers
     //1g_log 2loadfromyam
+    //we should not replace logger in map. It is so violence!
 
 }
