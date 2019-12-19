@@ -285,6 +285,21 @@ namespace sylar {
         }
     }
 
+    std::string Logger::toYamlString() const {
+        YAML::Node node;
+        node["name"] = m_name;
+        node["level"] = LogLevel::ToString(m_level);
+        node["formatter"] = m_formatter->getFormatter();
+        for (const auto &i : m_appenders) {
+            node["appender"].push_back(
+                    YAML::Load(i->toYamlString())); // not node.push_back(YAML::Load(i->toYamlString))
+        }
+        std::stringstream ss;
+        ss << node;
+        return ss.str();
+
+    }
+
     void LogFormatter::init() {
         std::vector<std::tuple<std::string, std::string, int> > vec;
         enum parse_stat { // Do not design deeply
@@ -424,12 +439,33 @@ namespace sylar {
         return logger;
     }
 
-    //sylar::ConfigVar<std::vector<sylar::LoggerConfig> >::ptr g_log =
-     //       sylar::Config::Lookup("logs", std::vector<sylar::LoggerConfig>{}, "system log"); // What map's key make up what 'typename T'
-
     //logMgr is logger's factory. This factory has a default root log. When load log config we should use this factory
     //we should has a global logconfig that used to load log config //Only after load log config we can get more loggers
     //1g_log 2loadfromyam
     //we should not replace logger in map. It is so violence!
 
+    void LoggerConfig::setDefaultRoot() {
+        /*
+        Logger::ptr logger = LoggerManager::getLogMgr()->getRoot(); // SOS
+        m_log_name = logger->getName();
+        m_level    = logger->getLevel();
+        m_formatter = logger->getFormatter()->getFormatter();
+        //m_appenders = logger->
+        for (const auto& i : logger->getAppender()) {
+            if (i->getFile() == "")  {
+                LogAppender::ptr ap(new StdoutLogAppender);
+                m_appenders.push_back(ap);
+            } else {
+                LogAppender::ptr ap(new FileLogAppender(i->getFile()));
+                ap->setFile(i->getFile());
+                m_appenders.push_back(ap);
+            }
+        }
+         */
+        m_log_name = "root";
+        m_level = LogLevel::Level::DEBUG;
+        m_formatter = "%d{%Y-%m-%d %H:%M:%S}%T%t%T%F%T[%p]%T[%c]%T%f:%l%T%m%n";
+        LogAppender::ptr ap(new StdoutLogAppender);
+        m_appenders.push_back(ap);
+    }
 }

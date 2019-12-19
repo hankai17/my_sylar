@@ -235,6 +235,7 @@ namespace sylar {
     class ConfigVar : public ConfigVarBase { // T MUST provide func that string <==> T
     public:
         typedef std::shared_ptr<ConfigVar> ptr;
+        typedef std::function<void(const T &old_val, const T &new_val)> on_change_cb;
         ConfigVar(const std::string& name, const T& default_val, const std::string& desc = "") // all para after desc must must must have default value
                 : ConfigVarBase(name, desc),
                   m_val(default_val) {
@@ -254,7 +255,8 @@ namespace sylar {
         bool fromString(const std::string& val) override {
             try {
                 //m_val = boost::lexical_cast<T>(val);
-                m_val = FromStr()(val);
+                //m_val = FromStr()(val);
+                setValue(FromStr()(val));
             } catch (std::exception& e) {
                 SYLAR_LOG_ERROR(SYLAR_LOG_ROOT()) << "Configvar fromeString() exception " << e.what() << " " <<
                                                   typeid(m_val).name();
@@ -263,10 +265,45 @@ namespace sylar {
             return true;
         }
 
+        void addListener(const std::string &key, on_change_cb cb) {
+            //m_cbs.insert(std::pair<std::string, on_change_cb>(key, cb));
+            m_cbs[key] = cb;
+        }
+
+        void delListener(const std::string &key) {
+            m_cbs.erase(key);
+        }
+
+        void clearListener() {
+            m_cbs.clear();
+        }
+
+        on_change_cb getListener(const std::string &key) {
+            /*
+            if (m_cbs.find(key) == m_cbs.end()) {
+                return nullptr;
+            }
+            return m_cbs[key];
+             */
+            auto it = m_cbs.find(key);
+            return it == m_cbs.end() ? nullptr : it->second;
+        }
+
         const T& getValue() const { return m_val; } // Why not T
-        void setValue(const T& v) { m_val = v; }
+        void setValue(const T &v) {
+            /*
+            if (v == m_val) { // operator= TODO
+                return;
+            }
+             */
+            for (const auto &i : m_cbs) {
+                i.second(m_val, v);
+            }
+        }
+
     private:
-        T      m_val; // not refer
+        T m_val; // not refer
+        std::map<std::string, on_change_cb> m_cbs;
     };
 
     template <> //template <typename T>

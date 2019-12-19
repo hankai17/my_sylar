@@ -57,12 +57,15 @@ int main1() {
 
 
 int main() {
-    file_logger = SYLAR_LOG_NAME("root1");
-    //YAML::Node root = YAML::LoadFile("/root/CLionProjects/my_sylar/tests/base_log.yml");
-    //sylar::Config::loadFromYaml(root);
-    file_logger->addAppender(sylar::LogAppender::ptr(new sylar::FileLogAppender("melon.log")));
+    file_logger = SYLAR_LOG_NAME("root");
+    SYLAR_LOG_DEBUG(file_logger) << file_logger->toYamlString();
 
-    SYLAR_LOG_DEBUG(file_logger) << "log thread test";
+    YAML::Node root = YAML::LoadFile("/root/CLionProjects/my_sylar/tests/base_log.yml");
+    sylar::Config::loadFromYaml(root);
+    //file_logger->addAppender(sylar::LogAppender::ptr(new sylar::FileLogAppender("melon.log")));
+
+    SYLAR_LOG_DEBUG(file_logger) << "after load config-------------------------->";
+    SYLAR_LOG_DEBUG(file_logger) << file_logger->toYamlString();
 
     std::vector<sylar::Thread::ptr> vec;
     for (const auto& i : {0, 1}) {

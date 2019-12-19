@@ -92,6 +92,8 @@ namespace sylar {
         //std::string format(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event); // Out put log // Why not ???
         std::string format(std::shared_ptr<Logger> logger, LogLevel::Level level, std::shared_ptr<LogEvent> event); // Out put log
         std::string getFormatter() const { return m_pattern; }
+
+        void setFormatter(const std::string &pattern) { m_pattern = pattern; }
         std::string toYamlString();
     public:
         class FormatItem {
@@ -137,11 +139,23 @@ namespace sylar {
         //void log(LogLevel::Level level, const std::string& filename, uint32_t line_no, uint64_t m_time); // How to set formatter?  so ugly so enclosure a class
         void log(LogLevel::Level level, LogEvent::ptr event); // user how to use it. //Why ptr
         std::string getName() const { return m_name; }
+
+        void setName(const std::string &name) { m_name = name; }
         LogLevel::Level getLevel() const { return m_level; }
+
+        void setLevel(const LogLevel::Level &level) { m_level = level; }
+
+        LogFormatter::ptr getFormatter() const { return m_formatter; }
 
         void addAppender(LogAppender::ptr appender);
         void delAppender(LogAppender::ptr appender);
+
+        std::list<LogAppender::ptr> getAppender() const { return m_appenders; }
         Logger(const std::string& name = "root");
+
+        std::string toYamlString() const;
+
+        void clearAppender() { m_appenders.clear(); } //not const
 
     private:
         std::string                 m_name;
@@ -225,6 +239,9 @@ namespace sylar {
             return ss.str();
         }
 
+        void setDefaultRoot();
+
+        LoggerConfig(const std::string &root = "") { if (root == "root") setDefaultRoot(); }
         std::string getLogName() const { return m_log_name; }
         void setLogName(const std::string& log_name) { m_log_name = log_name; }
         LogLevel::Level getLogLevel() const { return m_level; }
