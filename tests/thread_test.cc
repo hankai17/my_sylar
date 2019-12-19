@@ -28,12 +28,16 @@ void fun2() {
     }
 }
 
+sylar::Mutex s_mutex1;
+
 void fun3() {
     //while (1)
     for (int i = 0; i < 100000; i++) {
+        sylar::Mutex::Lock lock(s_mutex1);
         count++;
         SYLAR_LOG_DEBUG(file_logger) << "after count++: " << count;
     }
+    std::cout<<"thread count: " <<count<<std::endl;
 }
 
 int main1() {
@@ -76,5 +80,6 @@ int main() {
     for (const auto& i : {0, 1}) {
         vec[i]->join();
     }
+    std::cout<<"count: "<<count<<std::endl;
     return 0;
 }

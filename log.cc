@@ -218,14 +218,24 @@ namespace sylar {
             :m_filename(filename) {
         reopen();
     }
-
+    int g_count = 0;
     void FileLogAppender::log(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) {
         if (level >= m_level) {
+            uint64_t now = time(0);
+            if (now != m_lastTime) {
+                reopen();
+                m_lastTime = now;
+            }
+            MutexType::Lock lock(m_mutex);
+            g_count++;
+            std::cout<<"g_count: "<<g_count<<std::endl;
             m_filestream << m_formatter->format(logger, level, event);
+            m_filestream.flush();
         }
     }
 
     bool FileLogAppender::reopen() {
+        MutexType::Lock lock(m_mutex);
         if (m_filestream) {
             m_filestream.close();
         }

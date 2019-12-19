@@ -179,6 +179,8 @@ namespace sylar {
     class FileLogAppender : public LogAppender {
     public:
         typedef std::shared_ptr<FileLogAppender> ptr;
+        typedef sylar::Mutex MutexType;
+
         FileLogAppender(const std::string& filename);
         void log(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override;
         std::string toYamlString() override;
@@ -192,6 +194,8 @@ namespace sylar {
     private:
         std::string     m_filename;
         std::ofstream   m_filestream;
+        MutexType       m_mutex;
+        uint64_t        m_lastTime;
     };
 
     class LogEventWrap { // a middle layer used to event and logger
