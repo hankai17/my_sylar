@@ -24,6 +24,7 @@ set(LIB_SRC
         log.cc
         config.cc
         thread.cc
+        fiber.cc
         util.cc
         )
 

@@ -455,6 +455,8 @@ namespace sylar {
     //we should not replace logger in map. It is so violence!
 
     void LoggerConfig::setDefaultRoot() {
+        //Logger::ptr logger = LoggerManager::getLogMgr()->getRoot(); // SOS // global value rely on siglo however siglo init after global
+        //m_log_name = logger->getName();
         /*
         Logger::ptr logger = LoggerManager::getLogMgr()->getRoot(); // SOS
         m_log_name = logger->getName();
