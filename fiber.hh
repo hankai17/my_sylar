@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <functional>
+#include <ucontext.h>
 
 namespace sylar {
     class Fiber {
@@ -13,7 +14,8 @@ namespace sylar {
             HOLD,
             EXEC,
             TERM,
-            READY
+            READY,
+            EXCEPT
         };
 
         Fiber(std::function<void()> cb, size_t stacksize = 0);
@@ -36,7 +38,7 @@ namespace sylar {
 
         static uint64_t TotalFibers();
 
-        static MainFunc();
+        static void MainFunc();
 
     private:
         Fiber();
