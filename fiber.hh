@@ -40,6 +40,8 @@ namespace sylar {
 
         static void MainFunc();
 
+        uint64_t getFiberId() const { return m_id; }
+
     private:
         Fiber();
 

@@ -4,7 +4,7 @@
 #include <execinfo.h>
 
 namespace sylar {
-    sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
+    //sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
 
     pid_t GetThreadId() {
         return syscall(SYS_gettid);
@@ -20,7 +20,7 @@ namespace sylar {
         size_t s = ::backtrace(array, size);
         char** strings = backtrace_symbols(array, size);
         if (strings == NULL) {
-            SYLAR_LOG_ERROR(g_logger) << "backtrace_symbols failed";
+            SYLAR_LOG_ERROR(SYLAR_LOG_NAME("system")) << "backtrace_symbols failed";
             free(array);
             return;
         }
