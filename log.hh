@@ -222,7 +222,11 @@ namespace sylar {
         LoggerManager();
         static LoggerManager*               logMgr;
         Logger::ptr                         m_root;
-        std::map<std::string, Logger::ptr>  m_loggers;
+
+        static std::map<std::string, Logger::ptr> &GetMap() {
+            static std::map<std::string, Logger::ptr> m_loggers;
+            return m_loggers;
+        }
     };
     //LoggerManager* LoggerManager::logMgr = new LoggerManager;  // Why not here
 

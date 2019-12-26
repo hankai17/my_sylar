@@ -420,7 +420,7 @@ namespace sylar {
 
     private:
         //static ConfigVarMap        m_config; // Why static
-        static ConfigVarMap &getMap() { //普通静态成员 最好写成这种方式 不要写成像单例那种在类外部的全局区域声明 
+        static ConfigVarMap &getMap() { //普通静态成员 最好写成这种方式 不要写成像单例那种在类外部的全局区域声明
             static ConfigVarMap m_config;
             return m_config;
         } // not const

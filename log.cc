@@ -431,7 +431,7 @@ namespace sylar {
     LoggerManager::LoggerManager() {
         m_root.reset(new Logger("root"));
         m_root->addAppender(LogAppender::ptr(new StdoutLogAppender));
-        m_loggers[m_root->getName()] = m_root;
+        GetMap()[m_root->getName()] = m_root;
     }
 
     LoggerManager* LoggerManager::getLogMgr() {
@@ -439,13 +439,13 @@ namespace sylar {
     }
 
     Logger::ptr LoggerManager::getLogger(const std::string& name) {
-        auto it = m_loggers.find(name);
-        if ( it != m_loggers.end()) {
+        auto it = GetMap().find(name);
+        if (it != GetMap().end()) {
             return it->second;
         }
         //return nullptr;
         Logger::ptr logger(new Logger(name));
-        m_loggers[name] = logger;
+        GetMap()[name] = logger;
         return logger;
     }
 
