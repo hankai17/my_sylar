@@ -3,7 +3,7 @@
 
 namespace sylar {
 
-    Config::ConfigVarMap Config::m_config; //!!!
+    //Config::ConfigVarMap Config::m_config; //!!!
 
     ConfigVarBase::ptr Config::LookupBase(const std::string &name) { // It just a simple judge
         auto it = Config::getMap().find(name);
@@ -56,8 +56,8 @@ namespace sylar {
 
     sylar::ConfigVar<std::vector<sylar::LoggerConfig> >::ptr g_log_config =
             sylar::Config::Lookup("logs", std::vector<sylar::LoggerConfig>{LoggerConfig("root")}, "sylar log");
-    sylar::ConfigVar<uint32_t>::ptr g_fiber_stack_size =
-            sylar::Config::Lookup<uint32_t>("fiber.stacksize", 1024 * 1024, "fiber stack size");
+    //sylar::ConfigVar<uint32_t>::ptr g_fiber_stack_size =
+    //       sylar::Config::Lookup<uint32_t>("fiber.stacksize", 1024 * 1024, "fiber stack size");
 
     /*
     g_log_config->addListener("sylar log", [](const std::vector<sylar::LoggerConfig>& old_val, //Can not call it directly

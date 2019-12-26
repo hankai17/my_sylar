@@ -419,8 +419,11 @@ namespace sylar {
         static ConfigVarBase::ptr LookupBase(const std::string& name);
 
     private:
-        static ConfigVarMap        m_config; // Why static
-        static ConfigVarMap& getMap() { return m_config; } // not const
+        //static ConfigVarMap        m_config; // Why static
+        static ConfigVarMap &getMap() {
+            static ConfigVarMap m_config;
+            return m_config;
+        } // not const
     };
 }
 //#include "config.cc"

@@ -15,8 +15,8 @@ namespace sylar {
     //static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
     //sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
     //static sylar::ConfigVar<uint32_t>::ptr g_fiber_stack_size =
-    //sylar::ConfigVar<uint32_t>::ptr g_fiber_stack_size =
-     //       sylar::Config::Lookup<uint32_t>("fiber.stacksize", 1024 * 1024, "fiber stack size");
+    sylar::ConfigVar<uint32_t>::ptr g_fiber_stack_size =
+            sylar::Config::Lookup<uint32_t>("fiber.stacksize", 1024 * 1024, "fiber stack size");
 
     class MallocStackAllocator {
     public:
@@ -58,7 +58,7 @@ namespace sylar {
         SYLAR_LOG_DEBUG(SYLAR_LOG_NAME("system")) << "Fiber::Fiber";
     }
 
-    extern sylar::ConfigVar<uint32_t>::ptr g_fiber_stack_size; // SO ugly!
+    //extern sylar::ConfigVar<uint32_t>::ptr g_fiber_stack_size; // SO ugly!
     Fiber::Fiber(std::function<void()> cb, size_t stacksize)
     : m_id(++s_fiber_id),
     m_cb(cb) {
