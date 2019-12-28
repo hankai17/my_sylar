@@ -13,7 +13,7 @@ namespace sylar {
     static std::atomic<uint64_t> s_fiber_id {0};
 
     //static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
-    sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
+    static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
     //static sylar::ConfigVar<uint32_t>::ptr g_fiber_stack_size =
     sylar::ConfigVar<uint32_t>::ptr g_fiber_stack_size =
             sylar::Config::Lookup<uint32_t>("fiber.stacksize", 1024 * 1024, "fiber stack size");

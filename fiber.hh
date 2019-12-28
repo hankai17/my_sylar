@@ -7,6 +7,7 @@
 
 namespace sylar {
     class Fiber {
+        friend class Scheduler;
     public:
         typedef std::shared_ptr<Fiber> ptr;
         enum State {

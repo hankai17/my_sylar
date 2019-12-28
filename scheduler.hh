@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include <list>
+#include <vector>
 
 #include "thread.hh"
 #include "fiber.hh"
@@ -109,7 +110,14 @@ namespace sylar {
         MutexType                   m_mutex;
         std::string                 m_name;
         std::list<FiberAndThread>   m_fibers;
+        std::vector<Thread::ptr>    m_threads;
         Fiber::ptr                  m_rootFiber;
+
+    protected: // Why use protected
+        size_t                      m_threadCounts = 0;
+        std::vector<int>            m_threadIds {};
+        int                         m_rootThreadId = 0;
+
     };
 }
 
