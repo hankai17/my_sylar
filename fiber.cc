@@ -9,6 +9,7 @@
 
 namespace sylar {
     static thread_local Fiber* t_fiber = nullptr;
+    static thread_local Fiber::ptr t_threadFiber = nullptr;
     static std::atomic<uint64_t> s_fiber_count {0};
     static std::atomic<uint64_t> s_fiber_id {0};
 
@@ -36,16 +37,25 @@ namespace sylar {
     }
 
     Fiber::ptr Fiber::GetThis() {
-        if (t_fiber) {
+        if (true) {
+            if (t_fiber) {
+                return std::make_shared<Fiber>(*t_fiber);
+                //return t_fiber->shared_from_this(); //
+            }
+            // Why alloc a new fiber?
+            Fiber::ptr main_fiber(new Fiber);
+            SYLAR_ASSERT(t_fiber == main_fiber.get()); // Why
+            t_threadFiber = main_fiber; // used for call() and back()
+            // Now we had t_fiber already
             return std::make_shared<Fiber>(*t_fiber);
-            //return t_fiber->shared_from_this(); //
+        } else {
+            if (t_fiber) {
+                return t_fiber->shared_from_this();
+            }
+            Fiber::ptr main_fiber(new Fiber);
+            SYLAR_ASSERT(t_fiber == main_fiber.get());
+            return t_fiber->shared_from_this();
         }
-        // Why alloc a new fiber?
-        Fiber::ptr main_fiber(new Fiber);
-        SYLAR_ASSERT(t_fiber == main_fiber.get()); // Why
-        //t_threadFiber = main_fiber; // used for call() and back()
-        //return t_fiber->
-        return nullptr;
     }
 
     Fiber::Fiber() {

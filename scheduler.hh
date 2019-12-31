@@ -20,6 +20,8 @@ namespace sylar {
 
         const std::string& getName() const { return m_name; }
         static Fiber* GetMainFiber();
+
+        static void SetMainFiber(Fiber *fiber);
         static Scheduler* GetThis();
 
         void start();

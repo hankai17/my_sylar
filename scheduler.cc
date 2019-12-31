@@ -20,6 +20,10 @@ namespace sylar {
         return t_scheduler_fiber;
     }
 
+    void Scheduler::SetMainFiber(Fiber *fiber) {
+        t_scheduler_fiber = fiber;
+    }
+
     Scheduler::Scheduler(size_t threads, bool use_caller, const std::string &name)
     : m_name(name) {
         SYLAR_ASSERT(threads > 0);

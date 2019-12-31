@@ -6,7 +6,7 @@
 #include <ucontext.h>
 
 namespace sylar {
-    class Fiber {
+    class Fiber : public std::enable_shared_from_this<Fiber> {
         friend class Scheduler;
     public:
         typedef std::shared_ptr<Fiber> ptr;
@@ -42,6 +42,8 @@ namespace sylar {
         static void MainFunc();
 
         uint64_t getFiberId() const { return m_id; }
+
+        void setState(State state) { m_state = state; }
 
     private:
         Fiber();

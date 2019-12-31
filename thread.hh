@@ -248,7 +248,8 @@ namespace sylar {
         ~Thread();
 
         pid_t getId() const { return m_id; }
-        void setName(const std::string& name);
+
+        static void setName(const std::string &name);
         const std::string& getName() const { return m_name; }
         static void* run(void* arg); // Why static ?
         static std::string& GetName(); // const { return t_thread_name; }

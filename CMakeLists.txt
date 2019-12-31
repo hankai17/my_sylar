@@ -42,3 +42,7 @@ target_link_libraries(config_test ${PROJECT_NAME} ${YAMLCPP} ${THREAD})
 add_executable(thread_test tests/thread_test.cc)
 add_dependencies(thread_test ${PROJECT_NAME})
 target_link_libraries(thread_test ${LIBS})
+
+add_executable(fiber_test tests/fiber_test.cc)
+add_dependencies(fiber_test ${PROJECT_NAME})
+target_link_libraries(fiber_test ${LIBS})
