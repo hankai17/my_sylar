@@ -5,7 +5,6 @@ namespace sylar {
     static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
 
     static thread_local Scheduler* t_scheduler = nullptr;
-    static thread_local Fiber* t_scheduler_fiber = nullptr;
     static thread_local Fiber* t_fiber = nullptr;
 
     Scheduler* Scheduler::GetThis() {
@@ -17,11 +16,11 @@ namespace sylar {
     }
 
     Fiber* Scheduler::GetMainFiber() {
-        return t_scheduler_fiber;
+        return t_fiber;
     }
 
     void Scheduler::SetMainFiber(Fiber *fiber) {
-        t_scheduler_fiber = fiber;
+        t_fiber = fiber;
     }
 
     Scheduler::Scheduler(size_t threads, bool use_caller, const std::string &name)

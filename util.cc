@@ -1,5 +1,6 @@
 #include "util.hh"
 #include "log.hh"
+#include "fiber.hh"
 
 #include <execinfo.h>
 
@@ -10,8 +11,9 @@ namespace sylar {
         return syscall(SYS_gettid);
     }
 
-    uint32_t GetFiberId() {
-        return 9;
+    uint64_t GetFiberId() {
+        //return Fiber::GetThis()->getFiberId(); // It may bad_weak_ptr
+        return Fiber::GetFiberId();
     }
 
     //size: n items

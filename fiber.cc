@@ -9,11 +9,10 @@
 
 namespace sylar {
     static thread_local Fiber* t_fiber = nullptr;
-    static thread_local Fiber::ptr t_threadFiber = nullptr;
+    static thread_local Fiber::ptr t_kernel_fiber = nullptr;
     static std::atomic<uint64_t> s_fiber_count {0};
     static std::atomic<uint64_t> s_fiber_id {0};
 
-    //static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
     static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
     //static sylar::ConfigVar<uint32_t>::ptr g_fiber_stack_size =
     sylar::ConfigVar<uint32_t>::ptr g_fiber_stack_size =
@@ -36,42 +35,46 @@ namespace sylar {
         t_fiber = f;
     }
 
-    Fiber::ptr Fiber::GetThis() {
-        if (true) {
-            if (t_fiber) {
-                return std::make_shared<Fiber>(*t_fiber);
-                //return t_fiber->shared_from_this(); //
-            }
-            // Why alloc a new fiber?
-            Fiber::ptr main_fiber(new Fiber);
-            SYLAR_ASSERT(t_fiber == main_fiber.get()); // Why
-            t_threadFiber = main_fiber; // used for call() and back()
-            // Now we had t_fiber already
-            return std::make_shared<Fiber>(*t_fiber);
-        } else {
-            if (t_fiber) {
-                return t_fiber->shared_from_this();
-            }
-            Fiber::ptr main_fiber(new Fiber);
-            SYLAR_ASSERT(t_fiber == main_fiber.get());
-            return t_fiber->shared_from_this();
+    Fiber::ptr Fiber::GetThis() { // Factory, Must called in every thread
+        if (t_fiber) {
+            return t_fiber->shared_from_this(); // Not use std::make_shared<Fiber>(*t_fiber);  // Unspoken words: t_fiber already became a sharedptr
         }
+        Fiber::ptr main_fiber(new Fiber);
+        SetKernelFiber(main_fiber);
+        SYLAR_ASSERT(t_fiber == main_fiber.get());
+        return t_fiber->shared_from_this();
+    }
+
+    void Fiber::SetKernelFiber(Fiber::ptr f) {
+        t_kernel_fiber = f;
+    }
+
+    Fiber::ptr Fiber::GetKernelFiber() {
+        return t_kernel_fiber;
+    }
+
+    uint64_t Fiber::GetFiberId() {
+        if (t_fiber) {
+            return t_fiber->getFiberId();
+        }
+        return 0;
     }
 
     Fiber::Fiber() {
+        m_id = ++s_fiber_id;
         m_state = EXEC;
         SetThis(this);
         if (getcontext(&m_ctx)) {
             SYLAR_ASSERT(false); // TODO sylar_assert2
         }
         ++s_fiber_count;
-        SYLAR_LOG_DEBUG(SYLAR_LOG_NAME("system")) << "Fiber::Fiber";
+        SYLAR_LOG_DEBUG(g_logger) << "Fiber::Fiber";
     }
 
     //extern sylar::ConfigVar<uint32_t>::ptr g_fiber_stack_size; // SO ugly!
     Fiber::Fiber(std::function<void()> cb, size_t stacksize)
-    : m_id(++s_fiber_id),
-    m_cb(cb) {
+            : m_id(++s_fiber_id),
+              m_cb(cb) {
         ++s_fiber_count;
         m_stacksize = stacksize ? stacksize :  g_fiber_stack_size->getValue();
 
@@ -84,24 +87,28 @@ namespace sylar {
         m_ctx.uc_stack.ss_size = m_stacksize;
         makecontext(&m_ctx, &Fiber::MainFunc, 0);
 
-        SYLAR_LOG_DEBUG(SYLAR_LOG_NAME("system")) << "Fiber::Fiber id: " << m_id; // Not use s_fiber_id
+        SYLAR_LOG_DEBUG(g_logger) << "Fiber::Fiber id: " << m_id; // Not use s_fiber_id
     }
 
     void Fiber::swapIn() {
         SetThis(this);
         SYLAR_ASSERT(m_state != EXEC);
         m_state = EXEC;
-        if (swapcontext(&Scheduler::GetMainFiber()->m_ctx, &m_ctx)) {
+        //if (swapcontext(&Scheduler::GetMainFiber()->m_ctx, &m_ctx))
+        if (swapcontext(&t_kernel_fiber->m_ctx, &m_ctx)) {
             SYLAR_ASSERT(false);
         }
     }
 
     void Fiber::swapOut() {
-        SetThis(Scheduler::GetMainFiber());
-        if (swapcontext(&m_ctx, &Scheduler::GetMainFiber()->m_ctx)) {
-            SYLAR_ASSERT(false);
-        }
+        //SetThis(Scheduler::GetMainFiber());
+        SetThis(Fiber::GetKernelFiber().get());
+        //if (swapcontext(&m_ctx, &Scheduler::GetMainFiber()->m_ctx))
+        if (swapcontext(&m_ctx, &t_kernel_fiber->m_ctx)) {
+                SYLAR_ASSERT(false);
+            }
     }
+
 
     void Fiber::YeildToReady() {
         Fiber::ptr cur = GetThis();
@@ -119,8 +126,8 @@ namespace sylar {
         --s_fiber_id;
         if (m_stack) {
             SYLAR_ASSERT(m_state == INIT
-            || m_state == TERM
-            || m_state == EXCEPT)
+                         || m_state == TERM
+                         || m_state == EXCEPT)
             StackAllocator::Dealloc(m_stack, m_stacksize);
         } else {
             // TODO
@@ -133,8 +140,8 @@ namespace sylar {
     void Fiber::reset(std::function<void()> cb) { // So confuse why need this
         SYLAR_ASSERT(m_stack)
         SYLAR_ASSERT(m_state == TERM
-        || m_state == EXCEPT
-        || m_state == INIT);
+                     || m_state == EXCEPT
+                     || m_state == INIT);
         m_cb = cb;
         if (getcontext(&m_ctx)) {
             SYLAR_ASSERT("getcontext");
@@ -162,15 +169,15 @@ namespace sylar {
         } catch (std::exception& ex) {
             cur->m_state = EXCEPT;
             SYLAR_LOG_ERROR(SYLAR_LOG_NAME("system")) << "Fiber EXCEPT: " << ex.what()
-            << " Fiber id: " << cur->getFiberId()
-            << std::endl
-            << sylar::BacktraceToString();
+                                                      << " Fiber id: " << cur->getFiberId()
+                                                      << std::endl
+                                                      << sylar::BacktraceToString();
         } catch (...) {
             cur->m_state = EXCEPT;
             SYLAR_LOG_ERROR(SYLAR_LOG_NAME("system")) << "Fiber EXCEPT: "
-                                      << " Fiber id: " << cur->getFiberId()
-                                      << std::endl
-                                      << sylar::BacktraceToString();
+                                                      << " Fiber id: " << cur->getFiberId()
+                                                      << std::endl
+                                                      << sylar::BacktraceToString();
         }
         auto raw_ptr = cur.get(); // Why use raw ptr
         cur.reset();

@@ -20,33 +20,24 @@ namespace sylar {
         };
 
         Fiber(std::function<void()> cb, size_t stacksize = 0);
-
         ~Fiber();
-
         void reset(std::function<void()> cb);
-
         void swapIn();
-
         void swapOut();
-
-        static void SetThis(Fiber *f);
-
+        static void SetThis(Fiber* f);
         static Fiber::ptr GetThis();
-
+        static void SetKernelFiber(Fiber::ptr f);
+        static Fiber::ptr GetKernelFiber();
         static void YeildToReady();
-
         static void YeildToHold();
-
         static uint64_t TotalFibers();
-
         static void MainFunc();
-
         uint64_t getFiberId() const { return m_id; }
-
+        static uint64_t GetFiberId();
         void setState(State state) { m_state = state; }
 
     private:
-        Fiber();
+        Fiber(); // Why private?
 
         uint64_t m_id = 0;
         uint32_t m_stacksize = 0;
