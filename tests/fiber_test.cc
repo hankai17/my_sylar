@@ -50,3 +50,6 @@ int main() {
     }
 }
 
+// That test is simple. If a thread has more than one fiber, That will so difficult to coding
+// So scheduler is coming
+
