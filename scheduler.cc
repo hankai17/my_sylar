@@ -1,11 +1,16 @@
 #include "scheduler.hh"
 #include "macro.hh"
+#include <iostream>
 
 namespace sylar {
     static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
 
     static thread_local Scheduler* t_scheduler = nullptr;
-    static thread_local Fiber* t_fiber = nullptr;
+
+    // global ONLY has one scheduler and it has many threads and all threads have local d_kernel t_fiber
+    // global scheduler means main thread. Is main thread need fiber?
+
+    static thread_local Fiber* t_kernel_fiber = nullptr; // MUST equal to fiber.cc's d_kernel // Why use pointer?
 
     Scheduler* Scheduler::GetThis() {
         return t_scheduler; // Why not same as fiber.cc
@@ -16,26 +21,27 @@ namespace sylar {
     }
 
     Fiber* Scheduler::GetMainFiber() {
-        return t_fiber;
+        return t_kernel_fiber;
     }
 
     void Scheduler::SetMainFiber(Fiber *fiber) {
-        t_fiber = fiber;
+        t_kernel_fiber = fiber;
     }
 
     Scheduler::Scheduler(size_t threads, bool use_caller, const std::string &name)
     : m_name(name) {
         SYLAR_ASSERT(threads > 0);
-        sylar::Fiber::GetThis();
+        sylar::Fiber::GetThis(); // Get main thread's d_kernel_fiber
         --threads; // Why --
 
         SYLAR_ASSERT(GetThis() == nullptr); // Only has a global scheduler
         setThis();
 
         m_rootFiber.reset(new Fiber(std::bind(&Scheduler::run, this)));
-        //sylar::Thread::setName(m_name); // belongs to class can not use in there
+        sylar::Thread::SetName(m_name); // belongs to class can not use in there
 
-        t_fiber = m_rootFiber.get();
+        t_kernel_fiber = m_rootFiber.get(); //主线程的kernel fiber 并不像子线程那种kernel fiber
+
         //m_threadIds
 
         m_rootThreadId = GetThreadId();
@@ -53,7 +59,7 @@ namespace sylar {
         SYLAR_ASSERT(m_threads.empty());
         m_threads.resize(m_threadCounts);
         for (auto& i : m_threads) {
-            i.reset(new Thread( std::bind(&Scheduler::run, this), m_name) );
+            i.reset(new Thread( std::bind(&Scheduler::run, this), m_name) ); //???
             m_threadIds.push_back(i->getId());
         }
 
@@ -66,8 +72,8 @@ namespace sylar {
     void Scheduler::run() {
         SYLAR_LOG_INFO(g_logger) << "scheduler run";
         setThis();
-        if (sylar::GetThreadId() != m_rootThreadId) {
-            t_fiber = Fiber::GetThis().get();
+        if (sylar::GetThreadId() != m_rootThreadId) { //child threads && child threads' kernel fiber init
+            t_kernel_fiber = Fiber::GetThis().get();
         }
 
         Fiber::ptr idle_fiber(new Fiber(std::bind(&Scheduler::idle, this)));
@@ -113,6 +119,10 @@ namespace sylar {
                 cb_fiber.reset();
             } else {
                 SYLAR_LOG_INFO(g_logger) << "idle fiber";
+                if (idle_fiber->getState() == Fiber::TERM) {
+                    std::cout<< "idle end, we should break and end the fiber_system. Otherwise it will swapout the mainfun end and core" << std::endl;
+                    break;
+                }
                 idle_fiber->swapIn();
             }
         }

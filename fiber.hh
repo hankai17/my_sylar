@@ -35,6 +35,7 @@ namespace sylar {
         uint64_t getFiberId() const { return m_id; }
         static uint64_t GetFiberId();
         void setState(State state) { m_state = state; }
+        State getState() const { return m_state; }
 
     private:
         Fiber(); // Why private?

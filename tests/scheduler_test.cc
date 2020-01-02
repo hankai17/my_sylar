@@ -8,7 +8,7 @@
 sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
 
 int main() {
-    sylar::Scheduler sc(2);
+    sylar::Scheduler sc(2, true, "scheduler_test");
     sc.start();
-    sleep(2);
+    while(1);
 }

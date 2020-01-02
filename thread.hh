@@ -249,7 +249,7 @@ namespace sylar {
 
         pid_t getId() const { return m_id; }
 
-        static void setName(const std::string &name);
+        static void SetName(const std::string &name);
         const std::string& getName() const { return m_name; }
         static void* run(void* arg); // Why static ?
         static std::string& GetName(); // const { return t_thread_name; }

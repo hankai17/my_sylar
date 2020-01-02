@@ -111,13 +111,13 @@ namespace sylar {
     }
 
 
-    void Fiber::YeildToReady() {
+    void Fiber::YeildToReady() { // Why need this
         Fiber::ptr cur = GetThis();
         cur->m_state = READY;
         cur->swapOut();
     }
 
-    void Fiber::YeildToHold() {
+    void Fiber::YeildToHold() { // Normal used
         Fiber::ptr cur = GetThis();
         cur->m_state = HOLD;
         cur->swapOut();
