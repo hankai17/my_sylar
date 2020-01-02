@@ -107,6 +107,7 @@ namespace sylar {
         if (swapcontext(&m_ctx, &t_kernel_fiber->m_ctx)) {
                 SYLAR_ASSERT(false);
             }
+        std::cout<<"swapout over============="<<std::endl;
     }
 
 
@@ -120,6 +121,7 @@ namespace sylar {
         Fiber::ptr cur = GetThis();
         cur->m_state = HOLD;
         cur->swapOut();
+        //std::cout<< "YeildToHold cur->use_count(): " << cur.use_count() << std::endl;
     }
 
     Fiber::~Fiber() {
@@ -160,7 +162,8 @@ namespace sylar {
     }
 
     void Fiber::MainFunc() {
-        Fiber::ptr cur = GetThis();
+        Fiber::ptr cur = GetThis(); // I know that setthis means set pointer. Why getthis get shared_ptr?
+        std::cout<< "cur.use_count(): " << cur.use_count() << std::endl;
         SYLAR_ASSERT(cur);
         try {
             cur->m_cb();
@@ -179,9 +182,16 @@ namespace sylar {
                                                       << std::endl
                                                       << sylar::BacktraceToString();
         }
-        auto raw_ptr = cur.get(); // Why use raw ptr
-        cur.reset();
-        raw_ptr->swapOut();
+        if (true) {
+            auto raw_ptr = cur.get(); // Why use raw ptr
+            cur.reset();
+            //std::cout<< "cur.use_count(): " << cur.use_count() << std::endl;
+            //std::cout<< "GetThis().use_count(): " << GetThis().use_count() << std::endl;
+            raw_ptr->swapOut();
+        } else {
+            cur->swapOut();
+            std::cout << "================" << std::endl;
+        }
         //SYLAR_ASSERT("never reach there, Fiber id: " + std::to_string(raw_ptr->getFiberId()));
         SYLAR_ASSERT(false);
     }

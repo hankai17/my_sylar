@@ -24,11 +24,17 @@ void test_fiber() {
         sylar::Fiber::GetThis(); // All thread first words that we should get kernel first
         sylar::Fiber::ptr fiber(new sylar::Fiber(run_in_fiber)); // Why not bind // bad weak ptr
         fiber->swapIn();
+        std::cout<< "fiber.use_count(): " << fiber.use_count() << std::endl;
         SYLAR_LOG_DEBUG(g_logger) << "fiber hello world begin1";
         fiber->swapIn();
+        std::cout<< "fiber.use_count(): " << fiber.use_count() << std::endl;
         SYLAR_LOG_DEBUG(g_logger) << "fiber hello world begin3";
-        fiber->swapIn();
+        fiber->swapIn(); // In this swapin cb run_in_fiber is end, and then return to mainfun, and then swapout there
+        std::cout<< "fiber.use_count(): " << fiber.use_count() << std::endl; //In there fibers life is end, and fiber's use_count MUST MUST MUST equal 1, otherwise That is memory leak
+        SYLAR_LOG_DEBUG(g_logger) << "fiber hello world begin5";
+        //fiber->swapIn();
     }
+    std::cout<< "+++++++++++++++++++" << std::endl;
     SYLAR_LOG_DEBUG(g_logger) << "main end";
 }
 
@@ -38,7 +44,7 @@ int main() {
 
     sylar::Thread::setName("main");
     std::vector<sylar::Thread::ptr> thrs;
-    int thread_num = 4;
+    int thread_num = 1;
     for (int i = 0; i < thread_num; i++) {
         thrs.push_back(sylar::Thread::ptr(
                 new sylar::Thread(&test_fiber, "name_" + std::to_string(i))
@@ -48,6 +54,7 @@ int main() {
     for (int i = 0; i < thread_num; i++) {
         thrs[i]->join();
     }
+    std::cout<< "main() end" << std::endl;
 }
 
 // That test is simple. If a thread has more than one fiber, That will so difficult to coding

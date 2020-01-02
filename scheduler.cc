@@ -29,8 +29,8 @@ namespace sylar {
         sylar::Fiber::GetThis();
         --threads; // Why --
 
-        SYLAR_ASSERT(GetThis() == nullptr);
-        t_scheduler = this;
+        SYLAR_ASSERT(GetThis() == nullptr); // Only has a global scheduler
+        setThis();
 
         m_rootFiber.reset(new Fiber(std::bind(&Scheduler::run, this)));
         //sylar::Thread::setName(m_name); // belongs to class can not use in there

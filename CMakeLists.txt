@@ -46,3 +46,7 @@ target_link_libraries(thread_test ${LIBS})
 add_executable(fiber_test tests/fiber_test.cc)
 add_dependencies(fiber_test ${PROJECT_NAME})
 target_link_libraries(fiber_test ${LIBS})
+
+add_executable(scheduler_test tests/scheduler_test.cc)
+add_dependencies(scheduler_test ${PROJECT_NAME})
+target_link_libraries(scheduler_test ${LIBS})
