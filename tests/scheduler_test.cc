@@ -7,8 +7,20 @@
 
 sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
 
-int main() {
+void test_fiber() {
+    SYLAR_LOG_INFO(g_logger) << "test in fiber";
+}
+
+int main1() {
     sylar::Scheduler sc(2, true, "scheduler_test");
     sc.start();
+    while(1);
+}
+
+int main() {
+    sylar::Scheduler sc;
+    sc.schedule(&test_fiber);
+    sc.start();
+
     while(1);
 }

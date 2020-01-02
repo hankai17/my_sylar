@@ -64,9 +64,12 @@ namespace sylar {
         }
 
         if (m_rootFiber) {
-            //m_rootFiber->call();
+            std::cout << "11111111111111111111111111111111111111scheduler star end";
+            m_rootFiber->swapIn();
+            std::cout << "11111111111111111111111111111111111111scheduler star end";
             //SYLAR_LOG_DEBUG(g_logger) << "call out " << m_rootFiber->getState();
         }
+        std::cout << "scheduler star end";
     }
 
     void Scheduler::run() {

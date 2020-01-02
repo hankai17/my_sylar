@@ -42,7 +42,7 @@ int main() {
     YAML::Node root = YAML::LoadFile("/root/CLionProjects/my_sylar/tests/base_log.yml");
     //sylar::Config::loadFromYaml(root);
 
-    sylar::Thread::setName("main");
+    sylar::Thread::SetName("main");
     std::vector<sylar::Thread::ptr> thrs;
     int thread_num = 1;
     for (int i = 0; i < thread_num; i++) {
