@@ -9,12 +9,12 @@
 
 namespace sylar {
     static thread_local Fiber* t_fiber = nullptr;
-    static thread_local Fiber::ptr t_kernel_fiber = nullptr;
+    //static thread_local Fiber::ptr t_kernel_fiber = nullptr;
+    static thread_local Fiber::ptr t_main_thread_fiber = nullptr; // Only use for main thread
     static std::atomic<uint64_t> s_fiber_count {0};
     static std::atomic<uint64_t> s_fiber_id {0};
 
     static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
-    //static sylar::ConfigVar<uint32_t>::ptr g_fiber_stack_size =
     sylar::ConfigVar<uint32_t>::ptr g_fiber_stack_size =
             sylar::Config::Lookup<uint32_t>("fiber.stacksize", 1024 * 1024, "fiber stack size");
 
@@ -40,20 +40,10 @@ namespace sylar {
             return t_fiber->shared_from_this(); // Not use std::make_shared<Fiber>(*t_fiber);  // Unspoken words: t_fiber already became a sharedptr
         }
         Fiber::ptr main_fiber(new Fiber);
-        //SetKernelFiber(main_fiber); // For fiber test
+        t_main_thread_fiber = main_fiber;
         SYLAR_ASSERT(t_fiber == main_fiber.get());
         return t_fiber->shared_from_this();
     }
-
-    /*
-    void Fiber::SetKernelFiber(Fiber::ptr f) {
-        t_kernel_fiber = f;
-    }
-
-    Fiber::ptr Fiber::GetKernelFiber() {
-        return t_kernel_fiber;
-    }
-     */
 
     uint64_t Fiber::GetFiberId() {
         if (t_fiber) {
@@ -73,8 +63,7 @@ namespace sylar {
         SYLAR_LOG_DEBUG(g_logger) << "Fiber::Fiber";
     }
 
-    //extern sylar::ConfigVar<uint32_t>::ptr g_fiber_stack_size; // SO ugly!
-    Fiber::Fiber(std::function<void()> cb, size_t stacksize)
+    Fiber::Fiber(std::function<void()> cb, size_t stacksize, bool use_caller)
             : m_id(++s_fiber_id),
               m_cb(cb) {
         ++s_fiber_count;
@@ -87,7 +76,12 @@ namespace sylar {
         m_ctx.uc_link = nullptr;
         m_ctx.uc_stack.ss_sp = m_stack;
         m_ctx.uc_stack.ss_size = m_stacksize;
-        makecontext(&m_ctx, &Fiber::MainFunc, 0);
+
+        if (!use_caller) {
+            makecontext(&m_ctx, &Fiber::MainFunc, 0);
+        } else {
+            makecontext(&m_ctx, &Fiber::CallMainFunc, 0);
+        }
 
         SYLAR_LOG_DEBUG(g_logger) << "Fiber::Fiber id: " << m_id; // Not use s_fiber_id
     }
@@ -97,21 +91,34 @@ namespace sylar {
         SYLAR_ASSERT(m_state != EXEC);
         m_state = EXEC;
         if (swapcontext(&Scheduler::GetMainFiber()->m_ctx, &m_ctx)) {
-        //if (swapcontext(&t_kernel_fiber->m_ctx, &m_ctx)) // For fiber test
             SYLAR_ASSERT(false);
         }
     }
 
     void Fiber::swapOut() {
         SetThis(Scheduler::GetMainFiber());
-        //SetThis(Fiber::GetKernelFiber().get()); // For fiber test
+        std::cout<<"swapout begin============="<<std::endl;
         if (swapcontext(&m_ctx, &Scheduler::GetMainFiber()->m_ctx)) {
-        //if (swapcontext(&m_ctx, &t_kernel_fiber->m_ctx)) // For fiber test
                 SYLAR_ASSERT(false);
         }
         std::cout<<"swapout over============="<<std::endl;
     }
 
+    void Fiber::call() {
+        SetThis(this);
+        SYLAR_ASSERT(m_state != EXEC);
+        m_state = EXEC;
+        if (swapcontext(&t_main_thread_fiber->m_ctx, &m_ctx)) {
+            SYLAR_ASSERT(false);
+        }
+    }
+
+    void Fiber::back() {
+        SetThis(t_main_thread_fiber.get());
+        if (swapcontext(&m_ctx, &t_main_thread_fiber->m_ctx)) {
+            SYLAR_ASSERT(false);
+        }
+    }
 
     void Fiber::YeildToReady() { // Why need this
         Fiber::ptr cur = GetThis();
@@ -164,8 +171,7 @@ namespace sylar {
     }
 
     void Fiber::MainFunc() {
-        Fiber::ptr cur = GetThis(); // I know that setthis means set pointer. Why getthis get shared_ptr?
-        std::cout<< "cur.use_count(): " << cur.use_count() << std::endl;
+        Fiber::ptr cur = GetThis();
         SYLAR_ASSERT(cur);
         try {
             cur->m_cb();
@@ -184,17 +190,36 @@ namespace sylar {
                                                       << std::endl
                                                       << sylar::BacktraceToString();
         }
-        if (true) {
-            auto raw_ptr = cur.get(); // Why use raw ptr
-            cur.reset();
-            //std::cout<< "cur.use_count(): " << cur.use_count() << std::endl;
-            //std::cout<< "GetThis().use_count(): " << GetThis().use_count() << std::endl;
-            raw_ptr->swapOut();
-        } else {
-            cur->swapOut();
-            std::cout << "================" << std::endl;
-        }
+        auto raw_ptr = cur.get(); // Why use raw ptr
+        cur.reset();
+        raw_ptr->swapOut();
         //SYLAR_ASSERT("never reach there, Fiber id: " + std::to_string(raw_ptr->getFiberId()));
+        SYLAR_ASSERT(false);
+    }
+
+    void Fiber::CallMainFunc() {
+        Fiber::ptr cur = GetThis();
+        SYLAR_ASSERT(cur);
+        try {
+            cur->m_cb();
+            cur->m_cb = nullptr;
+            cur->m_state = TERM;
+        } catch (std::exception& ex) {
+            cur->m_state = EXCEPT;
+            SYLAR_LOG_ERROR(SYLAR_LOG_NAME("system")) << "Fiber EXCEPT: " << ex.what()
+                                                      << " Fiber id: " << cur->getFiberId()
+                                                      << std::endl
+                                                      << sylar::BacktraceToString();
+        } catch (...) {
+            cur->m_state = EXCEPT;
+            SYLAR_LOG_ERROR(SYLAR_LOG_NAME("system")) << "Fiber EXCEPT: "
+                                                      << " Fiber id: " << cur->getFiberId()
+                                                      << std::endl
+                                                      << sylar::BacktraceToString();
+        }
+        auto raw_ptr = cur.get();
+        cur.reset();
+        raw_ptr->back();
         SYLAR_ASSERT(false);
     }
 

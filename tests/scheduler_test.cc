@@ -19,8 +19,9 @@ int main1() {
 
 int main() {
     sylar::Scheduler sc;
-    sc.schedule(&test_fiber);
+    sc.schedule(&test_fiber, sylar::GetThreadId());
     sc.start();
-
-    while(1);
+    std::cout<<"sc.start() end"<<std::endl;
+    sc.stop();
+    std::cout<<"sc.stop() end"<<std::endl;
 }
