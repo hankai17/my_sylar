@@ -40,11 +40,12 @@ namespace sylar {
             return t_fiber->shared_from_this(); // Not use std::make_shared<Fiber>(*t_fiber);  // Unspoken words: t_fiber already became a sharedptr
         }
         Fiber::ptr main_fiber(new Fiber);
-        SetKernelFiber(main_fiber);
+        //SetKernelFiber(main_fiber); // For fiber test
         SYLAR_ASSERT(t_fiber == main_fiber.get());
         return t_fiber->shared_from_this();
     }
 
+    /*
     void Fiber::SetKernelFiber(Fiber::ptr f) {
         t_kernel_fiber = f;
     }
@@ -52,6 +53,7 @@ namespace sylar {
     Fiber::ptr Fiber::GetKernelFiber() {
         return t_kernel_fiber;
     }
+     */
 
     uint64_t Fiber::GetFiberId() {
         if (t_fiber) {
@@ -94,19 +96,19 @@ namespace sylar {
         SetThis(this);
         SYLAR_ASSERT(m_state != EXEC);
         m_state = EXEC;
-        //if (swapcontext(&Scheduler::GetMainFiber()->m_ctx, &m_ctx))
-        if (swapcontext(&t_kernel_fiber->m_ctx, &m_ctx)) {
+        if (swapcontext(&Scheduler::GetMainFiber()->m_ctx, &m_ctx)) {
+        //if (swapcontext(&t_kernel_fiber->m_ctx, &m_ctx)) // For fiber test
             SYLAR_ASSERT(false);
         }
     }
 
     void Fiber::swapOut() {
-        //SetThis(Scheduler::GetMainFiber());
-        SetThis(Fiber::GetKernelFiber().get());
-        //if (swapcontext(&m_ctx, &Scheduler::GetMainFiber()->m_ctx))
-        if (swapcontext(&m_ctx, &t_kernel_fiber->m_ctx)) {
+        SetThis(Scheduler::GetMainFiber());
+        //SetThis(Fiber::GetKernelFiber().get()); // For fiber test
+        if (swapcontext(&m_ctx, &Scheduler::GetMainFiber()->m_ctx)) {
+        //if (swapcontext(&m_ctx, &t_kernel_fiber->m_ctx)) // For fiber test
                 SYLAR_ASSERT(false);
-            }
+        }
         std::cout<<"swapout over============="<<std::endl;
     }
 

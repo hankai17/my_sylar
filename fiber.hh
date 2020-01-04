@@ -26,8 +26,8 @@ namespace sylar {
         void swapOut();
         static void SetThis(Fiber* f);
         static Fiber::ptr GetThis();
-        static void SetKernelFiber(Fiber::ptr f);
-        static Fiber::ptr GetKernelFiber();
+        //static void SetKernelFiber(Fiber::ptr f); // For fiber test
+        //static Fiber::ptr GetKernelFiber();
         static void YeildToReady();
         static void YeildToHold();
         static uint64_t TotalFibers();
