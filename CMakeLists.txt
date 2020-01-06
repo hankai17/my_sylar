@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 PROJECT(my_sylar)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
-set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O0 -ggdb -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function")
+set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O0 -ggdb -g -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function")
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 11)
 #set(CMAKE_AUTOMOC ON)
@@ -50,3 +50,5 @@ target_link_libraries(fiber_test ${LIBS})
 add_executable(scheduler_test tests/scheduler_test.cc)
 add_dependencies(scheduler_test ${PROJECT_NAME})
 target_link_libraries(scheduler_test ${LIBS})
+
+#valgrind --tool=memcheck --track-origins=yes --leak-check=full --show-leak-kinds=all ./scheduler_test

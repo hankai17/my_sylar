@@ -97,11 +97,9 @@ namespace sylar {
 
     void Fiber::swapOut() {
         SetThis(Scheduler::GetMainFiber());
-        std::cout<<"swapout begin============="<<std::endl;
         if (swapcontext(&m_ctx, &Scheduler::GetMainFiber()->m_ctx)) {
                 SYLAR_ASSERT(false);
         }
-        std::cout<<"swapout over============="<<std::endl;
     }
 
     void Fiber::call() {

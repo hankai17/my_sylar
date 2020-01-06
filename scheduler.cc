@@ -109,7 +109,7 @@ namespace sylar {
             } else {
                 SYLAR_LOG_INFO(g_logger) << "idle fiber";
                 if (idle_fiber->getState() == Fiber::TERM) {
-                    std::cout<< "idle end, we should break and end the fiber_system. Otherwise it will swapout the mainfun end and core" << std::endl;
+                    //std::cout<< "idle end, we should break and end the fiber_system. Otherwise it will swapout the mainfun end and core" << std::endl;
                     break;
                 }
                 idle_fiber->swapIn();
