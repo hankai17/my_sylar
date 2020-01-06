@@ -3,6 +3,7 @@ PROJECT(my_sylar)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O0 -ggdb -g -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function")
+#export GLIBCXX_FORCE_NEW=1
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 11)
 #set(CMAKE_AUTOMOC ON)
