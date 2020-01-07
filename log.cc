@@ -427,6 +427,7 @@ namespace sylar {
 
     //LoggerManager::ptr LoggerManager::logMgr(new LoggerManager);
     LoggerManager* LoggerManager::logMgr = new LoggerManager;
+    LoggerManager::Garbo LoggerManager::garbo;
 
     LoggerManager::LoggerManager() {
         m_root.reset(new Logger("root"));

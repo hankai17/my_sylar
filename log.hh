@@ -217,9 +217,29 @@ namespace sylar {
         Logger::ptr getLogger(const std::string& name);
         Logger::ptr getRoot() const { return m_root; }
         static LoggerManager* getLogMgr(); //{ return logMgr; }
+        /*
+        ~LoggerManager() {
+          for (const auto& i : GetMap()) {
+            std::cout<<i.second.use_count()<<std::endl;
+          }
+        }
+        */
 
     private:
+        class Garbo
+        {
+        //private:
+        public:
+            ~Garbo()
+            {
+                if (logMgr != nullptr)
+                {
+                    delete logMgr;
+                }
+            }
+        };
         LoggerManager();
+        static Garbo garbo;
         static LoggerManager*               logMgr;
         Logger::ptr                         m_root;
 
