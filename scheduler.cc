@@ -110,7 +110,7 @@ namespace sylar {
                 ft.reset();
             } else if (ft.cb) {
                 cb_fiber.reset(new Fiber(ft.cb));
-                cb_fiber->swapIn();
+                cb_fiber->swapIn(); // If simple noblock cb, next line the fiber will destruction
                 cb_fiber.reset();
             } else {
                 SYLAR_LOG_INFO(g_logger) << "idle fiber";
@@ -133,7 +133,7 @@ namespace sylar {
         if (m_rootThreadId != -1) {
             SYLAR_ASSERT(GetThis() == this);
         } else {
-            std::cout<<"m_rootThreadId: "<<m_rootThreadId<<" GetThis:"<< GetThis() << " this:"<<this<<std::endl;
+            //std::cout<<"m_rootThreadId: "<<m_rootThreadId<<" GetThis:"<< GetThis() << " this:"<<this<<std::endl;
             SYLAR_ASSERT(GetThis() != this);
         }
         m_stopping = true;

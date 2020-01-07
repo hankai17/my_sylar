@@ -119,7 +119,7 @@ namespace sylar {
         size_t                      m_threadCounts = 0;
         std::vector<int>            m_threadIds {};
         int                         m_rootThreadId = 0;
-
+        bool                        m_stopping = false;
     };
 }
 
