@@ -20,7 +20,7 @@ int main1() {
     while(1);
 }
 
-int main() {
+int main2() {
     sylar::Scheduler sc;
     int cbs = 5;
     for (int i = 0; i < cbs; i++) {
@@ -42,4 +42,23 @@ int main() {
     sc.stop();
     std::cout<<"sc.stop() end"<<std::endl;
     //while(1);
+    return 0;
+}
+
+void test_fiber1() {
+    static int j = 5;
+    SYLAR_LOG_INFO(g_logger) << "test_fiber1 j:" << j;
+    if (j-- > 0) {
+        sylar::Scheduler::GetThis()->schedule(&test_fiber1, sylar::GetThreadId());
+    }
+}
+
+int main() {
+    sylar::Scheduler sc(1, false, "real test");
+    sc.start();
+    sleep(1);
+    sc.schedule(&test_fiber1);
+    //while(1);
+    sc.stop();
+    return 0;
 }

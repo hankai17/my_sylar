@@ -26,19 +26,24 @@ namespace sylar {
     Scheduler::Scheduler(size_t threads, bool use_caller, const std::string &name)
             : m_name(name) {
         SYLAR_ASSERT(threads > 0);
-        sylar::Fiber::GetThis();
-        --threads; // Why --
 
-        SYLAR_ASSERT(GetThis() == nullptr); // Only has a global scheduler
-        setThis();
+        if (use_caller) { // use_caller的意思是主线程也跑 是fiber套fiber模型 一般情况下不需要主线程跑
+            sylar::Fiber::GetThis();
+            --threads; // Why --
 
-        m_rootFiber.reset(new Fiber(std::bind(&Scheduler::run, this), 0, use_caller));
-        sylar::Thread::SetName(m_name);
+            SYLAR_ASSERT(GetThis() == nullptr); // Only has a global scheduler
+            setThis();
 
-        t_kernel_fiber = m_rootFiber.get();
+            m_rootFiber.reset(new Fiber(std::bind(&Scheduler::run, this), 0, use_caller));
+            sylar::Thread::SetName(m_name);
 
-        //m_threadIds
-        m_rootThreadId = GetThreadId();
+            t_kernel_fiber = m_rootFiber.get();
+
+            //m_threadIds
+            m_rootThreadId = GetThreadId();
+        } else {
+          m_rootThreadId = -1;
+        }
         m_threadCounts = threads;
     }
 
@@ -57,17 +62,18 @@ namespace sylar {
             m_threadIds.push_back(i->getId());
         }
 
+        /*
         if (m_rootFiber) {
             m_rootFiber->call();
             //SYLAR_LOG_DEBUG(g_logger) << "call out " << m_rootFiber->getState();
         }
-        std::cout << "scheduler star end";
+        */
     }
 
     void Scheduler::run() {
         SYLAR_LOG_INFO(g_logger) << "scheduler run";
         setThis();
-        if (sylar::GetThreadId() != m_rootThreadId) { //child threads && child threads' kernel fiber init
+        if (sylar::GetThreadId() != m_rootThreadId) {
             t_kernel_fiber = Fiber::GetThis().get();
         }
 
@@ -81,7 +87,7 @@ namespace sylar {
             {
                 MutexType::Lock lock(m_mutex);
                 for (auto it = m_fibers.begin(); it != m_fibers.end();) {
-                    if (sylar::GetThreadId() != it->thread) {
+                    if (it->thread != -1 && sylar::GetThreadId() != it->thread) {
                         ++it;
                         tickle_me = true;
                         continue;
@@ -109,10 +115,10 @@ namespace sylar {
             } else {
                 SYLAR_LOG_INFO(g_logger) << "idle fiber";
                 if (idle_fiber->getState() == Fiber::TERM) {
-                    //std::cout<< "idle end, we should break and end the fiber_system. Otherwise it will swapout the mainfun end and core" << std::endl;
+                    std::cout<< "idle end, we should break and end the fiber_system. Otherwise it will swapout the mainfun end and core" << std::endl;
                     break;
                 }
-                idle_fiber->swapIn();
+                idle_fiber->swapIn(); // Second swapin goto idle_fiber's ctx that means goto after yeildtohold
             }
         }
     }
@@ -123,6 +129,21 @@ namespace sylar {
             SYLAR_LOG_INFO(g_logger) << this << " stopped";
             stopping();
         }
+
+        if (m_rootThreadId != -1) {
+            SYLAR_ASSERT(GetThis() == this);
+        } else {
+            std::cout<<"m_rootThreadId: "<<m_rootThreadId<<" GetThis:"<< GetThis() << " this:"<<this<<std::endl;
+            SYLAR_ASSERT(GetThis() != this);
+        }
+        m_stopping = true;
+
+        std::vector<Thread::ptr> thrs;
+        thrs.swap(m_threads);
+
+        for (const auto& i : thrs) {
+            i->join(); // Main thread blocks there
+        }
     }
 
     void Scheduler::tickle() {
@@ -130,11 +151,15 @@ namespace sylar {
     }
 
     bool Scheduler::stopping() {
-        return false;
+        return m_stopping && m_fibers.empty();
     }
 
     void Scheduler::idle() {
         SYLAR_LOG_INFO(g_logger) << "idle..";
+        while(1) {
+            sylar::Fiber::YeildToHold();
+        }
+        //std::cout<<"in idle() after yeildtohold" << std::endl;
     }
 
 }
