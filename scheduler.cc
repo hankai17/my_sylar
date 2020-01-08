@@ -105,14 +105,20 @@ namespace sylar {
             }
 
             if (ft.fiber /*&& fiber state*/) {
+                std::cout<<"0 ft.fiber.use_count: "<<ft.fiber.use_count()<<std::endl;
                 ft.fiber->swapIn();
-                ft.fiber->m_state = Fiber::HOLD;
+                if (ft.fiber->m_state == Fiber::TERM) {
+                    ;
+                } else {
+                    ft.fiber->m_state = Fiber::HOLD;
+                }
+                std::cout<<"3 ft.fiber.use_count: "<<ft.fiber.use_count()<<std::endl;
                 ft.reset();
             } else if (ft.cb) {
                 cb_fiber.reset(new Fiber(ft.cb));
-                std::cout<<"before ft.cb swapin"<<std::endl;
+                std::cout<<"before ft.cb swapin, cb_fiber.use_count: "<<cb_fiber.use_count()<<std::endl;
                 cb_fiber->swapIn(); // If simple noblock cb, next line the fiber will destruction
-                std::cout<<"after ft.cb swapin"<<std::endl;
+                std::cout<<"after ft.cb swapin, cb_fiber.use_count: "<<cb_fiber.use_count()<<std::endl;
                 cb_fiber.reset();
             } else {
                 SYLAR_LOG_INFO(g_logger) << "idle fiber";

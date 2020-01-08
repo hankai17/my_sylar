@@ -67,13 +67,13 @@ void fake_io_fiber() {
         size_t nread = 0;
         while ((nread = ::fread(buf, 1, 1024, fp)) > 0) {
             content.append(buf, nread);
-            std::cout<<"content: "<< content.length() << std::endl;
             j++;
-
+            std::cout<<"1content length: "<<content.length()<<" use_count: "<<sylar::Fiber::GetThis().use_count()<<std::endl;
             { //阻塞操作
-                sylar::Scheduler::GetThis()->schedule(sylar::Fiber::GetThis(), sylar::GetThreadId()); // 挂全局list上
-                sylar::Fiber::YeildToHold(); //主动swapout
+                sylar::Scheduler::GetThis()->schedule(sylar::Fiber::GetThis(), sylar::GetThreadId()); // 挂全局list上 use_count++
+                sylar::Fiber::YeildToHold(); //主动swapout use_count++
             }
+            std::cout<<"2content length: "<<content.length()<<" use_count: "<<sylar::Fiber::GetThis().use_count()<<std::endl;
 
         }
         ::fclose(fp);
