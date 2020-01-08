@@ -27,6 +27,7 @@ set(LIB_SRC
         thread.cc
         fiber.cc
         scheduler.cc
+        iomanager.cc
         util.cc
         )
 
