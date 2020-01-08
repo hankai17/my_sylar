@@ -5,6 +5,7 @@
 #include "fiber.hh"
 #include "scheduler.hh"
 #include <sys/time.h>
+#include <stdio.h>
 
 sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
 int count = 0;
@@ -53,7 +54,36 @@ void test_fiber1() {
     }
 }
 
-int main() {
+void fake_io_fiber() {
+    static int j = 0;
+    std::string content;
+    std::string filename = "Makefile";
+    FILE* fp = ::fopen(filename.c_str(), (const char*)"rb");
+    if (fp) {
+        //char iobuf[1024 * 1024] = {0};
+        //::setbuffer(fp, iobuf, sizeof iobuf);
+
+        char buf[1024] = {0};
+        size_t nread = 0;
+        while ((nread = ::fread(buf, 1, 1024, fp)) > 0) {
+            content.append(buf, nread);
+            std::cout<<"content: "<< content.length() << std::endl;
+            j++;
+
+            { //阻塞操作
+                sylar::Scheduler::GetThis()->schedule(sylar::Fiber::GetThis(), sylar::GetThreadId()); // 挂全局list上
+                sylar::Fiber::YeildToHold(); //主动swapout
+            }
+
+        }
+        ::fclose(fp);
+    } else {
+      std::cout<<"fp null"<<std::endl;
+    }
+    std::cout<<"content: "<< content.length() << std::endl;
+}
+
+int main3() {
     sylar::Scheduler sc(1, false, "real test");
     sc.start();
     sleep(1);
@@ -62,3 +92,14 @@ int main() {
     sc.stop();
     return 0;
 }
+
+int main() {
+    sylar::Scheduler sc(1, false, "real test");
+    sc.start();
+    sleep(1);
+    sc.schedule(&fake_io_fiber);
+    //sc.schedule(&test_fiber1);
+    sc.stop();
+    return 0;
+}
+

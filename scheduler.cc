@@ -110,7 +110,9 @@ namespace sylar {
                 ft.reset();
             } else if (ft.cb) {
                 cb_fiber.reset(new Fiber(ft.cb));
+                std::cout<<"before ft.cb swapin"<<std::endl;
                 cb_fiber->swapIn(); // If simple noblock cb, next line the fiber will destruction
+                std::cout<<"after ft.cb swapin"<<std::endl;
                 cb_fiber.reset();
             } else {
                 SYLAR_LOG_INFO(g_logger) << "idle fiber";
