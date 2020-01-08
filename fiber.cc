@@ -172,9 +172,7 @@ namespace sylar {
         Fiber::ptr cur = GetThis();
         SYLAR_ASSERT(cur);
         try {
-            std::cout<<"before cb..."<<std::endl;
             cur->m_cb();
-            std::cout<<"after cb..."<<std::endl;
             cur->m_cb = nullptr;
             cur->m_state = TERM;
         } catch (std::exception& ex) {
