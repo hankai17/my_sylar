@@ -26,7 +26,7 @@ namespace sylar {
             };
 
             EventContext& getContext(Event event);
-            void resetContext(const EventContext& ctx);
+            void resetContext(EventContext& ctx); // not const
             void triggerEvent(Event event);
 
             EventContext read;
