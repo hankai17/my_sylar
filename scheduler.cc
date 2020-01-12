@@ -123,6 +123,9 @@ namespace sylar {
                     break;
                 }
                 idle_fiber->swapIn(); // Second swapin goto idle_fiber's ctx that means goto after yeildtohold
+                if (idle_fiber->getState() != Fiber::TERM) {
+                    idle_fiber->setState(Fiber::HOLD);
+                }
             }
         }
     }

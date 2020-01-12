@@ -2,9 +2,11 @@
 #include "macro.hh"
 
 #include <sys/epoll.h>
+#include <sys/time.h>
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <iostream>
 
 namespace sylar {
     static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
@@ -255,10 +257,12 @@ namespace sylar {
               delete[] ptr;
               });
         for (;;) {
+            /*  I DO NOT UNDERSTAND stop & stopping logic !
             if (stopping()) {
                 SYLAR_LOG_INFO(g_logger) << "name=" << getName() << " idle stopping exit";
                 break;
             }
+             */
 
             int ret = 0;
             do {
@@ -271,10 +275,16 @@ namespace sylar {
             } while(1);
 
             for (int i = 0; i < ret; i++) {
+                std::cout<<"i: "<<i<<std::endl;
                 epoll_event& event = events[i];
                 if (event.data.fd == m_tickleFds[0]) {
                     uint8_t goddess;
-                    while (read(m_tickleFds[0], &goddess, 1) == 1);
+                    int ret = 0;
+                    while ((ret = read(m_tickleFds[0], &goddess, 1)) == 1)
+                    {
+                       std::cout << "read ret: "<<ret <<std::endl;
+                    };
+                    //read(m_tickleFds[0], &goddess, 1);
                     continue;
                 }
 
@@ -316,7 +326,16 @@ namespace sylar {
 
             }
 
+            if (1) {
+                struct timeval l_now = {0};
+                gettimeofday(&l_now, NULL);
+                long end_time = ((long) l_now.tv_sec) * 1000 + (long) l_now.tv_usec / 1000;
+                std::cout << "idle...  " << end_time << std::endl;
+            }
+            std::cout<< "====================" <<std::endl;
+
             Fiber::ptr cur = Fiber::GetThis();
+            //cur->setState(sylar::Fiber::HOLD); // It is so ugly
             auto raw_ptr = cur.get();
             cur.reset();
             raw_ptr->swapOut();
