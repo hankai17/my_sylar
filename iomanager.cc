@@ -242,6 +242,7 @@ namespace sylar {
     void IOManager::tickle() {
         //if (hasIdleThread) {
         //}
+        std::cout<<"tickle......"<<std::endl;
         int ret = write(m_tickleFds[1], "M", 1);
         SYLAR_ASSERT(ret == 1);
     }
@@ -280,9 +281,10 @@ namespace sylar {
                 if (event.data.fd == m_tickleFds[0]) {
                     uint8_t goddess;
                     int ret = 0;
-                    while ((ret = read(m_tickleFds[0], &goddess, 1)) == 1)
+                    std::cout<<"before read m_tickleFds[0]" <<std::endl;
+                    while ((ret = read(m_tickleFds[0], &goddess, 1)) > 0)
                     {
-                       std::cout << "read ret: "<<ret <<std::endl;
+                       std::cout << "!!!read ret: "<<ret <<std::endl;
                     };
                     //read(m_tickleFds[0], &goddess, 1);
                     continue;

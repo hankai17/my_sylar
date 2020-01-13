@@ -9,6 +9,7 @@ sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
 void true_io_test1() {
     SYLAR_LOG_DEBUG(g_logger) << "test socket";
 }
+// 1为什么有时候能运行test_socket 有时候却不行
 
 int main() {
     SYLAR_LOG_DEBUG(g_logger) << "EPOLLIN: " << EPOLLIN << "  EPOLLOUT: " << EPOLLOUT;
@@ -19,3 +20,4 @@ int main() {
     //std::cout<<"2++++++++++++++++"<<std::endl;
     return 0;
 }
+

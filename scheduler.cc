@@ -101,7 +101,7 @@ namespace sylar {
             }
 
             if (tickle_me) {
-                tickle();
+                //tickle(); // Why tickle?
             }
 
             if (ft.fiber /*&& fiber state*/) {

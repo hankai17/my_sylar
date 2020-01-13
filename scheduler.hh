@@ -36,7 +36,7 @@ namespace sylar {
             }
 
             if (need_tickle) { // If m_fibers is empty we should tickle
-                tickle();
+                // tickle(); // Why tickle
             }
         }
 
@@ -51,7 +51,7 @@ namespace sylar {
             }
 
             if (need_tickle) {
-                tickle();
+                //tickle();
             }
         }
 
