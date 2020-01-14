@@ -328,13 +328,12 @@ namespace sylar {
 
             }
 
-            if (1) {
+            if (0) {
                 struct timeval l_now = {0};
                 gettimeofday(&l_now, NULL);
                 long end_time = ((long) l_now.tv_sec) * 1000 + (long) l_now.tv_usec / 1000;
                 std::cout << "idle...  " << end_time << std::endl;
             }
-            std::cout<< "====================" <<std::endl;
 
             Fiber::ptr cur = Fiber::GetThis();
             //cur->setState(sylar::Fiber::HOLD); // It is so ugly
