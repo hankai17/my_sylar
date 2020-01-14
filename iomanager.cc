@@ -280,13 +280,11 @@ namespace sylar {
                 epoll_event& event = events[i];
                 if (event.data.fd == m_tickleFds[0]) {
                     uint8_t goddess;
-                    int ret = 0;
                     std::cout<<"before read m_tickleFds[0]" <<std::endl;
-                    while ((ret = read(m_tickleFds[0], &goddess, 1)) > 0)
-                    {
-                       std::cout << "!!!read ret: "<<ret <<std::endl;
+                    while (read(m_tickleFds[0], &goddess, 1) == 1) {
+                       std::cout << "read 1 " <<std::endl;
                     };
-                    //read(m_tickleFds[0], &goddess, 1);
+                    std::cout<<"---------------------->"<<std::endl;
                     continue;
                 }
 

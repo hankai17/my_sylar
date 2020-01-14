@@ -36,7 +36,7 @@ namespace sylar {
             }
 
             if (need_tickle) { // If m_fibers is empty we should tickle
-                // tickle(); // Why tickle
+                tickle(); // Why tickle ? Because there are cbs in list We should NOT sleep in epoll
             }
         }
 

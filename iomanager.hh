@@ -13,7 +13,8 @@ namespace sylar {
         enum Event {
             NONE    = 0x0,
             READ    = 0x1, // EPOLLIN
-            WRITE   = 0x2, // EPOLLOUT
+            //WRITE   = 0x2, // EPOLLOUT // Define in epoll.h. There diff from muduo
+            WRITE   = 0x4, // EPOLLOUT
         };
 
     private:
