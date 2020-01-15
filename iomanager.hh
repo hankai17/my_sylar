@@ -58,6 +58,7 @@ namespace sylar {
     private:
         int m_epfd = 0;
         int m_tickleFds[2];
+        int m_wakeupFd = -1;
         std::atomic<size_t> m_pendingEventCount = {0};
         RWMutexType m_mutex;
         std::vector<FdContext*> m_fdContexts;

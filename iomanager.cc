@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <iostream>
+#include <sys/eventfd.h>
 
 namespace sylar {
     static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
@@ -60,22 +61,35 @@ namespace sylar {
         m_epfd = epoll_create(5000);
         SYLAR_ASSERT(m_epfd);
 
-        int ret = pipe(m_tickleFds);
-        SYLAR_ASSERT(!ret)
+        if (0) {
+            int ret = pipe(m_tickleFds);
+            SYLAR_ASSERT(!ret)
 
-        epoll_event event;
-        memset(&event, 0, sizeof(epoll_event));
-        event.events = EPOLLIN | EPOLLET;
-        event.data.fd = m_tickleFds[0];
+            epoll_event event;
+            memset(&event, 0, sizeof(epoll_event));
+            event.events = EPOLLIN | EPOLLET;
+            event.data.fd = m_tickleFds[0];
 
-        ret = fcntl(m_tickleFds[0], F_SETFL, 0, O_NONBLOCK);
-        SYLAR_ASSERT(!ret)
+            ret = fcntl(m_tickleFds[0], F_SETFL, 0, O_NONBLOCK);
+            SYLAR_ASSERT(!ret)
 
-        ret = epoll_ctl(m_epfd, EPOLL_CTL_ADD, m_tickleFds[0], &event);
-        SYLAR_ASSERT(!ret)
+            ret = epoll_ctl(m_epfd, EPOLL_CTL_ADD, m_tickleFds[0], &event);
+            SYLAR_ASSERT(!ret)
+        } else { //感受不出来socket跟eventfd的区别 https://stackoverflow.com/questions/27147850/what-is-the-difference-between-epoll-file-descriptor-and-event-file-descriptor
+          //eventfd不依赖epoll 
+            m_wakeupFd = ::eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
+            SYLAR_ASSERT(m_wakeupFd >= 0);
+
+            epoll_event event;
+            memset(&event, 0, sizeof(epoll_event));
+            event.events = EPOLLIN | EPOLLET;
+            event.data.fd = m_wakeupFd;
+
+            int ret = epoll_ctl(m_epfd, EPOLL_CTL_ADD, m_wakeupFd, &event);
+            SYLAR_ASSERT(!ret)
+        }
 
         contextResize(32);
-
         start();
     }
 
@@ -243,8 +257,13 @@ namespace sylar {
         //if (hasIdleThread) {
         //}
         std::cout<<"tickle......"<<std::endl;
-        int ret = write(m_tickleFds[1], "M", 1);
-        SYLAR_ASSERT(ret == 1);
+        if (0) {
+            int ret = write(m_tickleFds[1], "M", 1);
+            SYLAR_ASSERT(ret == 1);
+        } else {
+            int ret = write(m_wakeupFd, "M", 1);
+            SYLAR_ASSERT(ret == 1);
+        }
     }
 
     bool IOManager::stopping() {
@@ -278,14 +297,24 @@ namespace sylar {
             for (int i = 0; i < ret; i++) {
                 std::cout<<"i: "<<i<<std::endl;
                 epoll_event& event = events[i];
-                if (event.data.fd == m_tickleFds[0]) {
-                    uint8_t goddess;
-                    std::cout<<"before read m_tickleFds[0]" <<std::endl;
-                    while (read(m_tickleFds[0], &goddess, 1) == 1) {
-                       std::cout << "read 1 " <<std::endl;
-                    };
-                    std::cout<<"---------------------->"<<std::endl;
-                    continue;
+
+                if (0) {
+                    if (event.data.fd == m_tickleFds[0]) {
+                        uint8_t goddess;
+                        std::cout<<"before read m_tickleFds[0]" <<std::endl;
+                        while (read(m_tickleFds[0], &goddess, 1) == 1) {
+                           std::cout << "read 1 " <<std::endl;
+                        };
+                        std::cout<<"---------------------->"<<std::endl;
+                        continue;
+                    }
+                } else {
+                    if (event.data.fd == m_wakeupFd) {
+                        uint8_t goddess;
+                        size_t ret = read(m_wakeupFd, &goddess, 1);
+                        SYLAR_ASSERT(ret == 1);
+                        continue;
+                    }
                 }
 
                 FdContext* fd_ctx = (FdContext*)event.data.ptr;
