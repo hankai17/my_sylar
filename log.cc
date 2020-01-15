@@ -183,6 +183,7 @@ namespace sylar {
         std::stringstream ss;
         for (auto&i : m_items) {
             i->format(ss, logger, level, event);
+            //std::cout<< "debug log, " << ss.str() << std::endl;
         }
         return ss.str();
     }
@@ -402,7 +403,7 @@ namespace sylar {
         };
 
         for (auto& i : vec) {
-            //std::cout << std::get<0>(i) << std::endl;
+            //std::cout << "+++" << std::get<0>(i) << " : " << std::get<1>(i) << std::endl;
             if (std::get<2>(i) == 0) {
                 m_items.push_back(FormatItem::ptr(new StringFormatItem(std::get<0>(i)))); // "["
             } else {
@@ -447,6 +448,7 @@ namespace sylar {
         //return nullptr;
         Logger::ptr logger(new Logger(name));
         GetMap()[name] = logger;
+        logger->addAppender(LogAppender::ptr(new StdoutLogAppender)); // For system debug
         return logger;
     }
 
