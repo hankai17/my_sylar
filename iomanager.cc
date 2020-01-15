@@ -59,9 +59,9 @@ namespace sylar {
     IOManager::IOManager(size_t threads, bool use_caller, const std::string &name)
     :Scheduler(threads, use_caller, name) {
         m_epfd = epoll_create(5000);
-        SYLAR_ASSERT(m_epfd);
+        SYLAR_ASSERT(m_epfd > 0);
 
-        if (0) {
+        if (1) {
             int ret = pipe(m_tickleFds);
             SYLAR_ASSERT(!ret)
 
@@ -70,7 +70,8 @@ namespace sylar {
             event.events = EPOLLIN | EPOLLET;
             event.data.fd = m_tickleFds[0];
 
-            ret = fcntl(m_tickleFds[0], F_SETFL, 0, O_NONBLOCK);
+            //ret = fcntl(m_tickleFds[0], F_SETFL, 0, O_NONBLOCK);
+            ret = fcntl(m_tickleFds[0], F_SETFL, O_NONBLOCK);
             SYLAR_ASSERT(!ret)
 
             ret = epoll_ctl(m_epfd, EPOLL_CTL_ADD, m_tickleFds[0], &event);
@@ -256,13 +257,15 @@ namespace sylar {
     void IOManager::tickle() {
         //if (hasIdleThread) {
         //}
-        std::cout<<"tickle......"<<std::endl;
-        if (0) {
+        //std::cout<<"iomanager tickle......"<<std::endl;
+        if (1) {
             int ret = write(m_tickleFds[1], "M", 1);
             SYLAR_ASSERT(ret == 1);
         } else {
-            int ret = write(m_wakeupFd, "M", 1);
-            SYLAR_ASSERT(ret == 1);
+            uint64_t m = 1;
+            int ret = write(m_wakeupFd, &m, sizeof(uint64_t));
+            //std::cout<<"write eventfd errno: " << strerror(errno) << std::endl;
+            SYLAR_ASSERT(ret == 8);
         }
     }
 
@@ -295,24 +298,19 @@ namespace sylar {
             } while(1);
 
             for (int i = 0; i < ret; i++) {
-                std::cout<<"i: "<<i<<std::endl;
                 epoll_event& event = events[i];
 
-                if (0) {
+                if (1) {
                     if (event.data.fd == m_tickleFds[0]) {
                         uint8_t goddess;
-                        std::cout<<"before read m_tickleFds[0]" <<std::endl;
-                        while (read(m_tickleFds[0], &goddess, 1) == 1) {
-                           std::cout << "read 1 " <<std::endl;
-                        };
-                        std::cout<<"---------------------->"<<std::endl;
+                        while (read(m_tickleFds[0], &goddess, 1) == 1);
                         continue;
                     }
                 } else {
                     if (event.data.fd == m_wakeupFd) {
-                        uint8_t goddess;
-                        size_t ret = read(m_wakeupFd, &goddess, 1);
-                        SYLAR_ASSERT(ret == 1);
+                        uint64_t goddess;
+                        size_t ret = read(m_wakeupFd, &goddess, sizeof(uint64_t));
+                        SYLAR_ASSERT(ret == 8);
                         continue;
                     }
                 }
