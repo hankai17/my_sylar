@@ -37,10 +37,10 @@ void true_io_test3() {
     if (connect(sock, (const sockaddr*)&addr, sizeof(addr)) == 0) {
     } else if (errno == EINPROGRESS) {
         SYLAR_LOG_DEBUG(g_logger) << " connect errno: " << errno << "  " << strerror(errno);
-        sylar::IOManager::GetThis()->addEvent(sock, sylar::IOManager::READ, [](){
+        sylar::IOManager::GetThis()->addEvent(sock, sylar::IOManager::READ, []() {
             SYLAR_LOG_DEBUG(g_logger) << "read callback";
         });
-        sylar::IOManager::GetThis()->addEvent(sock, sylar::IOManager::WRITE, [](){
+        sylar::IOManager::GetThis()->addEvent(sock, sylar::IOManager::WRITE, []() {
             SYLAR_LOG_DEBUG(g_logger) << "write callback";
             //sylar::IOManager::GetThis()->cancelEvent(sock, sylar::IOManager::READ);
             //close(sock);
@@ -50,11 +50,17 @@ void true_io_test3() {
         close(sock);
     }
 }
+//true_io_test3跟fake_io_fiber的区别 fake_io_fiber测得是立即事件调度(ft的cb跟fiber)中的换入换出 这里测的是
+//true_io_test3直接退出来了 fiber生命周期结束  接下来只是回调 跟fiber没有关系
+
+void true_io_test4() {
+
+}
 
 int main() {
     SYLAR_LOG_DEBUG(g_logger) << "EPOLLIN: " << EPOLLIN << "  EPOLLOUT: " << EPOLLOUT;
     sylar::IOManager io(1, false, "iomanager");
-    io.schedule(&true_io_test3);
+    io.schedule(&true_io_test2);
     io.stop();
     return 0;
 }
