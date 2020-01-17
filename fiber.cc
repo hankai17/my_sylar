@@ -6,6 +6,7 @@
 #include "util.hh"
 
 #include <atomic>
+#include <jemalloc/jemalloc.h>
 
 namespace sylar {
     static thread_local Fiber* t_fiber = nullptr;

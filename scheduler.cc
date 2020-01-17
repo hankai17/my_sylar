@@ -1,11 +1,16 @@
 #include "scheduler.hh"
 #include "macro.hh"
 #include <iostream>
+#include <sys/time.h>
 
 namespace sylar {
     static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
     static thread_local Scheduler* t_scheduler = nullptr;
     static thread_local Fiber* t_kernel_fiber = nullptr;
+
+    static int idle_count = 0;
+    long start_time = 0; 
+    long end_time = 0; 
 
     Scheduler* Scheduler::GetThis() {
         return t_scheduler; // Why not same as fiber.cc
@@ -127,6 +132,13 @@ namespace sylar {
                     break;
                 }
                 idle_fiber->swapIn(); // Second swapin goto idle_fiber's ctx that means goto after yeildtohold
+                if (idle_count == 0) {
+                    struct timeval l_now = {0};
+                    gettimeofday(&l_now, NULL);
+                    start_time = ((long)l_now.tv_sec)*1000+(long)l_now.tv_usec/1000;
+                    std::cout<< "idle_count == 0 start: " << start_time << std::endl;
+                }
+                idle_count++; 
             }
         }
     }
@@ -166,6 +178,15 @@ namespace sylar {
         SYLAR_LOG_INFO(g_logger) << "idle..";
         while(1) {
             sylar::Fiber::YeildToHold();
+            idle_count++;
+            if (idle_count == 1000000) {
+                    struct timeval l_now = {0};
+                    gettimeofday(&l_now, NULL);
+                    end_time = ((long)l_now.tv_sec)*1000+(long)l_now.tv_usec/1000;
+                    std::cout<< "idle_count == 0 end: " << end_time << std::endl;
+                    std::cout<<idle_count << " elapse " << end_time - start_time << std::endl;
+              break;
+            }
         }
         //std::cout<<"in idle() after yeildtohold" << std::endl;
     }

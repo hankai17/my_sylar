@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 2.8)
 PROJECT(my_sylar)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
-set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O0 -ggdb -g -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function")
+#set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O2 -ggdb -g -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function")
+set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O3 -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function")
 #export GLIBCXX_FORCE_NEW=1
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 11)
@@ -18,7 +19,7 @@ include_directories("./"
 
 find_library(YAMLCPP yaml-cpp /usr/local/lib/)
 find_library(THREAD pthread /usr/lib64/)
-set(LIBS ${PROJECT_NAME} pthread yaml-cpp)
+set(LIBS ${PROJECT_NAME} pthread yaml-cpp jemalloc)
 
 
 set(LIB_SRC

@@ -93,13 +93,22 @@ int main3() {
     return 0;
 }
 
-int main() {
+int main4() {
     sylar::Scheduler sc(1, false, "real test");
     sc.start();
     sleep(1);
-    sc.schedule(&fake_io_fiber);
+    //sc.schedule(&fake_io_fiber);
     //sc.schedule(&test_fiber1);
     sc.stop();
     return 0;
 }
 
+// -O3 1000000次切换需要1.3s
+// -O3 jemalloc 1000000 需要1.1s
+// 大概500ns 切换一次
+
+int main() {
+  while(1) {
+
+  }
+}
