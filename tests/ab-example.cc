@@ -31,6 +31,8 @@ void printer(void *p)
   }
 
 }
+// 300ns
+// https://imcn.me/html/y2016/27727.html
 
 
 int main()
