@@ -28,6 +28,7 @@ set(LIB_SRC
         fiber.cc
         scheduler.cc
         iomanager.cc
+        timer.cc
         util.cc
         )
 
