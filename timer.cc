@@ -3,8 +3,8 @@
 
 namespace sylar {
 
-    bool Timer::Comparator::operator() (const Timer::ptr lhs, 
-          const Timer::ptr rhs) const {
+    bool Timer::Comparator::operator() (const Timer::ptr& lhs, 
+          const Timer::ptr& rhs) const {
         if (!lhs && !rhs) {
             return false;
         }
@@ -61,7 +61,7 @@ namespace sylar {
         }
         m_manager->m_timers.erase(it);
         m_next = sylar::GetCurrentMs() + m_Tms;
-        m_manager->m_timers.insert(shared_from_this());
+        m_manager->m_timers.insert(shared_from_this()); //不能直接改 必须erase后再插入 //好哲学
         return true;
     }
 
@@ -82,7 +82,7 @@ namespace sylar {
         if (from_now) {
             start = sylar::GetCurrentMs();
         } else {
-            start = m_next - mTms;
+            start = m_next - m_Tms;
         }
         m_Tms = ms;
         m_next = m_Tms + start;
@@ -96,19 +96,40 @@ namespace sylar {
     TimerManager::~TimerManager() {
     }
 
-    void TimerManager::addTimer(Timer::ptr timer, const RWMutexType::WriteLock& m) {
-        auto it = m_timer.insert(timer).first; //迭代器
-        bool at_front = (it == m_timer.begin()); //堆顶最小值
+    bool TimerManager::hasTimer() {
+        RWMutexType::ReadLock lock(m_mutex);
+        return !m_timers.empty();
+    }
+
+    uint64_t TimerManager::getNextTimer() { //现在距离堆头还有多长时间
+        RWMutexType::ReadLock lock(m_mutex);
+        m_tickle = false; // Why
+        if (m_timers.empty()) {
+            return ~0ull; //FFFFFFFF
+        }
+
+        const Timer::ptr& next = *m_timers.begin();
+        uint64_t now_ms = sylar::GetCurrentMs();
+        if (now_ms >= next->m_next) {
+            return 0;
+        } else {
+            return next->m_next - now_ms;
+        }
+    }
+
+    void TimerManager::addTimer(Timer::ptr timer, RWMutexType::WriteLock& lock) { //base
+        auto it = m_timers.insert(timer).first; //迭代器
+        bool at_front = (it == m_timers.begin()); //堆顶最小值
         if (at_front) {
             m_tickle = true;
         }
         lock.unlock();
         if (at_front) {
-            //
+            onTimerInsertedAtFront();
         }
     }
 
-    Timer::ptr TimerManager::addTimer(uint64_t ms, std::function<void()> cb, bool recuring = false) {
+    Timer::ptr TimerManager::addTimer(uint64_t ms, std::function<void()> cb, bool recuring) { // 外部directly使用
         Timer::ptr timer(new Timer(ms, cb, recuring, this)); // Why not shared_from_this
         RWMutexType::WriteLock lock(m_mutex);
         addTimer(timer, lock);
@@ -123,19 +144,22 @@ namespace sylar {
             if (m_timers.empty()) {
                 return;
             }
-            Timer::ptr now_timer(new Timer(now_ms));
-            auto it = m_timers.lower_bound(now_timer);
-            expired.insert(expired.begin(), m_timers.begin(), it);
-            m_timers.erase(m_timer.begin(), it);
-            cbs.reserve(expired.size());
-            for (const auto& it : expired) {
-                cbs.push_back(it->m_cb);
-                if (it->recursor) {
-                    it->m_next = now_ms + it->m_ms;
-                    m_timers.insert(it);
-                } else {
-                    it->m_cb = nullptr;  // Why
-                }
+        }
+
+        RWMutexType::WriteLock lock(m_mutex);
+        //暂不考虑更改系统问题
+        Timer::ptr now_timer(new Timer(now_ms));
+        auto it = m_timers.lower_bound(now_timer);
+        expired.insert(expired.begin(), m_timers.begin(), it);
+        m_timers.erase(m_timers.begin(), it);
+        cbs.reserve(expired.size());
+        for (const auto& it : expired) {
+            cbs.push_back(it->m_cb);
+            if (it->m_recursor) {
+                it->m_next = now_ms + it->m_Tms;
+                m_timers.insert(it);
+            } else {
+                it->m_cb = nullptr;  // Why
             }
         }
     }

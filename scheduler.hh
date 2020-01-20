@@ -36,22 +36,23 @@ namespace sylar {
             }
 
             if (need_tickle) { // If m_fibers is empty we should tickle
-                tickle(); // Why tickle ? Because there are cbs in list We should NOT sleep in epoll
+                tickle(); // Why tickle ? Because If there are cbs in list We should NOT sleep in epoll
             }
         }
 
         template <typename T>
-        void schedule(T begin, T end) {
+        void schedule(T begin, T end, int thread = -1) {
             bool need_tickle = false;
             {
                 MutexType::Lock lock(m_mutex);
                 while (begin != end) {
-                    need_tickle = scheduleNoLock(&*begin) || need_tickle;
+                    need_tickle = scheduleNoLock(&*begin, thread) || need_tickle;
+                    ++begin;
                 }
             }
 
             if (need_tickle) {
-                //tickle();
+                tickle();
             }
         }
 

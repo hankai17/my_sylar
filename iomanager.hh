@@ -2,10 +2,11 @@
 #define _IOMANAGER_HH__
 
 #include "scheduler.hh"
+#include "timer.hh"
 #include <functional>
 
 namespace sylar {
-    class IOManager : public Scheduler {
+    class IOManager : public Scheduler, public TimerManager {
     public:
         typedef std::shared_ptr<IOManager> ptr;
         typedef RWMutex RWMutexType;
@@ -52,6 +53,7 @@ namespace sylar {
         void tickle() override;
         bool stopping() override;
         void idle() override;
+        void onTimerInsertedAtFront() override;
 
         void contextResize(size_t size);
 

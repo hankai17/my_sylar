@@ -9,7 +9,11 @@
 #include "thread.hh"
 
 namespace sylar {
+
+    class TimerManager;
+
     class Timer : public std::enable_shared_from_this<Timer> {
+    friend class TimerManager;
     public:
         typedef std::shared_ptr<Timer> ptr;
         bool cancel();
@@ -26,22 +30,28 @@ namespace sylar {
         std::function<void()>   m_cb;
         bool                    m_recursor = false;
         uint64_t                m_next = 0;
-        TimerManager::ptr       m_manager = nullptr; // 作用是为了cancel refresh reset 直接从全局set上取下来?
+        //TimerManager::ptr       m_manager = nullptr; // 作用是为了cancel refresh reset 直接从全局set上取下来? //前向引用 用不了
+        TimerManager*       m_manager = nullptr; // 作用是为了cancel refresh reset 直接从全局set上取下来?
     };
 
     // Timer只包装时间变量 manager管理全局timers manager用在idle里 为了提升效率 里面肯定关联容器 关联容器就少不了仿函数/函数对象/谓词
     // 注意 这里是全源码第一处第一次用关联容器
 
     class TimerManager {
+    friend class Timer;
     public:
         typedef std::shared_ptr<TimerManager> ptr;
         typedef RWMutex RWMutexType;
 
         TimerManager();
         virtual ~TimerManager();
-        void addTimer(Timer::ptr timer, const RWMutexType::WriteLock& m);
+        void addTimer(Timer::ptr timer, RWMutexType::WriteLock& m);
         Timer::ptr addTimer(uint64_t ms, std::function<void()> cb, bool recuring = false);
         void listExpiresCbs(std::vector<std::function<void()> >& cbs);
+        bool hasTimer();
+        uint64_t getNextTimer();
+    protected:
+        virtual void onTimerInsertedAtFront() = 0;
 
     private:
         RWMutexType                             m_mutex;

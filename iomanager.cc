@@ -269,6 +269,11 @@ namespace sylar {
         }
     }
 
+    void IOManager::onTimerInsertedAtFront() {
+        std::cout<<"timer tickle..."<<std::endl;
+        tickle();
+    }
+
     bool IOManager::stopping() {
         return Scheduler::stopping()
           && m_pendingEventCount == 0;
@@ -290,12 +295,21 @@ namespace sylar {
             int ret = 0;
             do {
                 static const int MAX_TIMEOUT = 5000;
+                std::cout<<"-------------->before epoll"<<std::endl;
                 ret = epoll_wait(m_epfd, events, 4, MAX_TIMEOUT);
+                std::cout<<"<--------------after epoll"<<std::endl;
                 if (ret < 0 && errno == EINTR) {
                 } else {
                     break;
                 }
             } while(1);
+
+            std::vector<std::function<void()> > cbs;
+            listExpiresCbs(cbs);
+            if (!cbs.empty()) {
+                schedule(cbs.begin(), cbs.end());
+                cbs.clear();
+            }
 
             for (int i = 0; i < ret; i++) {
                 epoll_event& event = events[i];

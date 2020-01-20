@@ -58,4 +58,8 @@ add_executable(iomanager_test tests/iomanager_test.cc)
 add_dependencies(iomanager_test ${PROJECT_NAME})
 target_link_libraries(iomanager_test ${LIBS})
 
+add_executable(timer_test tests/timer_test.cc)
+add_dependencies(timer_test ${PROJECT_NAME})
+target_link_libraries(timer_test ${LIBS})
+
 #valgrind --tool=memcheck --track-origins=yes --leak-check=full --show-leak-kinds=all ./scheduler_test
