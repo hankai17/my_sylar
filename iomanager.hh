@@ -48,6 +48,7 @@ namespace sylar {
         bool cancelAll(int fd);
 
         static IOManager* GetThis();
+        bool stopping(uint64_t& timeout);
 
     protected:
         void tickle() override;

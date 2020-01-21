@@ -96,6 +96,7 @@ namespace sylar {
 
                     ft = *it;
                     m_fibers.erase(it);
+                    ++m_activeFiberCount;
                     break;
                 }
             }
@@ -106,6 +107,7 @@ namespace sylar {
 
             if (ft.fiber /*&& fiber state*/) {
                 ft.fiber->swapIn();
+                --m_activeFiberCount;
                 if (ft.fiber->m_state == Fiber::TERM) {
                     ;
                 } else {
@@ -115,6 +117,7 @@ namespace sylar {
             } else if (ft.cb) {
                 cb_fiber.reset(new Fiber(ft.cb));
                 cb_fiber->swapIn(); // If simple noblock cb, next line the fiber will destruction
+                --m_activeFiberCount;
                 cb_fiber.reset();
             } else {
                 SYLAR_LOG_INFO(g_logger) << "idle fiber";
@@ -122,7 +125,9 @@ namespace sylar {
                     //std::cout<< "idle end, we should break and end the fiber_system. Otherwise it will swapout the mainfun end and core" << std::endl;
                     break;
                 }
+                ++m_activeIdleFiberCount;
                 idle_fiber->swapIn(); // Second swapin goto idle_fiber's ctx that means goto after yeildtohold
+                --m_activeIdleFiberCount;
                 if (idle_fiber->getState() != Fiber::TERM) {
                     idle_fiber->setState(Fiber::HOLD);
                 }
@@ -158,7 +163,8 @@ namespace sylar {
     }
 
     bool Scheduler::stopping() {
-        return m_stopping && m_fibers.empty();
+        return m_autostop && m_stopping && m_fibers.empty()
+          && m_activeFiberCount == 0;
     }
 
     void Scheduler::idle() {

@@ -270,7 +270,7 @@ namespace sylar {
     }
 
     void IOManager::onTimerInsertedAtFront() {
-        std::cout<<"timer tickle..."<<std::endl;
+        //std::cout<<"timer tickle..."<<std::endl;
         tickle();
     }
 
@@ -279,25 +279,38 @@ namespace sylar {
           && m_pendingEventCount == 0;
     }
 
+    bool IOManager::stopping(uint64_t& timeout) {
+        timeout = getNextTimer();
+        return timeout == ~0ull
+          && m_pendingEventCount == 0
+          && Scheduler::stopping();
+    }
+
     void IOManager::idle() {
         epoll_event* events = new epoll_event[64](); // ?
         std::shared_ptr<epoll_event> shared_events(events, [](epoll_event* ptr) {
               delete[] ptr;
               });
         for (;;) {
-            /*  I DO NOT UNDERSTAND stop & stopping logic !
-            if (stopping()) {
+            // stop & stopping logic // used for epoll timeout
+            uint64_t next_timeout = 0;
+            if (stopping(next_timeout)) {
                 SYLAR_LOG_INFO(g_logger) << "name=" << getName() << " idle stopping exit";
                 break;
-            }
-             */
+            } // next_timout maybe 0, FFFFFFFF and normal val
 
             int ret = 0;
             do {
-                static const int MAX_TIMEOUT = 5000;
-                std::cout<<"-------------->before epoll"<<std::endl;
-                ret = epoll_wait(m_epfd, events, 4, MAX_TIMEOUT);
-                std::cout<<"<--------------after epoll"<<std::endl;
+                static const int MAX_TIMEOUT = 3000;
+                if (next_timeout != ~0ull) {
+                    next_timeout = next_timeout > MAX_TIMEOUT ? MAX_TIMEOUT : next_timeout;
+                } else {
+                    next_timeout = MAX_TIMEOUT;
+                }
+
+                //std::cout<<"-------------->before epoll"<<std::endl;
+                ret = epoll_wait(m_epfd, events, 4, next_timeout);
+                //std::cout<<"<--------------after epoll"<<std::endl;
                 if (ret < 0 && errno == EINTR) {
                 } else {
                     break;

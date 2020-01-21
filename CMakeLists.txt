@@ -62,4 +62,8 @@ add_executable(timer_test tests/timer_test.cc)
 add_dependencies(timer_test ${PROJECT_NAME})
 target_link_libraries(timer_test ${LIBS})
 
+add_executable(pingpong_test tests/pingpong_bench.cc)
+add_dependencies(pingpong_test ${PROJECT_NAME})
+target_link_libraries(pingpong_test ${LIBS})
+
 #valgrind --tool=memcheck --track-origins=yes --leak-check=full --show-leak-kinds=all ./scheduler_test

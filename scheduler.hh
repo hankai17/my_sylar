@@ -121,6 +121,9 @@ namespace sylar {
         std::vector<int>            m_threadIds {};
         int                         m_rootThreadId = 0;
         bool                        m_stopping = false;
+        std::atomic<size_t>         m_activeFiberCount = {0}; // Not contain m_activeIdleFiber
+        std::atomic<size_t>         m_activeIdleFiberCount = {0};
+        bool                        m_autostop = false;
     };
 }
 

@@ -55,12 +55,12 @@ namespace sylar {
         if (!m_cb) {
             return false;
         }
-        auto it = m_manager->m_timers.find(shared_from_this());
+        auto it = m_manager->m_timers.find(shared_from_this()); // 首先timers里得有 即针对的仍然是周期任务
         if (it == m_manager->m_timers.end()) {
             return false; 
         }
         m_manager->m_timers.erase(it);
-        m_next = sylar::GetCurrentMs() + m_Tms;
+        m_next = sylar::GetCurrentMs() + m_Tms; // 续命周期?
         m_manager->m_timers.insert(shared_from_this()); //不能直接改 必须erase后再插入 //好哲学
         return true;
     }
@@ -86,7 +86,7 @@ namespace sylar {
         }
         m_Tms = ms;
         m_next = m_Tms + start;
-        m_manager->addTimer(shared_from_this(), lock); // Why not insert directly?
+        m_manager->addTimer(shared_from_this(), lock); // Why not insert directly? //感觉可以直接插入
         return true;
     }
 
@@ -101,7 +101,7 @@ namespace sylar {
         return !m_timers.empty();
     }
 
-    uint64_t TimerManager::getNextTimer() { //现在距离堆头还有多长时间
+    uint64_t TimerManager::getNextTimer() { //现在距离堆头还有多长时间 用在idle里stop那里 epoll timeout
         RWMutexType::ReadLock lock(m_mutex);
         m_tickle = false; // Why
         if (m_timers.empty()) {
