@@ -9,7 +9,6 @@
 
 namespace sylar {
     static thread_local Fiber* t_fiber = nullptr;
-    //static thread_local Fiber::ptr t_kernel_fiber = nullptr;
     static thread_local Fiber::ptr t_main_thread_fiber = nullptr; // Only use for main thread
     static std::atomic<uint64_t> s_fiber_count {0};
     static std::atomic<uint64_t> s_fiber_id {0};

@@ -59,7 +59,7 @@ namespace sylar {
         m_threads.resize(m_threadCounts);
         for (auto& i : m_threads) {
             i.reset(new Thread( std::bind(&Scheduler::run, this), m_name));
-            m_threadIds.push_back(i->getId());
+            m_threadIds.push_back(i->getId()); // In thread we must wait signal. Otherwise we can not get threadId
         }
 
         /*
@@ -145,7 +145,6 @@ namespace sylar {
         if (m_rootThreadId != -1) {
             SYLAR_ASSERT(GetThis() == this);
         } else {
-            //std::cout<<"m_rootThreadId: "<<m_rootThreadId<<" GetThis:"<< GetThis() << " this:"<<this<<std::endl;
             SYLAR_ASSERT(GetThis() != this);
         }
         m_stopping = true;
@@ -159,7 +158,6 @@ namespace sylar {
     }
 
     void Scheduler::tickle() {
-        SYLAR_LOG_INFO(g_logger) << "tickle..";
     }
 
     bool Scheduler::stopping() {
@@ -168,11 +166,9 @@ namespace sylar {
     }
 
     void Scheduler::idle() {
-        SYLAR_LOG_INFO(g_logger) << "idle..";
         while(1) {
             sylar::Fiber::YeildToHold();
         }
-        //std::cout<<"in idle() after yeildtohold" << std::endl;
     }
 
 }

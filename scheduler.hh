@@ -64,7 +64,7 @@ namespace sylar {
         void setThis();
 
     private:
-        struct FiberAndThread { // 3P
+        struct FiberAndThread {
             Fiber::ptr              fiber;
             std::function<void()>   cb;
             int                     thread;
@@ -74,7 +74,7 @@ namespace sylar {
                      thread(thr) {
             }
 
-            FiberAndThread(Fiber::ptr* f, int thr)
+            FiberAndThread(Fiber::ptr* f, int thr) // pointer && swap
                     :thread(thr) {
                 fiber.swap(*f);
             }
@@ -100,8 +100,8 @@ namespace sylar {
             }
         };
 
-        template <typename T> // T is 3p
-        bool scheduleNoLock(T t, int thread) { // no lock means that it had locked in upper
+        template <typename T>
+        bool scheduleNoLock(T t, int thread) {
             bool need_tickle = m_fibers.empty();
             FiberAndThread ft(t, thread);
             if (ft.fiber || ft.cb) {
@@ -112,7 +112,7 @@ namespace sylar {
 
         MutexType                   m_mutex;
         std::string                 m_name;
-        std::list<FiberAndThread>   m_fibers;
+        std::list<FiberAndThread>   m_fibers; // Gobal 3P list
         std::vector<Thread::ptr>    m_threads;
         Fiber::ptr                  m_rootFiber;
 
