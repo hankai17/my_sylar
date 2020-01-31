@@ -1,8 +1,8 @@
 # my_sylar
-Pure copy from sylar
+Pure copy from sylar: https://github.com/sylar-yin/sylar. It may refer mordor: https://github.com/mozy/mordor
 
 ## copy rule
-1. myself
+1. myself && test && learn
 2. refer sylar
 
 ## 栈
