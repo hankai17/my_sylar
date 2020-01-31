@@ -21,6 +21,9 @@ void test_ipv4() {
     if (addr2) {
         SYLAR_LOG_DEBUG(g_logger) <<  addr2->toString();
     }
+
+    sylar::IPAddress::ptr addr3 (new sylar::IPv4Address(16909060, 999)); //16909060 = 1.2.3.4(HEX)
+    SYLAR_LOG_DEBUG(g_logger) << addr3->toString();
 }
 
 void test_resolve() {
@@ -37,8 +40,21 @@ void test_resolve() {
     }
 }
 
+void test_interface() {
+    std::multimap<std::string, std::pair<sylar::Address::ptr, uint32_t> > result;
+        auto ret = sylar::Address::GetInterfaceAddresses(result);
+        if (ret) {
+            for (const auto& i : result) {
+                SYLAR_LOG_DEBUG(g_logger) << i.first << " " << i.second.first->toString()
+                << " " << i.second.second;
+            }
+        }
+        return;
+};
+
 int main() {
     test_ipv4();
     test_resolve();
+    test_interface();
     return 0;
 }

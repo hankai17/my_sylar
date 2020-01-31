@@ -13,6 +13,15 @@ namespace sylar {
         return (1 << (sizeof(T) * 8 - bits)) - 1;
     }
 
+    template <typename T>
+    static uint32_t CountBytes (T value) {
+        uint32_t result = 0;
+        for (; value; ++result) {
+            value &= value - 1;  //二进制数中有多少个1: n & n - 1
+        }
+        return result;
+    }
+
     Address::ptr Address::Create(const sockaddr* addr, socklen_t addrlen) {
         if (addr == nullptr) {
             return nullptr;
@@ -26,10 +35,11 @@ namespace sylar {
             }
             case AF_INET6: {
                 result.reset(new IPv6Address(*(sockaddr_in6*)addr));
-               break;
+                break;
             }
             default: {
-               break;
+                result.reset(new UnknownAddress(*addr));
+                break;
             }
         }
         return result;
@@ -70,7 +80,7 @@ namespace sylar {
 
         int error = getaddrinfo(node.c_str(), service_port, &hints, &results);
         if (error) {
-            SYLAR_LOG_ERROR(g_logger) << "IPAddress::Lookup getaddrinfo(" << node.c_str()
+            SYLAR_LOG_ERROR(g_logger) << "Address::Lookup getaddrinfo(" << node.c_str()
                                       << ", " << service_port << "...) err=" << error << " errno=" << errno << " " << strerror(errno);
             return false;
         }
@@ -83,6 +93,61 @@ namespace sylar {
         }
         freeaddrinfo(results);
         return true;
+    }
+
+    bool Address::GetInterfaceAddresses(std::multimap<std::string, std::pair<Address::ptr, uint32_t> >& result,
+                                      int family) {
+        struct ifaddrs* next, *results;
+        if (getifaddrs(&results) != 0) {
+            SYLAR_LOG_ERROR(g_logger) << "Address::GetInterfaceAddresses1(result, " << family << ") errno: " << errno
+            << " strerrno: " << strerror(errno);
+            return false;
+        }
+
+        try {
+            for (next = results; next; next = next->ifa_next) {
+                Address::ptr addr;
+                uint32_t prefix_len = ~0u;
+                if (family != AF_UNSPEC && family != next->ifa_addr->sa_family) {
+                    continue;
+                }
+                switch (next->ifa_addr->sa_family) {
+                    case AF_INET: {
+                        addr = Create(next->ifa_addr, sizeof(sockaddr_in));
+                        uint32_t netmast = ((sockaddr_in*)next->ifa_netmask)->sin_addr.s_addr;
+                        prefix_len = CountBytes(netmast);
+                        break;
+                    }
+                    case AF_INET6: {
+                        addr = Create(next->ifa_addr, sizeof(sockaddr_in6));
+                        in6_addr& netmast = ((sockaddr_in6*)next->ifa_netmask)->sin6_addr;
+                        prefix_len = 0;
+                        for (int i = 0; i < 16; i++) {
+                            prefix_len += CountBytes(netmast.s6_addr[i]);
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+                if (addr) {
+                    result.insert(std::make_pair(next->ifa_name,
+                            std::make_pair(addr, prefix_len)));
+                }
+            }
+        } catch (...) {
+            SYLAR_LOG_ERROR(g_logger) << "Address::GetInterfaceAddresses1 exception";
+            freeifaddrs(results);
+            return false;
+        }
+        freeifaddrs(results);
+        return true;
+    }
+
+    bool Address::GetInterfaceAddresses(std::vector<std::pair<Address::ptr, uint32_t> >& result,
+                                      const std::string& iface, int family) {
+        //TODO
+        return false;
     }
 
     IPAddress::ptr IPAddress::Create(const char* address, uint16_t port) { //校验点分ip得到协议 调不同协议的create函数
@@ -129,7 +194,7 @@ namespace sylar {
         m_addr.sin_family = AF_INET;
     }
 
-    IPv4Address::IPv4Address(uint32_t address, uint16_t port) { // Used for caller how to call address?
+    IPv4Address::IPv4Address(uint32_t address, uint16_t port) {
         memset(&m_addr, 0, sizeof(m_addr));
         m_addr.sin_family = AF_INET;
         m_addr.sin_port = byteswapOnLittleEndian(port);
@@ -269,6 +334,28 @@ namespace sylar {
 
     void IPv6Address::setPort(uint16_t port) {
         m_addr.sin6_port = byteswapOnLittleEndian(port);
+    }
+
+    UnknownAddress::UnknownAddress(int family) {
+        memset(&m_addr, 0, sizeof(m_addr));
+        m_addr.sa_family = family;
+    }
+
+    UnknownAddress::UnknownAddress(const sockaddr& address) {
+        m_addr = address;
+    }
+
+    const sockaddr* UnknownAddress::getAddr() const {
+        return &m_addr;
+    }
+
+    socklen_t UnknownAddress::getAddrLen() const {
+        return sizeof(m_addr);
+    }
+
+    std::ostream& UnknownAddress::insert(std::ostream& os) const {
+        os << "UnknownAddress family: " << m_addr.sa_family;
+        return os;
     }
 
 }

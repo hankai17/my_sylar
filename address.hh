@@ -27,6 +27,10 @@ namespace sylar {
 
         static bool Lookup(std::vector<Address::ptr>& result, const std::string& host,
                 int family = AF_UNSPEC, int type = 0, int protocol = 0);
+        static bool GetInterfaceAddresses(std::multimap<std::string, std::pair<Address::ptr, uint32_t> >& result,
+                int family = AF_UNSPEC);
+        static bool GetInterfaceAddresses(std::vector<std::pair<Address::ptr, uint32_t> >& result,
+                const std::string& iface, int family = AF_UNSPEC);
     };
 
     class IPAddress : public Address {
@@ -84,6 +88,19 @@ namespace sylar {
         sockaddr_in6     m_addr;
     };
 
+    class UnknownAddress : public Address {
+    public:
+        typedef std::shared_ptr<UnknownAddress> ptr;
+        UnknownAddress(int family);
+        UnknownAddress(const sockaddr& address);
+
+        const sockaddr* getAddr() const override;
+        socklen_t getAddrLen() const override;
+        std::ostream& insert(std::ostream& os) const override;
+
+    private:
+        sockaddr m_addr;
+    };
 }
 
 #endif
