@@ -30,6 +30,7 @@ set(LIB_SRC
         iomanager.cc
         timer.cc
         address.cc
+        fd_manager.cc
         util.cc
         )
 
