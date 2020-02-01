@@ -18,7 +18,7 @@ include_directories("./"
 
 find_library(YAMLCPP yaml-cpp /usr/local/lib/)
 find_library(THREAD pthread /usr/lib64/)
-set(LIBS ${PROJECT_NAME} pthread yaml-cpp)
+set(LIBS ${PROJECT_NAME} pthread yaml-cpp dl)
 
 
 set(LIB_SRC
@@ -30,6 +30,7 @@ set(LIB_SRC
         iomanager.cc
         timer.cc
         address.cc
+        hook.cc
         fd_manager.cc
         util.cc
         )
@@ -71,5 +72,9 @@ target_link_libraries(pingpong_test ${LIBS})
 add_executable(address_test tests/address_test.cc)
 add_dependencies(address_test ${PROJECT_NAME})
 target_link_libraries(address_test ${LIBS})
+
+add_executable(hook_test tests/hook_test.cc)
+add_dependencies(hook_test ${PROJECT_NAME})
+target_link_libraries(hook_test ${LIBS})
 
 #valgrind --tool=memcheck --track-origins=yes --leak-check=full --show-leak-kinds=all ./scheduler_test

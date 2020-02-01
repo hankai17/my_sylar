@@ -1,10 +1,11 @@
-#include "fd_manager.hh"
+//#include "fd_manager.hh"
 
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
 
+/*
 namespace sylar {
     FdCtx::FdCtx(int fd)
     : m_isInit(false),
@@ -47,3 +48,4 @@ namespace sylar {
     }
 
 }
+ */
