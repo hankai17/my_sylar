@@ -2,6 +2,8 @@
 #define __FD_MANAGER_HH__
 
 #include <memory>
+#include <vector>
+#include "thread.hh"
 
 namespace sylar {
 
@@ -36,6 +38,20 @@ private:
     uint64_t    m_recvTimeout;
     uint64_t    m_sendTimeout;
 
+};
+
+class FdManager {
+public:
+    typedef std::shared_ptr<FdManager> ptr;
+    typedef RWMutex RWMutexType;
+
+    FdManager();
+    FdCtx::ptr get(int fd, bool auto_create = false);
+    void del(int fd);
+
+private:
+    RWMutexType                 m_mutex;
+    std::vector<FdCtx::ptr>     m_datas;
 };
 
 }
