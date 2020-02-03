@@ -45,11 +45,22 @@ public:
     typedef std::shared_ptr<FdManager> ptr;
     typedef RWMutex RWMutexType;
 
-    FdManager();
+    static FdManager* getFdMgr() { return fdMgr; }
     FdCtx::ptr get(int fd, bool auto_create = false);
     void del(int fd);
 
 private:
+    FdManager();
+    class Garbo {
+    public:
+        ~Garbo() {
+            if (fdMgr != nullptr) {
+                delete fdMgr;
+            }
+        }
+    };
+    static FdManager*           fdMgr;
+    static Garbo                garbo;
     RWMutexType                 m_mutex;
     std::vector<FdCtx::ptr>     m_datas;
 };

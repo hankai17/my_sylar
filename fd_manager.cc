@@ -72,11 +72,14 @@ namespace sylar {
         }
     }
 
+
+    FdManager* FdManager::fdMgr = new FdManager;
+    FdManager::Garbo FdManager::garbo;
     FdManager::FdManager() {
         m_datas.resize(64);
     }
 
-    FdCtx::ptr FdManager::get(int fd, bool auto_create) {
+    FdCtx::ptr FdManager::get(int fd, bool auto_create) { // true是创建 false是已经有了 ???
         RWMutexType::ReadLock lock(m_mutex);
         if ((int)m_datas.size() <= fd) {
             if (auto_create == false) {
@@ -102,6 +105,4 @@ namespace sylar {
         }
         m_datas[fd].reset();
     }
-
-
 }

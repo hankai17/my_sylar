@@ -136,6 +136,18 @@ namespace sylar {
         return timer;
     }
 
+    static void OnTimer(std::weak_ptr<void> weak_cond, std::function<void()> cb) {
+        std::shared_ptr<void> tmp = weak_cond.lock();
+        if (tmp) {
+            cb();
+        }
+    }
+
+    Timer::ptr TimerManager::addConditionTimer(uint64_t ms, std::function<void()> cb,
+                                 std::weak_ptr<void> weak_cond, bool recuring) {
+        return addTimer(ms, std::bind(&OnTimer, weak_cond, cb), recuring);
+    }
+
     void TimerManager::listExpiresCbs(std::vector<std::function<void()> >& cbs) { // 核心函数 idle里每次都要执行
         uint64_t now_ms = sylar::GetCurrentMs();
         std::vector<Timer::ptr> expired;
