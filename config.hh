@@ -265,7 +265,7 @@ namespace sylar {
             return true;
         }
 
-        void addListener(const std::string &key, on_change_cb cb) {
+        void addListener(const std::string& key, on_change_cb cb) {
             //m_cbs.insert(std::pair<std::string, on_change_cb>(key, cb));
             m_cbs[key] = cb;
         }
