@@ -32,6 +32,7 @@ set(LIB_SRC
         address.cc
         hook.cc
         fd_manager.cc
+        socket.cc
         util.cc
         )
 

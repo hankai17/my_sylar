@@ -185,7 +185,7 @@ namespace sylar {
         return ss.str();
     }
 
-    int Address::toFamily() const {
+    int Address::getFamily() const {
         return getAddr()->sa_family;
     }
 

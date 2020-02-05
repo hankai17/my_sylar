@@ -23,7 +23,7 @@ namespace sylar {
         virtual std::ostream& insert(std::ostream& os) const = 0;
 
         std::string toString();
-        int toFamily() const;
+        int getFamily() const;
 
         static bool Lookup(std::vector<Address::ptr>& result, const std::string& host,
                 int family = AF_UNSPEC, int type = 0, int protocol = 0);
