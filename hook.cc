@@ -95,7 +95,7 @@ static ssize_t do_io(int fd, OriginFunc fun, const char* hook_fun_name,
     uint64_t to = ctx->getTimeout(timeout_so);
     std::shared_ptr<timer_info> tinfo(new timer_info);
 
-    retry:
+retry:
     ssize_t n = fun(fd, std::forward<Args>(args)...);
     while (n == -1 && errno == EINTR) {
         n = fun(fd, std::forward<Args>(args)...);
