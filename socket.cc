@@ -2,8 +2,13 @@
 #include "log.hh"
 #include "fd_manager.hh"
 #include "macro.hh"
+#include "iomanager.hh"
 
+#include <unistd.h>
+#include <netinet/tcp.h>
+#include <sys/types.h>
 #include <sys/socket.h>
+#include <limits.h>
 
 namespace sylar {
 static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
@@ -153,7 +158,7 @@ static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
             }
         }
         socklen_t addrlen = result->getAddrLen();
-        if (getsockname(m_sock, result->getAddr(), &addrlen)) {
+        if (getsockname(m_sock, (sockaddr*)result->getAddr(), &addrlen)) {
             SYLAR_LOG_ERROR(g_logger) << "Socket::getLocalAddress getsockname err: "
             << errno << " strerrno: " << strerror(errno);
             return Address::ptr(new UnknownAddress(m_family));
@@ -165,7 +170,7 @@ static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
         return m_localAddress;
     }
 
-    Address::ptr Socket::getRemoteAddress() {
+    Address::ptr Socket::getRemoteAddress() { // 通常是accept后拿到的链接
         if (m_remoteAddress) {
             return m_remoteAddress;
         }
@@ -190,7 +195,7 @@ static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
             }
         }
         socklen_t addrlen = result->getAddrLen();
-        if (getpeername(m_sock, result->getAddr(), &addrlen)) {
+        if (getpeername(m_sock, (sockaddr*)result->getAddr(), &addrlen)) {
             SYLAR_LOG_ERROR(g_logger) << "Socket::getRemoteAddress getpeername err: "
                                       << errno << " strerrno: " << strerror(errno);
             return Address::ptr(new UnknownAddress(m_family));
@@ -199,6 +204,7 @@ static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
             // TODO
         }
         m_remoteAddress = result;
+        return m_remoteAddress;
     }
 
     bool Socket::init(int sock) {
@@ -228,18 +234,34 @@ static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
         return nullptr;
     }
 
-    bool Socket::isVaild() {
+    bool Socket::isVaild() const {
         return m_sock != -1;
+    }
+
+    void Socket::newSock() {
+        m_sock = socket(m_family, m_type, m_protocol);
+        if (SYLAR_UNLICKLY(m_sock != -1)) {
+            initSock();
+        } else {
+            SYLAR_LOG_ERROR(g_logger) << "Socket::newSock(" << m_family
+            << ", " << m_type << ", " << m_protocol << ") " << " err: " << errno
+            << " strerror: " << strerror(errno);
+        }
     }
 
     bool Socket::bind(const Address::ptr addr) { // Why not refer
         if (!isVaild()) {
             newSock();
-            if (SYLAR_UNLICKLY(!isValid())) {
-                return true;
+            if (SYLAR_UNLICKLY(!isVaild())) {
+                return false;
             }
         }
         if (SYLAR_UNLICKLY(addr->getFamily() != m_family)) {
+            SYLAR_LOG_ERROR(g_logger) << "Socket::bind errno: " << errno
+            << " strerrno: " << strerror(errno);
+            return false;
+        }
+        if (::bind(m_sock, addr->getAddr(), addr->getAddrLen())) {
             SYLAR_LOG_ERROR(g_logger) << "Socket::bind errno: " << errno
             << " strerrno: " << strerror(errno);
             return false;
@@ -262,8 +284,8 @@ static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
         }
         if (timeout_ms == (unsigned int)-1) {
             if (::connect(m_sock, addr->getAddr(), addr->getAddrLen())) {
-                SYLAR_LOG_ERROR(g_logger) << "Socket::connect " << addr->toString() << " errno: " << errno
-                                          << " strerrno: " << strerror(errno);
+                SYLAR_LOG_ERROR(g_logger) << "Socket::connect " << addr->toString()
+                << " errno: " << errno << " strerrno: " << strerror(errno);
                 close();
                 return false;
             }
@@ -286,4 +308,123 @@ static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
         }
         return true;
     }
+
+    int Socket::send(const void* buffer, size_t length, int flags) {
+        if (isConnected()) {
+            return ::send(m_sock, buffer, length, flags);
+        }
+        return -1;
+    }
+
+    int Socket::send(iovec* buffers, size_t length, int flags) {
+        if (isConnected()) {
+            msghdr msg;
+            memset(&msg, 0, sizeof(msg));
+            msg.msg_iov = (iovec*)buffers;
+            msg.msg_iovlen = length;
+            return ::sendmsg(m_sock, &msg, flags);
+        }
+        return -1;
+    }
+
+    int Socket::sendTo(const void* buffer, size_t length, const Address::ptr to, int flags) {
+        if (isConnected()) {
+            return ::sendto(m_sock, buffer, length, flags, to->getAddr(), to->getAddrLen());
+        }
+        return -1;
+    }
+
+    int Socket::sendTo(iovec* buffers, size_t length, const Address::ptr to, int flags) {
+        if (isConnected()) {
+            msghdr msg;
+            memset(&msg, 0, sizeof(msg));
+            msg.msg_iov = (iovec*)buffers;
+            msg.msg_iovlen = length;
+            msg.msg_name = (void*)to->getAddr();
+            msg.msg_namelen = to->getAddrLen();
+            return ::sendmsg(m_sock, &msg, flags); // ???
+        }
+        return -1;
+    }
+
+    int Socket::recv(void* buffer, size_t length, int flags) {
+        if (isConnected()) {
+            return ::recv(m_sock, buffer, length, flags);
+        }
+        return -1;
+    }
+
+    int Socket::recv(iovec* buffers, size_t length, int flags) {
+        if (isConnected()) {
+            msghdr msg;
+            memset(&msg, 0, sizeof(msg));
+            msg.msg_iov = (iovec*)buffers;
+            msg.msg_iovlen = length;
+            return ::recvmsg(m_sock, &msg, flags);
+        }
+        return -1;
+    }
+
+    int Socket::recvFrom(void* buffer, size_t length, Address::ptr from, int flags) {
+        if (isConnected()) {
+            socklen_t len = from->getAddrLen();
+            return ::recvfrom(m_sock, buffer, length, flags, (sockaddr*)from->getAddr(), &len);
+        }
+        return -1;
+    }
+
+    int Socket::recvFrom(iovec* buffers, size_t length, Address::ptr from, int flags) {
+        if (isConnected()) {
+            msghdr msg;
+            memset(&msg, 0, sizeof(msg));
+            msg.msg_iov = (iovec*)buffers;
+            msg.msg_iovlen = length;
+            msg.msg_name = (void*)from->getAddr();
+            msg.msg_namelen = from->getAddrLen();
+            return ::recvmsg(m_sock, &msg, flags);
+        }
+        return -1;
+    }
+
+    int Socket::getError() {
+        int error = 0;
+        size_t len = sizeof(error);
+        if (!getOption(SOL_SOCKET, SO_ERROR, &error, &len)) {
+            return -1;
+        }
+        return error;
+    }
+
+    std::ostream& Socket::dump(std::ostream& os) const {
+        os << "[Socket socket: " << m_sock
+        << " is_connected: " << m_isConnected
+        << " family: " << m_family
+        << " type: " << m_type
+        << " protocol: " << m_protocol;
+        if (m_localAddress) {
+            os << " local_addr: " << m_localAddress->toString();
+        }
+        if (m_remoteAddress) {
+            os << " remote_addr: " << m_remoteAddress->toString();
+        }
+        os << "]";
+        return os;
+    }
+
+    bool Socket::cancelRead() {
+        return IOManager::GetThis()->cancelEvent(m_sock, sylar::IOManager::READ);
+    }
+
+    bool Socket::cancelWrite() {
+        return IOManager::GetThis()->cancelEvent(m_sock, sylar::IOManager::WRITE);
+    }
+
+    bool Socket::cancelAccept() {
+        return IOManager::GetThis()->cancelEvent(m_sock, sylar::IOManager::READ);
+    }
+
+    bool Socket::cancelAll() {
+        return IOManager::GetThis()->cancelAll(m_sock);
+    }
+
 }

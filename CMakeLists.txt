@@ -78,4 +78,8 @@ add_executable(hook_test tests/hook_test.cc)
 add_dependencies(hook_test ${PROJECT_NAME})
 target_link_libraries(hook_test ${LIBS})
 
+add_executable(socket_test tests/socket_test.cc)
+add_dependencies(socket_test ${PROJECT_NAME})
+target_link_libraries(socket_test ${LIBS})
+
 #valgrind --tool=memcheck --track-origins=yes --leak-check=full --show-leak-kinds=all ./scheduler_test
