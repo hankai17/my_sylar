@@ -6,8 +6,9 @@
 
 sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
 
-void test_socket() {
-    SYLAR_LOG_DEBUG(g_logger) << "test_socket begin";
+void test_socket(int index) {
+    SYLAR_LOG_DEBUG(g_logger) << "index begin: " << index;
+    /*
     std::vector<sylar::Address::ptr> addrs;
     //sylar::Address::Lookup(addrs, "www.ifeng.com");
     sylar::Address::Lookup(addrs, "www.baidu.com");
@@ -21,21 +22,24 @@ void test_socket() {
         return;
     }
     // Must IPv4
-
+    */
+    sylar::IPAddress::ptr addr = sylar::IPv4Address::Create("127.0.0.1");
     sylar::Socket::ptr sock = sylar::Socket::CreateTCP(addr);
-    addr->setPort(80);
-    SYLAR_LOG_DEBUG(g_logger) << addr->toString();
+    addr->setPort(90);
+    //SYLAR_LOG_DEBUG(g_logger) << addr->toString();
 
     if (!sock->connect(addr)) {
         SYLAR_LOG_DEBUG(g_logger) << "connect failed " << addr->toString();
         return;
     } else {
-        SYLAR_LOG_DEBUG(g_logger) << "connect success";
+        //SYLAR_LOG_DEBUG(g_logger) << "connect success";
     }
 
-    const char buff[] = "GET / HTTP/1.1\r\n\r\n";
+    //const char buff[] = "GET / HTTP/1.1\r\n\r\n";
     //const char buff[] = "GET / HTTP/1.1\r\nHost: www.ifeng.com\r\n\r\n";
-    int ret = sock->send(buff, sizeof(buff));
+    const char buff[] = "GET /2.html HTTP/1.1\r\nHost: 127.0.0.1\r\n\r\n";
+    //int ret = sock->send(buff, sizeof(buff));
+    int ret = sock->send(buff, strlen(buff));
     if (ret <= 0) {
         SYLAR_LOG_DEBUG(g_logger) << "send failed ret: " << ret;
         return;
@@ -43,19 +47,24 @@ void test_socket() {
 
     std::string buffs;
     buffs.resize(4096);
-    ret = sock->recv(&buffs[0], buffs.size());
-    if (ret <= 0) {
-        SYLAR_LOG_DEBUG(g_logger) << "recv failed ret: " << ret;
-        return;
+
+    while( (ret = sock->recv(&buffs[0], buffs.size())) > 0) {
+        //SYLAR_LOG_DEBUG(g_logger) << "ret: " << ret;
+        buffs.clear();
+        buffs.resize(4096);
     }
-    buffs.resize(ret);
+    SYLAR_LOG_DEBUG(g_logger) << "ret: " << ret;
+
     //SYLAR_LOG_DEBUG(g_logger) << buffs;
-    SYLAR_LOG_DEBUG(g_logger) << "sock.use_count: " << sock.use_count();
+    //SYLAR_LOG_DEBUG(g_logger) << "sock.use_count: " << sock.use_count();
+    SYLAR_LOG_DEBUG(g_logger) << "index  done: " << index;
 }
 
 int main() {
     sylar::IOManager iom(1, false);
-    iom.schedule(test_socket);
+    for (int i = 0; i < 5000; i++) {
+        iom.schedule(std::bind(test_socket, i));
+    }
     iom.stop();
     return 0;
 }
