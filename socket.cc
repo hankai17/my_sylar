@@ -3,6 +3,7 @@
 #include "fd_manager.hh"
 #include "macro.hh"
 #include "iomanager.hh"
+#include "hook.hh"
 
 #include <unistd.h>
 #include <netinet/tcp.h>
@@ -30,7 +31,7 @@ static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
             return true;
         }
         m_isConnected = false;
-        if (m_sock == -1) {
+        if (m_sock != -1) {
             ::close(m_sock);
             m_sock = -1;
         }
@@ -286,6 +287,13 @@ static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
             if (::connect(m_sock, addr->getAddr(), addr->getAddrLen())) {
                 SYLAR_LOG_ERROR(g_logger) << "Socket::connect " << addr->toString()
                 << " errno: " << errno << " strerrno: " << strerror(errno);
+                close();
+                return false;
+            }
+        } else {
+            if (::connect_with_timeout(m_sock, addr->getAddr(), addr->getAddrLen(), timeout_ms)) {
+                SYLAR_LOG_ERROR(g_logger) << "Socket::connect_with_timeout " << addr->toString()
+                << " timeout_ms: " << timeout_ms << " errno: " << errno << " strerrno: " << strerror(errno);
                 close();
                 return false;
             }

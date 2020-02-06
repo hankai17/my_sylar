@@ -7,6 +7,7 @@
 #include <sys/socket.h>
 #include <time.h>
 #include <unistd.h>
+#include <stdint.h>
 
 namespace sylar {
     bool is_hook_enable();
@@ -31,6 +32,7 @@ extern socket_fun socket_f;
 
 typedef int (*connect_fun)(int sockfd, const struct sockaddr* addr, socklen_t addrlen);
 extern connect_fun connect_f;
+extern int connect_with_timeout(int fd, const struct sockaddr* addr, socklen_t addrlen, uint64_t timeout_ms);
 
 typedef int (*accept_fun)(int s, struct sockaddr* addr, socklen_t* addrlen);
 extern accept_fun accept_f;

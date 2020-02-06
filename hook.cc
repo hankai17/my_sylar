@@ -49,6 +49,7 @@ XX(close);
 XX(fcntl);
 XX(ioctl);
 XX(getsockopt);
+XX(setsockopt);
 #undef XX
     }
 
