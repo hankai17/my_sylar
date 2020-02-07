@@ -7,7 +7,7 @@
 sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
 
 void test_socket(int index) {
-    //SYLAR_LOG_DEBUG(g_logger) << "index begin: " << index;
+    SYLAR_LOG_DEBUG(g_logger) << "index begin: " << index;
     /*
     std::vector<sylar::Address::ptr> addrs;
     //sylar::Address::Lookup(addrs, "www.ifeng.com");
@@ -32,7 +32,7 @@ void test_socket(int index) {
         SYLAR_LOG_DEBUG(g_logger) << "index: " << index << "  connect failed " << addr->toString();
         return;
     } else {
-        //SYLAR_LOG_DEBUG(g_logger) << "connect success";
+        SYLAR_LOG_DEBUG(g_logger) << "connect success";
     }
 
     //const char buff[] = "GET / HTTP/1.1\r\n\r\n";
@@ -43,13 +43,17 @@ void test_socket(int index) {
     if (ret <= 0) {
         SYLAR_LOG_DEBUG(g_logger) << "send failed ret: " << ret;
         return;
+    } else {
+        SYLAR_LOG_DEBUG(g_logger) << "index: " << index << " send request ret: " << ret;
     }
+
+    // We should check whether buff send all ok. so we SHOULD SHOULD SHOULD check ret == strlen(buff)
 
     std::string buffs;
     buffs.resize(4096);
 
     while( (ret = sock->recv(&buffs[0], buffs.size())) > 0) {
-        //SYLAR_LOG_DEBUG(g_logger) << "ret: " << ret;
+        //SYLAR_LOG_DEBUG(g_logger) << "while ret: " << ret;
         buffs.clear();
         buffs.resize(4096);
     }
@@ -57,7 +61,7 @@ void test_socket(int index) {
     if (ret == -1) {
         SYLAR_LOG_DEBUG(g_logger) << "index: " << index << "  err: " << strerror(errno);
     } else {
-        SYLAR_LOG_DEBUG(g_logger) << "index: " << index << " done";
+        SYLAR_LOG_DEBUG(g_logger) << "index: " << index << " done ret: " << ret;
     }
 
     //SYLAR_LOG_DEBUG(g_logger) << buffs;

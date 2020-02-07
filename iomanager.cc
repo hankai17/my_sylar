@@ -344,9 +344,11 @@ namespace sylar {
 
                 FdContext* fd_ctx = (FdContext*)event.data.ptr;
                 FdContext::MutexType::Lock lock(fd_ctx->mutex);
+                std::cout << "1events: " << event.events << std::endl;
                 if (event.events & (EPOLLERR | EPOLLHUP)) {
-                    event.events |= EPOLLIN | EPOLLOUT;
+                    event.events |= (EPOLLIN | EPOLLOUT) & fd_ctx->events; //702889d05447d889c9f79b3c94c3e61c3d675be5
                 }
+                std::cout << "2events: " << event.events << std::endl;
                 int real_events = NONE; // Only read or write
                 if (event.events & EPOLLIN) {
                     real_events |= READ;
