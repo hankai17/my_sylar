@@ -107,7 +107,7 @@ retry:
         sylar::Timer::ptr timer;
         std::weak_ptr<timer_info> winfo(tinfo);
 
-        if (to != (unsigned int)-1) { // 即上层设置了此次io的超时时间
+        if (to != (uint64_t)-1) { // 即上层设置了此次io的超时时间
             timer = iom->addConditionTimer(to, [winfo, fd, iom, event]() { // 假设从上树发生io的几行的用时时间为0
                 auto t = winfo.lock(); // io结束 & 超时 不确定哪个先执行 这就是weakptr的应用时机
                 if (!t || t->cancelled) {
@@ -252,7 +252,7 @@ int connect_with_timeout(int fd, const struct sockaddr* addr, socklen_t addrlen,
     std::shared_ptr<timer_info> tinfo(new timer_info);
     std::weak_ptr<timer_info> winfo(tinfo);
 
-    if (timeout_ms != (unsigned int)-1) {
+    if (timeout_ms != (uint64_t)-1) {
         timer = iom->addConditionTimer(timeout_ms, [winfo, fd, iom]() {
             auto t = winfo.lock();
             if (!t || t->cancelled) {

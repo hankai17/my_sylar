@@ -7,7 +7,7 @@
 sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
 
 void test_socket(int index) {
-    SYLAR_LOG_DEBUG(g_logger) << "index begin: " << index;
+    //SYLAR_LOG_DEBUG(g_logger) << "index begin: " << index;
     /*
     std::vector<sylar::Address::ptr> addrs;
     //sylar::Address::Lookup(addrs, "www.ifeng.com");
@@ -29,7 +29,7 @@ void test_socket(int index) {
     //SYLAR_LOG_DEBUG(g_logger) << addr->toString();
 
     if (!sock->connect(addr)) {
-        SYLAR_LOG_DEBUG(g_logger) << "connect failed " << addr->toString();
+        SYLAR_LOG_DEBUG(g_logger) << "index: " << index << "  connect failed " << addr->toString();
         return;
     } else {
         //SYLAR_LOG_DEBUG(g_logger) << "connect success";
@@ -53,11 +53,15 @@ void test_socket(int index) {
         buffs.clear();
         buffs.resize(4096);
     }
-    SYLAR_LOG_DEBUG(g_logger) << "ret: " << ret;
+
+    if (ret == -1) {
+        SYLAR_LOG_DEBUG(g_logger) << "index: " << index << "  err: " << strerror(errno);
+    } else {
+        SYLAR_LOG_DEBUG(g_logger) << "index: " << index << " done";
+    }
 
     //SYLAR_LOG_DEBUG(g_logger) << buffs;
     //SYLAR_LOG_DEBUG(g_logger) << "sock.use_count: " << sock.use_count();
-    SYLAR_LOG_DEBUG(g_logger) << "index  done: " << index;
 }
 
 int main() {

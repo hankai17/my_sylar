@@ -283,7 +283,7 @@ static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
                                       << " strerrno: " << strerror(errno);
             return false;
         }
-        if (timeout_ms == (unsigned int)-1) {
+        if (timeout_ms == (uint64_t)-1) {
             if (::connect(m_sock, addr->getAddr(), addr->getAddrLen())) {
                 SYLAR_LOG_ERROR(g_logger) << "Socket::connect " << addr->toString()
                 << " errno: " << errno << " strerrno: " << strerror(errno);
