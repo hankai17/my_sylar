@@ -448,7 +448,7 @@ namespace sylar {
         //return nullptr;
         Logger::ptr logger(new Logger(name));
         GetMap()[name] = logger;
-        //logger->addAppender(LogAppender::ptr(new StdoutLogAppender)); // For system debug
+        logger->addAppender(LogAppender::ptr(new StdoutLogAppender)); // For system debug
         return logger;
     }
 

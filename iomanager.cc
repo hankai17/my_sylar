@@ -44,8 +44,8 @@ namespace sylar {
     }
 
     void IOManager::FdContext::triggerEvent(IOManager::Event event) {
-      SYLAR_ASSERT(events & event);
-      events = (Event)(events & ~event); // ?
+      SYLAR_ASSERT(events & event); // 只监听了写 但来了读写事件 是不存在这种情况的
+      events = (Event)(events & ~event); // 同时监听读写 但只来了写 那么events要置为读
       EventContext& ctx = getContext(event);
       if (ctx.cb) {
           ctx.scheduler->schedule(&ctx.cb);
@@ -324,6 +324,7 @@ namespace sylar {
                 cbs.clear();
             }
 
+            SYLAR_LOG_ERROR(g_logger) << "epoll_ctl ret: " << ret;
             for (int i = 0; i < ret; i++) {
                 epoll_event& event = events[i];
 
@@ -344,11 +345,11 @@ namespace sylar {
 
                 FdContext* fd_ctx = (FdContext*)event.data.ptr;
                 FdContext::MutexType::Lock lock(fd_ctx->mutex);
-                std::cout << "1events: " << event.events << std::endl;
+                //std::cout << "1events: " << event.events << std::endl;
                 if (event.events & (EPOLLERR | EPOLLHUP)) {
                     event.events |= (EPOLLIN | EPOLLOUT) & fd_ctx->events; //702889d05447d889c9f79b3c94c3e61c3d675be5
                 }
-                std::cout << "2events: " << event.events << std::endl;
+                //std::cout << "2events: " << event.events << std::endl;
                 int real_events = NONE; // Only read or write
                 if (event.events & EPOLLIN) {
                     real_events |= READ;
