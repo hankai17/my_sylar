@@ -12,7 +12,7 @@ namespace sylar {
 
     class ByteArray {
     public:
-        typedef std::shared_ptr<BypteArray> ptr;
+        typedef std::shared_ptr<ByteArray> ptr;
         struct Node {
             Node(size_t s);
             Node();
