@@ -35,6 +35,7 @@ set(LIB_SRC
         socket.cc
         bytearray.cc
         util.cc
+        http/http.cc
         )
 
 add_library(${PROJECT_NAME} SHARED ${LIB_SRC})
