@@ -129,6 +129,12 @@ namespace sylar {
 #undef XX
   };
 
+
+  HttpStatus CharsToHttpStatus(const char* m);
+  HttpMethod CharsToHttpMethod(const char* m);
+  const char* HttpStatusToString(const HttpStatus& m);
+  const char* HttpMethodToString(const HttpMethod& m);
+
   struct CaseInsensitiveLess {
       bool operator() (const std::string& lv, const std::string& rv) const;
   };

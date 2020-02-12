@@ -125,7 +125,29 @@ namespace sylar {
             }
         }
 
-        std::ostream& HttpRequest::dump(std::ostream &os) const {
+        HttpMethod CharsToHttpMethod(const char* m) {
+#define XX(num, name, string) \
+            if (strncmp(#string, m, strlen(#string)) == 0) { \
+                return HttpMethod::name; \
+            }
+    HTTP_METHOD_MAP(XX);
+#undef XX
+            return HttpMethod::INVALID_METHOD;
+        }
+
+        /*
+        HttpStatus CharsToHttpStatus(const char* m) {
+#define XX(num, name, string) \
+            if (strncmp(#string, m, strlen(#string)) == 0) { \
+                return HttpStatus::name; \
+            }
+            HTTP_STATUS_MAP(XX);
+#undef XX
+            return HttpStatus::
+        }
+         */
+
+        std::ostream& HttpRequest::dump(std::ostream &os) const { // fragment consits of paras
             // GET / HTTP/1.1
             // Host: www.ifeng.com
 

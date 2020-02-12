@@ -36,6 +36,9 @@ set(LIB_SRC
         bytearray.cc
         util.cc
         http/http.cc
+        http/http11_parser.cc
+        http/httpclient_parser.cc
+        http/http_parser.cc
         )
 
 add_library(${PROJECT_NAME} SHARED ${LIB_SRC})
