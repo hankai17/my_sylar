@@ -2,6 +2,7 @@
 #include "log.hh"
 
 #include <string.h>
+#include <iostream>
 
 namespace sylar {
     namespace http {
@@ -201,7 +202,11 @@ namespace sylar {
         }
 
         void HttpResponse::setHeader(const std::string& key, const std::string& val) {
-            m_headers[key] = val;
+            //std::cout << "m_headers.size(): " << m_headers.size()
+            //<< " key: " << key << "  value: " << val << std::endl;
+            //m_headers[key] = val; // https://www.cnblogs.com/tianzeng/p/9017148.html
+            m_headers.insert(std::pair<std::string, std::string>(key, val));
+
         }
 
         void HttpResponse::delHeader(const std::string& key) {

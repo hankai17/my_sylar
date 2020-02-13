@@ -3,6 +3,9 @@
 #include "iomanager.hh"
 #include "address.hh"
 #include "socket.hh"
+#include "buffer.hh"
+
+#include <fstream>
 
 sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
 
@@ -47,28 +50,54 @@ void test_socket() {
 
     // We should check whether buff send all ok. so we SHOULD SHOULD SHOULD check ret == strlen(buff)
 
-    std::string buffs;
-    buffs.resize(4096);
-    size_t buff_offset = 0;
+    sylar::Buffer::ptr buffer(new sylar::Buffer);
     sylar::http::HttpResponseParser parser;
+    size_t header_length = 0;
+    std::ofstream   m_filestream;
+    int once_flag = 1;
 
-    while( (ret = sock->recv(&buffs[buff_offset], buffs.size())) > 0) {
-        SYLAR_LOG_DEBUG(g_logger) << "ret: " << ret;
+    while( (ret = sock->recv(buffer->beginWrite(), buffer->writableBytes() - 1)) > 0) {
+
+        buffer->ensuerWritableBytes(buffer->writableBytes() + ret);
+        buffer->hasWritten(ret);
+        SYLAR_LOG_DEBUG(g_logger) << "ret: " << ret << buffer->peek();
         if (!parser.isFinished()) {
-            size_t parsed = parser.execute(&buffs[0], buffs.size());
-            SYLAR_LOG_DEBUG(g_logger) << "parsed: " << parsed;
+            header_length = parser.execute(buffer->peek(), buffer->readableBytes());
+            SYLAR_LOG_DEBUG(g_logger) << "parsed: " << header_length;
         }
-        buff_offset += ret;
+        if (parser.isFinished() && once_flag == 1) {
+            buffer->retrieve(header_length - 1);
+            once_flag = 0;
+        }
+        if (parser.isFinished() && parser.getContentLength() > 0) {
+            SYLAR_LOG_DEBUG(g_logger) << "parser content-length: " << parser.getContentLength()
+            << "  buffer->readableBytes(): " << buffer->readableBytes();
+            if (parser.getContentLength() == buffer->readableBytes()) {
+                break;
+            }
+        }
 
-        buffs.resize(buffs.size() * 2);
+        // operate data
+    }
+
+    if (parser.isFinished()) {
+        //SYLAR_LOG_DEBUG(g_logger)<< parser.getData()->toString();
     }
 
     if (ret == -1) {
         SYLAR_LOG_DEBUG(g_logger) << "recv: err: " << strerror(errno);
     } else {
-        SYLAR_LOG_DEBUG(g_logger) << "recv done ret: " << ret;
+        SYLAR_LOG_DEBUG(g_logger) << "recv done ret: " << ret
+        << " cl: " << buffer->readableBytes()
+        << " parserd cl: " << parser.getData()->getHeader("Content-Length", "nullptr");
+        m_filestream.open("1.html", std::ios::trunc);
+        if (!m_filestream) {
+            SYLAR_LOG_DEBUG(g_logger) << "open file failed";
+            return;
+        }
+        m_filestream << buffer->peek();
+        m_filestream.flush();
     }
-
 }
 
 int main() {
