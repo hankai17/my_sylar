@@ -91,4 +91,8 @@ add_executable(bytearray_test tests/bytearray_test.cc)
 add_dependencies(bytearray_test ${PROJECT_NAME})
 target_link_libraries(bytearray_test ${LIBS})
 
+add_executable(http_test tests/http_test.cc)
+add_dependencies(http_test ${PROJECT_NAME})
+target_link_libraries(http_test ${LIBS})
+
 #valgrind --tool=memcheck --track-origins=yes --leak-check=full --show-leak-kinds=all ./scheduler_test
