@@ -9,7 +9,7 @@ namespace sylar {
 
         bool CaseInsensitiveLess::operator() (const std::string& lv,
                 const std::string& rv) const {
-            return strcasecmp(lv.c_str(), rv.c_str());
+            return strcasecmp(lv.c_str(), rv.c_str()) < 0; // https://blog.csdn.net/test1280/article/details/100806433 STL code analy
         }
 
         HttpRequest::HttpRequest(uint8_t version, bool close)
@@ -204,9 +204,8 @@ namespace sylar {
         void HttpResponse::setHeader(const std::string& key, const std::string& val) {
             //std::cout << "m_headers.size(): " << m_headers.size()
             //<< " key: " << key << "  value: " << val << std::endl;
-            //m_headers[key] = val; // https://www.cnblogs.com/tianzeng/p/9017148.html
-            m_headers.insert(std::pair<std::string, std::string>(key, val));
-
+            m_headers[key] = val; // https://www.cnblogs.com/tianzeng/p/9017148.html
+            //m_headers.insert(std::pair<std::string, std::string>(key, val));
         }
 
         void HttpResponse::delHeader(const std::string& key) {

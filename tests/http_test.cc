@@ -11,8 +11,8 @@ sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
 
 void test_socket() {
     std::vector<sylar::Address::ptr> addrs;
-    //sylar::Address::Lookup(addrs, "www.ifeng.com");
-    sylar::Address::Lookup(addrs, "www.baidu.com");
+    sylar::Address::Lookup(addrs, "www.ifeng.com");
+    //sylar::Address::Lookup(addrs, "www.baidu.com");
     if (addrs.size() < 1) {
         SYLAR_LOG_DEBUG(g_logger) << "resolve error";
         return;
@@ -36,7 +36,8 @@ void test_socket() {
         //SYLAR_LOG_DEBUG(g_logger) << "connect success";
     }
 
-    const char buff[] = "GET / HTTP/1.1\r\nHost: www.baidu.com\r\n\r\n";
+    //const char buff[] = "GET / HTTP/1.1\r\nHost: www.baidu.com\r\n\r\n";
+    const char buff[] = "GET / HTTP/1.1\r\nHost: www.ifeng.com\r\n\r\n";
     //const char buff[] = "GET /2.html HTTP/1.1\r\nHost: 127.0.0.1:90\r\n\r\n";
     int ret = sock->send(buff, strlen(buff));
     if (ret <= 0) {
@@ -60,12 +61,17 @@ void test_socket() {
 
         buffer->ensuerWritableBytes(buffer->writableBytes() + ret);
         buffer->hasWritten(ret);
-        SYLAR_LOG_DEBUG(g_logger) << "ret: " << ret << buffer->peek();
+        //SYLAR_LOG_DEBUG(g_logger) << "ret: " << ret << buffer->peek();
         if (!parser.isFinished()) {
             header_length = parser.execute(buffer->peek(), buffer->readableBytes());
             SYLAR_LOG_DEBUG(g_logger) << "parsed: " << header_length;
         }
         if (parser.isFinished() && once_flag == 1) {
+            SYLAR_LOG_DEBUG(g_logger) << "parsed finished, Content-Length: "
+            << parser.getContentLength()
+            << "   " << parser.getData()->getHeader("content-length", "null");
+            SYLAR_LOG_DEBUG(g_logger) << parser.getData()->toString();
+            std::stringstream ss; parser.getData()->dump(ss); SYLAR_LOG_DEBUG(g_logger) << ss.str();
             buffer->retrieve(header_length - 1);
             once_flag = 0;
         }
