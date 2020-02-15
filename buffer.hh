@@ -63,6 +63,7 @@ namespace sylar {
         void shrink(size_t reserve);
         size_t internalCap() const { return m_buffer.capacity(); }
         ssize_t readFd(int fd, int* savedErrno);
+        ssize_t orireadFd(int fd, int* savedErrno);
 
         //char* beginWrite() const { return begin() + m_writeIndex; } // WHY not const ?
         char* beginWrite() { return begin() + m_writeIndex; }

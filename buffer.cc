@@ -172,6 +172,32 @@ namespace sylar {
     }
 
     ssize_t Buffer::readFd(int fd, int* savedErrno) {
+        //char extrabuf[65] = {0}; // MUST core down in httpclient_parser.rl:191 Assertion `*pe == '\0' && "pointer does not end on NUL"'
+        char extrabuf[65535] = {0};
+        struct iovec vec[2];
+        const size_t writable = writableBytes();
+
+        const int iovcnt = (writable < sizeof(extrabuf)) ? 2 : 1;
+
+        vec[0].iov_base = begin() + m_writeIndex;
+        vec[0].iov_len = iovcnt == 1 ? writable - 1 : writable;
+        vec[1].iov_base = extrabuf;
+        vec[1].iov_len = iovcnt == 1 ? sizeof(extrabuf) : sizeof(extrabuf) - 1;
+
+        const ssize_t n = readv(fd, vec, iovcnt);
+        if (n < 0) {
+            *savedErrno = errno;
+        //} else if (implicit_cast<size_t>(n) <= writable) {
+        } else if (static_cast<size_t>(n) <= writable) {
+            m_writeIndex += n;
+        } else {
+            m_writeIndex = m_buffer.size();
+            append(extrabuf, n - writable + 1);
+        }
+        return n;
+    }
+
+    ssize_t Buffer::orireadFd(int fd, int* savedErrno) {
         char extrabuf[65535] = {0};
         struct iovec vec[2];
         const size_t writable = writableBytes();
@@ -180,13 +206,12 @@ namespace sylar {
         vec[0].iov_len = writable;
         vec[1].iov_base = extrabuf;
         vec[1].iov_len = sizeof(extrabuf);
-
         const int iovcnt = (writable < sizeof(extrabuf)) ? 2 : 1;
-        //const ssize_t n = ::readv(fd, vec, iovcnt);
+
         const ssize_t n = readv(fd, vec, iovcnt);
         if (n < 0) {
             *savedErrno = errno;
-        //} else if (implicit_cast<size_t>(n) <= writable) {
+            //} else if (implicit_cast<size_t>(n) <= writable) {
         } else if (static_cast<size_t>(n) <= writable) {
             m_writeIndex += n;
         } else {
