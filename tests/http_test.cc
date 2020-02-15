@@ -57,6 +57,9 @@ void test_socket() {
     std::ofstream   m_filestream;
     int once_flag = 1;
 
+//#define USER_MKSPACE_PRODUCER_CONSUMER 0
+
+#ifdef USER_MKSPACE_PRODUCER_CONSUMER
     while( (ret = sock->recv(buffer->beginWrite(), buffer->writableBytes() - 1)) > 0) {
 
         buffer->ensuerWritableBytes(buffer->writableBytes() + ret);
@@ -85,6 +88,32 @@ void test_socket() {
 
         // operate data
     }
+#else
+    int errnos;
+    while((ret = buffer->readFd(sock->getSocket(), &errnos)) > 0) {
+        if (!parser.isFinished()) {
+            header_length = parser.execute(buffer->peek(), buffer->readableBytes());
+            SYLAR_LOG_DEBUG(g_logger) << "parsed: " << header_length;
+        }
+        if (parser.isFinished() && once_flag == 1) {
+            SYLAR_LOG_DEBUG(g_logger) << "parsed finished, Content-Length: "
+                                      << parser.getContentLength()
+                                      << "   " << parser.getData()->getHeader("content-length", "null");
+            SYLAR_LOG_DEBUG(g_logger) << parser.getData()->toString();
+            std::stringstream ss; parser.getData()->dump(ss); SYLAR_LOG_DEBUG(g_logger) << ss.str();
+            buffer->retrieve(header_length - 1);
+            once_flag = 0;
+        }
+        if (parser.isFinished() && parser.getContentLength() > 0) {
+            SYLAR_LOG_DEBUG(g_logger) << "parser content-length: " << parser.getContentLength()
+                                      << "  buffer->readableBytes(): " << buffer->readableBytes();
+            if (parser.getContentLength() == buffer->readableBytes()) {
+                break;
+            }
+        }
+    }
+
+#endif
 
     if (parser.isFinished()) {
         //SYLAR_LOG_DEBUG(g_logger)<< parser.getData()->toString();

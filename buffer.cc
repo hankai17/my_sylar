@@ -1,6 +1,7 @@
 #include "buffer.hh"
 #include "macro.hh"
 #include "endian.hh"
+#include "hook.hh"
 
 #include <string.h>
 #include <sys/uio.h>
@@ -181,7 +182,8 @@ namespace sylar {
         vec[1].iov_len = sizeof(extrabuf);
 
         const int iovcnt = (writable < sizeof(extrabuf)) ? 2 : 1;
-        const ssize_t n = ::readv(fd, vec, iovcnt);
+        //const ssize_t n = ::readv(fd, vec, iovcnt);
+        const ssize_t n = readv(fd, vec, iovcnt);
         if (n < 0) {
             *savedErrno = errno;
         //} else if (implicit_cast<size_t>(n) <= writable) {
@@ -195,3 +197,11 @@ namespace sylar {
     }
 
 }
+
+// 诡辩
+// 目前最常用的千兆以太网的裸吞吐量是 125MB/s，扣除以太网 header、IP header、TCP header之后，应用层的吞吐率大约在 115 MB/s 上下。
+// 而现在服务器上最常用的 DDR2/DDR3 内存的带宽至少是 4GB/s，比千兆以太网高 40 倍以上。就是说，对于几 k 或几十 k 大小的数据，
+// 在内存里边拷几次根本不是问题，因为受以太网延迟和带宽的限制，跟这个程序通信的其他机器上的程序不会觉察到性能差异
+
+// 吞吐量能让千兆以太网饱和，也就是每秒收发 120 兆字节的数据
+// https://www.cnblogs.com/nengm1988/p/8073842.html eventbuffer用realloc 按说性能跟muduo buffer差不多
