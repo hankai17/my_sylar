@@ -127,6 +127,7 @@ retry:
             }
         } else { // success add
             sylar::Fiber::YeildToHold();
+            SYLAR_LOG_DEBUG(g_logger) << "after yeildtohold";
             if (timer) {
                 timer->cancel();
             }

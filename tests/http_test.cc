@@ -135,12 +135,11 @@ void test_socket() {
     }
 }
 
-void test_throughput() {
+void test_throughput(int index) {
      uint64_t btime = sylar::GetCurrentMs();
     auto addr = sylar::IPv4Address::Create("192.168.1.10");
     sylar::Socket::ptr sock = sylar::Socket::CreateTCP(addr);
     addr->setPort(80);
-    SYLAR_LOG_DEBUG(g_logger) << addr->toString();
 
     if (!sock->connect(addr)) {
         SYLAR_LOG_DEBUG(g_logger) << "connect failed " << addr->toString()
@@ -150,7 +149,7 @@ void test_throughput() {
         //SYLAR_LOG_DEBUG(g_logger) << "connect success";
     }
 
-    const char buff[] = "GET /1.rar HTTP/1.0\r\nHost: 192.168.1.10\r\n\r\n";
+    const char buff[] = "GET /1.rar HTTP/1.1\r\nHost: 192.168.1.10\r\n\r\n";
     int ret = sock->send(buff, strlen(buff));
     if (ret <= 0) {
         SYLAR_LOG_DEBUG(g_logger) << "send failed ret: " << ret;
@@ -160,6 +159,7 @@ void test_throughput() {
     } else {
         SYLAR_LOG_DEBUG(g_logger) << "send incompletable ret: " << ret;
     }
+    //sock->setRecvTimeout(5000); // TODO
 
     // We should check whether buff send all ok. so we SHOULD SHOULD SHOULD check ret == strlen(buff)
 
@@ -202,35 +202,61 @@ void test_throughput() {
     }
 #else
     int errnos;
-    while((ret = buffer->readFd(sock->getSocket(), &errnos)) > 0) { // MUST core down in ~fiber() Assertion `m_state == INIT || m_state == TERM || m_state == EXCEPT' failed.
+    uint64_t sum_flow = 0;
+    while((ret = buffer->orireadFd(sock->getSocket(), &errnos)) > 0) {
         //buffer->retrieve(ret); // Best performance: 330MB/s
-        if (!parser.isFinished()) {
-            header_length = parser.execute(buffer->peek(), buffer->readableBytes());
-            SYLAR_LOG_DEBUG(g_logger) << "parsed: " << header_length;
+        if (!parser.isFinished()) { // 如果buffer一直增 就会230MB/s 如果buffer消费的快就达到瓶颈330MB/s
+            std::string header(buffer->peek(), buffer->readableBytes());
+            //header_length = parser.execute(&header[0], header.size()); // so dangerous
+            header_length = parser.execute(const_cast<char*>(header.c_str()), header.size());
         }
         if (once_flag == 1 && parser.isFinished()) {
-            SYLAR_LOG_DEBUG(g_logger) << "parsed finished, Content-Length: "
-                                      << parser.getContentLength();
-            buffer->retrieve(header_length - 1);
+            //SYLAR_LOG_DEBUG(g_logger) << "parsed finished, Content-Length: "
+                                      //<< parser.getContentLength();
+            sum_flow += (ret - header_length + 1);
             once_flag = 2;
         }
-        if ( /*once_flag == 2*/ parser.isFinished() && parser.getContentLength() > 0) {
-            if (parser.getContentLength() == buffer->readableBytes()) {
+        buffer->retrieve(ret);
+        if (parser.isFinished() && parser.getContentLength() > 0) {
+            if (once_flag == 2) {
+                once_flag = 3;
+            } else {
+                sum_flow += ret;
+            }
+            if (parser.getContentLength() == sum_flow) {
                 break;
             }
         }
     }
 
 #endif
-    uint64_t etime = sylar::GetCurrentMs();
-    SYLAR_LOG_DEBUG(g_logger)<< "time elaspe(ms): " << etime - btime;
 
     if (ret == -1) {
         SYLAR_LOG_DEBUG(g_logger) << "recv: err: " << strerror(errno);
     } else {
-        SYLAR_LOG_DEBUG(g_logger) << "recv done ret: " << ret
-                                  << " cl: " << buffer->readableBytes()
-                                  << " parserd cl: " << parser.getData()->getHeader("Content-Length", "nullptr");
+        uint64_t etime = sylar::GetCurrentMs();
+        if (ret == 0) {
+            SYLAR_LOG_DEBUG(g_logger) << "index: " << index
+            << " ret: 0"
+            << " errno: " << errno
+            << " " << strerror(errno);
+        }
+        if (parser.isFinished()) {
+            if (parser.getData()->getStatus() == sylar::http::HttpStatus::OK) {
+                SYLAR_LOG_DEBUG(g_logger) << "index: " << index << "  ret: " << ret
+                << " 200OK time elaspe(ms): " << etime - btime
+                                            << " sum: " << sum_flow
+                                            << " conent-length: " << parser.getContentLength()
+                                          << "  rate(MB/s): " << (parser.getContentLength() / (etime - btime)) * 1000 / 1024 / 1024;
+            } else {
+                SYLAR_LOG_DEBUG(g_logger) << "index: " << index << "  "
+                        << parser.getData()->getReason() << " time elaspe(ms): " << etime - btime
+                                          << "  rate(MB/s): " << (parser.getContentLength() / (etime - btime)) * 1000 / 1024 / 1024;
+            }
+        } else {
+            SYLAR_LOG_DEBUG(g_logger) << "index: " << index << " "
+            << "parsed failed";
+        }
         /*
         m_filestream.open("1.html", std::ios::trunc);
         if (!m_filestream) {
@@ -246,9 +272,9 @@ void test_throughput() {
 
 int main() {
     sylar::IOManager iom(1, false, "io");
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < 20; i++) {
         //iom.schedule(test_socket);
-        iom.schedule(test_throughput);
+        iom.schedule(std::bind(test_throughput, i));
     }
     iom.stop();
     return 0;

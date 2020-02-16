@@ -171,7 +171,7 @@ namespace sylar {
         std::swap(m_writeIndex, buffer.m_writeIndex);
     }
 
-    ssize_t Buffer::readFd(int fd, int* savedErrno) {
+    ssize_t Buffer::readFd(int fd, int* savedErrno) { // 一个奇怪的现象 不管ret返回值是多少 最后一个字符的下一个字符不是0
         //char extrabuf[65] = {0}; // MUST core down in httpclient_parser.rl:191 Assertion `*pe == '\0' && "pointer does not end on NUL"'
         char extrabuf[65535] = {0};
         struct iovec vec[2];
@@ -192,7 +192,7 @@ namespace sylar {
             m_writeIndex += n;
         } else {
             m_writeIndex = m_buffer.size();
-            append(extrabuf, n - writable + 1);
+            append(extrabuf, n - writable);
         }
         return n;
     }
