@@ -41,6 +41,7 @@ set(LIB_SRC
         http/http_parser.cc
         buffer.cc
         tcp_server.cc
+        stream.cc
         )
 
 add_library(${PROJECT_NAME} SHARED ${LIB_SRC})
@@ -104,5 +105,9 @@ target_link_libraries(server_test ${LIBS})
 add_executable(server_test1 tests/server_test1.cc)
 add_dependencies(server_test1 ${PROJECT_NAME})
 target_link_libraries(server_test1 ${LIBS})
+
+add_executable(echo_server examples/echo_server.cc)
+add_dependencies(echo_server ${PROJECT_NAME})
+target_link_libraries(echo_server ${LIBS})
 
 #valgrind --tool=memcheck --track-origins=yes --leak-check=full --show-leak-kinds=all ./scheduler_test
