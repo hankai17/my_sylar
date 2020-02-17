@@ -22,7 +22,7 @@ namespace sylar {
         return result;
     }
 
-    Address::ptr Address::Create(const sockaddr* addr, socklen_t addrlen) {
+    Address::ptr Address::Create(const sockaddr* addr, socklen_t addrlen) { // https://blog.csdn.net/albertsh/article/details/80991684
         if (addr == nullptr) {
             return nullptr;
         }

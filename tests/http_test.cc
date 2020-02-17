@@ -137,9 +137,10 @@ void test_socket() {
 
 void test_throughput(int index) {
      uint64_t btime = sylar::GetCurrentMs();
-    auto addr = sylar::IPv4Address::Create("192.168.1.10");
+    //auto addr = sylar::IPv4Address::Create("192.168.1.10");
+    auto addr = sylar::IPv4Address::Create("127.0.0.1");
     sylar::Socket::ptr sock = sylar::Socket::CreateTCP(addr);
-    addr->setPort(80);
+    addr->setPort(9527);
 
     if (!sock->connect(addr)) {
         SYLAR_LOG_DEBUG(g_logger) << "connect failed " << addr->toString()
@@ -159,7 +160,7 @@ void test_throughput(int index) {
     } else {
         SYLAR_LOG_DEBUG(g_logger) << "send incompletable ret: " << ret;
     }
-    //sock->setRecvTimeout(5000); // TODO
+    sock->setRecvTimeout(5000); // TODO
 
     // We should check whether buff send all ok. so we SHOULD SHOULD SHOULD check ret == strlen(buff)
 
@@ -272,7 +273,7 @@ void test_throughput(int index) {
 
 int main() {
     sylar::IOManager iom(1, false, "io");
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < 1; i++) {
         //iom.schedule(test_socket);
         iom.schedule(std::bind(test_throughput, i));
     }
