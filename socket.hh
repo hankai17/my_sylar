@@ -84,6 +84,7 @@ namespace sylar {
         int getSocket() const { return m_sock; }
 
         std::ostream& dump(std::ostream& os) const;
+        std::string toString() const;
 
         bool cancelRead();
         bool cancelWrite();

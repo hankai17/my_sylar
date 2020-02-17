@@ -113,7 +113,7 @@ namespace sylar {
                 if (ft.fiber->m_state == Fiber::TERM) {
                     ;
                 } else {
-                    ft.fiber->m_state = Fiber::HOLD;
+                    ft.fiber->m_state = Fiber::HOLD; // Fiber EXCEPT: std::bad_alloc Fiber id: 3
                 }
                 ft.reset();
             } else if (ft.cb) {

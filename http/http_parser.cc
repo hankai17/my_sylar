@@ -164,7 +164,7 @@ namespace sylar {
 
         size_t HttpResponseParser::execute(char* data, size_t len) {
             size_t offset = httpclient_parser_execute(&m_parser, data, len, 0);
-            memmove(data, data + offset, len - offset);
+            //memmove(data, data + offset, len - offset);
             return offset;
         }
 

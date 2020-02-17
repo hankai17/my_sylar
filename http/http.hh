@@ -5,6 +5,7 @@
 #include <map>
 #include <stdint.h>
 #include <boost/lexical_cast.hpp>
+#include <iostream>
 
 namespace sylar {
     namespace http {
@@ -290,15 +291,16 @@ namespace sylar {
           val = boost::lexical_cast<T>(it->second);
         } catch (...) {
           val = def;
+          return false;
         }
-        return false;
+        return true;
       }
 
   private:
       HttpStatus    m_status;
       uint8_t       m_version;
       std::string   m_reason;
-      MapType       m_headers;
+      MapType       m_headers; // May be error: baidu.com has 3 Set-Cookie headers!
       bool          m_close;
       std::string   m_body;
   };

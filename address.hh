@@ -12,6 +12,8 @@
 #include <vector>
 #include <map>
 
+// Used for package sockaddr struct
+
 namespace sylar {
     class Address {
     public:
