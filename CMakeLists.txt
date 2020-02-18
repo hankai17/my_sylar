@@ -110,4 +110,9 @@ add_executable(echo_server examples/echo_server.cc)
 add_dependencies(echo_server ${PROJECT_NAME})
 target_link_libraries(echo_server ${LIBS})
 
+###############################
+add_executable(counter utils/counter.cc)
+add_dependencies(counter ${PROJECT_NAME})
+target_link_libraries(counter ${LIBS})
+
 #valgrind --tool=memcheck --track-origins=yes --leak-check=full --show-leak-kinds=all ./scheduler_test

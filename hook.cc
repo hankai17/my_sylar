@@ -251,7 +251,7 @@ int connect_with_timeout(int fd, const struct sockaddr* addr, socklen_t addrlen,
     sylar::IOManager* iom = sylar::IOManager::GetThis();
     sylar::Timer::ptr timer;
     std::shared_ptr<timer_info> tinfo(new timer_info);
-    std::weak_ptr<timer_info> winfo(tinfo);
+    std::weak_ptr<timer_info> winfo(tinfo); // owner持有shared_ptr child持有weak_ptr
 
     if (timeout_ms != (uint64_t)-1) {
         timer = iom->addConditionTimer(timeout_ms, [winfo, fd, iom]() {
