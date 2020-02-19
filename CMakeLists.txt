@@ -42,6 +42,7 @@ set(LIB_SRC
         buffer.cc
         tcp_server.cc
         stream.cc
+        http/http_server.cc
         )
 
 add_library(${PROJECT_NAME} SHARED ${LIB_SRC})
@@ -109,6 +110,10 @@ target_link_libraries(server_test1 ${LIBS})
 add_executable(echo_server examples/echo_server.cc)
 add_dependencies(echo_server ${PROJECT_NAME})
 target_link_libraries(echo_server ${LIBS})
+
+add_executable(http_server tests/http_server.cc)
+add_dependencies(http_server ${PROJECT_NAME})
+target_link_libraries(http_server ${LIBS})
 
 ###############################
 add_executable(counter utils/counter.cc)

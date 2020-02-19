@@ -21,7 +21,7 @@ private:
 };
 
 int64_t Counter::getValue() const {
-    RWMutexType::ReadLock lock(mutex_);
+    RWMutexType::ReadLock lock(mutex_); // mutable used for there https://blog.csdn.net/Cyang_liu/article/details/65449457
     return value_;
 }
 

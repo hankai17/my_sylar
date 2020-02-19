@@ -59,12 +59,12 @@ class Foo : public Observer {
     }
     /*
     Foo(Observable* ob) {
-        ob->register_(this); // 非线程安全 因为此时foo的构造正在进行中还没有完全结束 this指针不能暴露给其它人
+        ob->register_(this); // 1 非线程安全 因为此时foo的构造正在进行中还没有完全结束 this指针不能暴露给其它人
     }
      */
     /*
     Foo();
-    void observer(Observable* ob) { // 构造正确做法
+    void observer(Observable* ob) { // 2 构造正确做法 初始化跟暴露this 分开写
         ob->register_(this);
     }
      */

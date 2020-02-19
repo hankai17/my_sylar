@@ -19,7 +19,7 @@ protected:
     Observable* subject_;
 };
 
-class Observable { // 全换成weak_ptr
+class Observable { // 1全换成weak_ptr
 public:
     void register_(boost::weak_ptr<Observer> x);
     // void unregister(boost::weak_ptr<Observer> x);
@@ -46,7 +46,7 @@ private:
 };
 
 Observer::~Observer() {
-    // subject_->unregister(this); // 之所以还不是完全的线程安全 原因在这不能确定subject_是否还活着
+    // subject_->unregister(this); // 2之所以还不是完全的线程安全 原因在这不能确定subject_是否还活着
                                     // 所以要把observer里的obeserverable改成weak_ptr 全局observerable要改成shared_ptr
 }
 
