@@ -115,6 +115,10 @@ add_executable(http_server tests/http_server.cc)
 add_dependencies(http_server ${PROJECT_NAME})
 target_link_libraries(http_server ${LIBS})
 
+add_executable(race_condition tests/race_condition.cc)
+add_dependencies(race_condition ${PROJECT_NAME})
+target_link_libraries(race_condition ${LIBS})
+
 ###############################
 add_executable(counter utils/counter.cc)
 add_dependencies(counter ${PROJECT_NAME})
