@@ -150,6 +150,20 @@ namespace sylar {
         return false;
     }
 
+    std::shared_ptr<IPAddress> Address::LookupAnyIPAddress(const std::string& host,
+                                                         int family, int type, int proto) {
+        std::vector<Address::ptr> result;
+        if (Lookup(result, host, family, type, proto)) {
+            for (const auto& i : result) {
+                IPAddress::ptr addr = std::dynamic_pointer_cast<IPAddress>(i);
+                if (addr) {
+                    return addr;
+                }
+            }
+        }
+        return nullptr;
+    }
+
     IPAddress::ptr IPAddress::Create(const char* address, uint16_t port) { //校验点分ip得到协议 调不同协议的create函数
         addrinfo hints, *results;
         memset(&hints, 0, sizeof(addrinfo));

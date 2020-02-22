@@ -45,6 +45,7 @@ set(LIB_SRC
         stream.cc
         http/http_server.cc
         http/http_connection.cc
+        uri.cc
         )
 
 add_library(${PROJECT_NAME} SHARED ${LIB_SRC})

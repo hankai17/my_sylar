@@ -15,6 +15,7 @@
 // Used for package sockaddr struct
 
 namespace sylar {
+    class IPAddress;
     class Address {
     public:
         typedef std::shared_ptr<Address> ptr;
@@ -33,6 +34,8 @@ namespace sylar {
                 int family = AF_UNSPEC);
         static bool GetInterfaceAddresses(std::vector<std::pair<Address::ptr, uint32_t> >& result,
                 const std::string& iface, int family = AF_UNSPEC);
+        static std::shared_ptr<IPAddress> LookupAnyIPAddress(const std::string& host,
+                int family = AF_INET, int type = 0, int proto = 0);
     };
 
     class IPAddress : public Address {
