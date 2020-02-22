@@ -2,23 +2,23 @@
  *
  * Copyright (c) 2010, Zed A. Shaw and Mongrel2 Project Contributors.
  * All rights reserved.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- *
+ * 
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
- *
+ * 
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *
+ * 
  *     * Neither the name of the Mongrel2 Project, Zed A. Shaw, nor the names
  *       of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written
  *       permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
  * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
  * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
@@ -38,7 +38,9 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
-//#include <dbg.h>
+extern "C" {
+#include <dbg.h>
+}
 
 #define LEN(AT, FPC) (FPC - buffer - parser->AT)
 #define MARK(M,FPC) (parser->M = (FPC) - buffer)
@@ -47,14 +49,14 @@
 /** Machine **/
 
 %%{
-
+  
   machine http_parser;
 
   action mark {MARK(mark, fpc); }
 
 
   action start_field { MARK(field_start, fpc); }
-  action write_field {
+  action write_field { 
     parser->field_len = LEN(field_start, fpc);
   }
 
@@ -66,12 +68,12 @@
     }
   }
 
-  action request_method {
-    if(parser->request_method != NULL)
+  action request_method { 
+    if(parser->request_method != NULL) 
       parser->request_method(parser->data, PTR_TO(mark), LEN(mark, fpc));
   }
 
-  action request_uri {
+  action request_uri { 
     if(parser->request_uri != NULL)
       parser->request_uri(parser->data, PTR_TO(mark), LEN(mark, fpc));
   }
@@ -82,12 +84,12 @@
   }
 
   action start_query {MARK(query_start, fpc); }
-  action query_string {
+  action query_string { 
     if(parser->query_string != NULL)
       parser->query_string(parser->data, PTR_TO(query_start), LEN(query_start, fpc));
   }
 
-  action http_version {
+  action http_version {	
     if(parser->http_version != NULL)
       parser->http_version(parser->data, PTR_TO(mark), LEN(mark, fpc));
   }
@@ -135,7 +137,9 @@
 
   pct_encoded   = ( "%" xdigit xdigit ) ;
 
-  pchar         = ( unreserved | pct_encoded | sub_delims | ":" | "@" ) ;
+# pchar         = ( unreserved | pct_encoded | sub_delims | ":" | "@" ) ;
+# add (any -- ascii) support chinese
+  pchar         = ( (any -- ascii) | unreserved | pct_encoded | sub_delims | ":" | "@" ) ;
 
   fragment      = ( ( pchar | "/" | "?" )* ) >mark %fragment ;
 
@@ -275,9 +279,13 @@ int http_parser_init(http_parser *parser) {
 
 
 /** exec **/
-size_t http_parser_execute(http_parser *parser, const char *buffer, size_t len, size_t off)
+size_t http_parser_execute(http_parser *parser, const char *buffer, size_t len, size_t off)  
 {
   if(len == 0) return 0;
+  parser->nread = 0;
+  parser->mark = 0;
+  parser->field_len = 0;
+  parser->field_start = 0;
 
   const char *p, *pe;
   int cs = parser->cs;

@@ -34,13 +34,15 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "http11_parser.h"
+#include "http11_parser.hh"
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
-//#include <dbg.h>
+extern "C" {
+#include "http/dbg.h"
+}
 
 #define LEN(AT, FPC) (FPC - buffer - parser->AT)
 #define MARK(M,FPC) (parser->M = (FPC) - buffer)
@@ -66,7 +68,7 @@ static const int http_parser_en_main = 1;
 
 int http_parser_init(http_parser *parser) {
   int cs = 0;
-  
+
 #line 71 "http11_parser.cc"
 	{
 	cs = http_parser_start;
@@ -102,7 +104,7 @@ size_t http_parser_execute(http_parser *parser, const char *buffer, size_t len, 
 
   assert(pe - p == (int)len - (int)off && "pointers aren't same distance");
 
-  
+
 #line 107 "http11_parser.cc"
 	{
 	short _widec;
@@ -157,20 +159,20 @@ case 3:
 	if ( (*p) < 123 ) {
 		if ( 94 <= (*p) && (*p) <= 94 ) {
 			_widec = (short)(128 + ((*p) - -128));
-			if ( 
+			if (
 #line 129 "http11_parser.rl"
  parser->uri_relaxed  ) _widec += 256;
 		}
 	} else if ( (*p) > 123 ) {
 		if ( 125 <= (*p) && (*p) <= 125 ) {
 			_widec = (short)(128 + ((*p) - -128));
-			if ( 
+			if (
 #line 129 "http11_parser.rl"
  parser->uri_relaxed  ) _widec += 256;
 		}
 	} else {
 		_widec = (short)(128 + ((*p) - -128));
-		if ( 
+		if (
 #line 129 "http11_parser.rl"
  parser->uri_relaxed  ) _widec += 256;
 	}
@@ -635,20 +637,20 @@ case 19:
 	if ( (*p) < 123 ) {
 		if ( 94 <= (*p) && (*p) <= 94 ) {
 			_widec = (short)(128 + ((*p) - -128));
-			if ( 
+			if (
 #line 129 "http11_parser.rl"
  parser->uri_relaxed  ) _widec += 256;
 		}
 	} else if ( (*p) > 123 ) {
 		if ( 125 <= (*p) && (*p) <= 125 ) {
 			_widec = (short)(128 + ((*p) - -128));
-			if ( 
+			if (
 #line 129 "http11_parser.rl"
  parser->uri_relaxed  ) _widec += 256;
 		}
 	} else {
 		_widec = (short)(128 + ((*p) - -128));
-		if ( 
+		if (
 #line 129 "http11_parser.rl"
  parser->uri_relaxed  ) _widec += 256;
 	}
@@ -685,7 +687,7 @@ tr8:
       parser->request_path(parser->data, PTR_TO(mark), LEN(mark,p));
   }
 #line 74 "http11_parser.rl"
-	{
+	{ 
     if(parser->request_uri != NULL)
       parser->request_uri(parser->data, PTR_TO(mark), LEN(mark, p));
   }
@@ -697,7 +699,7 @@ tr39:
       parser->request_path(parser->data, PTR_TO(mark), LEN(mark,p));
   }
 #line 74 "http11_parser.rl"
-	{
+	{ 
     if(parser->request_uri != NULL)
       parser->request_uri(parser->data, PTR_TO(mark), LEN(mark, p));
   }
@@ -706,24 +708,24 @@ tr55:
 #line 84 "http11_parser.rl"
 	{MARK(query_start, p); }
 #line 85 "http11_parser.rl"
-	{
+	{ 
     if(parser->query_string != NULL)
       parser->query_string(parser->data, PTR_TO(query_start), LEN(query_start, p));
   }
 #line 74 "http11_parser.rl"
-	{
+	{ 
     if(parser->request_uri != NULL)
       parser->request_uri(parser->data, PTR_TO(mark), LEN(mark, p));
   }
 	goto st20;
 tr59:
 #line 85 "http11_parser.rl"
-	{
+	{ 
     if(parser->query_string != NULL)
       parser->query_string(parser->data, PTR_TO(query_start), LEN(query_start, p));
   }
 #line 74 "http11_parser.rl"
-	{
+	{ 
     if(parser->request_uri != NULL)
       parser->request_uri(parser->data, PTR_TO(mark), LEN(mark, p));
   }

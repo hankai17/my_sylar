@@ -3,8 +3,8 @@
 
 #include <memory>
 #include "http.hh"
-#include "httpclient_parser.h"
-#include "http11_parser.h"
+#include "httpclient_parser.hh"
+#include "http11_parser.hh"
 
 namespace sylar {
     namespace http {
@@ -20,6 +20,7 @@ namespace sylar {
             HttpRequest::ptr getData() const { return m_data; }
             void setError(int v) { m_error = v; }
             uint64_t getContentLength();
+            const http_parser& getParser() const { return m_parser; }
 
             static uint64_t GetHttpRequestBufferSize();
             static uint64_t GetHttpRequestMaxBodySize();
@@ -35,13 +36,17 @@ namespace sylar {
             typedef std::shared_ptr<HttpResponseParser> ptr;
             HttpResponseParser();
 
-            size_t execute(char* data, size_t len);
+            size_t execute(char* data, size_t len, bool chunk = false);
             int isFinished();
             int hasError();
 
             HttpResponse::ptr getData() const { return m_data; }
             void setError(int v) { m_error = v; }
             uint64_t getContentLength();
+            const httpclient_parser& getParser() const { return m_parser; }
+
+            static uint64_t GetHttpResponseBufferSize();
+            static uint64_t GetHttpResponseMaxBodySize();
 
         private:
             httpclient_parser       m_parser;

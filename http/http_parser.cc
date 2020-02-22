@@ -138,6 +138,14 @@ namespace sylar {
             return s_http_request_max_body_size;
         }
 
+        uint64_t HttpResponseParser::GetHttpResponseBufferSize() {
+            return s_http_request_buffer_size;
+        }
+
+        uint64_t HttpResponseParser::GetHttpResponseMaxBodySize() {
+            return s_http_request_max_body_size;
+        }
+
         void on_response_reason(void* data, const char* at, size_t length) {
             HttpResponseParser* parser = static_cast<HttpResponseParser*>(data);
             parser->getData()->setReason(std::string(at, length));
@@ -198,9 +206,12 @@ namespace sylar {
             m_parser.data = this;
         }
 
-        size_t HttpResponseParser::execute(char* data, size_t len) {
+        size_t HttpResponseParser::execute(char* data, size_t len, bool chunk) {
+            if (chunk) {
+                httpclient_parser_init(&m_parser);
+            }
             size_t offset = httpclient_parser_execute(&m_parser, data, len, 0);
-            //memmove(data, data + offset, len - offset);
+            memmove(data, data + offset, len - offset);
             return offset;
         }
 

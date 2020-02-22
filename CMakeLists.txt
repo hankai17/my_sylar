@@ -36,6 +36,7 @@ set(LIB_SRC
         bytearray.cc
         util.cc
         http/http.cc
+        http/dbg.c
         http/http11_parser.cc
         http/httpclient_parser.cc
         http/http_parser.cc
@@ -43,6 +44,7 @@ set(LIB_SRC
         tcp_server.cc
         stream.cc
         http/http_server.cc
+        http/http_connection.cc
         )
 
 add_library(${PROJECT_NAME} SHARED ${LIB_SRC})
@@ -118,6 +120,14 @@ target_link_libraries(http_server ${LIBS})
 add_executable(race_condition tests/race_condition.cc)
 add_dependencies(race_condition ${PROJECT_NAME})
 target_link_libraries(race_condition ${LIBS})
+
+add_executable(http_connection_test tests/http_connection_test.cc)
+add_dependencies(http_connection_test ${PROJECT_NAME})
+target_link_libraries(http_connection_test ${LIBS})
+
+add_executable(http_parser tests/http_parser.cc)
+add_dependencies(http_parser ${PROJECT_NAME})
+target_link_libraries(http_parser ${LIBS})
 
 ###############################
 add_executable(counter utils/counter.cc)
