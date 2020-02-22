@@ -32,7 +32,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "httpclient_parser.h"
+#include "httpclient_parser.hh"
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
@@ -206,10 +206,10 @@ int httpclient_parser_execute(httpclient_parser *parser, const char *buffer, siz
     check(parser->field_len <= len, "field has length longer than whole buffer");
     check(parser->field_start < len, "field starts after buffer end");
 
-    if(parser->body_start) {
-        /* final \r\n combo encountered so stop right here */
-        parser->nread++;
-    }
+    //if(parser->body_start) {
+    //   /* final \r\n combo encountered so stop right here */
+    //  parser->nread++;
+    //}
 
     return(parser->nread);
 
