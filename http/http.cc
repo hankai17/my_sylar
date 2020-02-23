@@ -232,7 +232,7 @@ namespace sylar {
             os << "Connection: " << ((m_close) ? "close" : "keep-alive") << "\r\n";
             if (!m_body.empty()) {
                 os << "Content-Length: " << m_body.size() << "\r\n\r\n";
-                os << m_body;
+                //os << m_body;
             } else {
                 os << "\r\n";
             }

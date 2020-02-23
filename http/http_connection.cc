@@ -1,6 +1,7 @@
 #include "http/http_connection.hh"
 #include "http/http_parser.hh"
 #include "log.hh"
+#include <iostream>
 
 namespace sylar {
     namespace http {
@@ -35,6 +36,7 @@ namespace sylar {
                 int len = read(data + offset, buff_size - offset);
                 if (len <= 0) {
                     close();
+                    //std::cout << "errno: " << errno << " strerrno: " << strerror(errno) << std::endl;
                     return nullptr;
                 }
                 len += offset;
@@ -213,14 +215,14 @@ namespace sylar {
             }
             if (!sock->connect(addr)) { // timeout_ms not connect timeout
                 return std::make_shared<HttpResult>((int)HttpResult::Error::CONNECT_FAIL, nullptr,
-                        "connect faild: ", addr->toString());
+                        "connect faild: " + addr->toString());
             }
             sock->setRecvTimeout(timeout_ms);
             HttpConnection::ptr conn = std::make_shared<HttpConnection>(sock);
             int ret = conn->sendRequest(req);
             if (ret == 0) {
                 return std::make_shared<HttpResult>((int)HttpResult::Error::SEND_CLOSED_BY_PEER, nullptr,
-                        "send request closed by peer: ", addr->toString());
+                        "send request closed by peer: " + addr->toString());
             }
             if (ret < 0) {
                 return std::make_shared<HttpResult>((int)HttpResult::Error::SEND_SOCKET_ERROR, nullptr,
@@ -358,7 +360,7 @@ namespace sylar {
             }
             if (!has_host) {
                 if (m_vhost.empty()) {
-                    req->setHeader("Host", m_host)
+                    req->setHeader("Host", m_host);
                 } else {
                     req->setHeader("Host", m_vhost);
                 }
@@ -393,7 +395,7 @@ namespace sylar {
             int ret = conn->sendRequest(req);
             if (ret == 0) {
                 return std::make_shared<HttpResult>((int)HttpResult::Error::SEND_CLOSED_BY_PEER, nullptr,
-                                                    "send request closed by peer: ", sock->getRemoteAddress()->toString());
+                                                    "send request closed by peer: " + sock->getRemoteAddress()->toString());
             }
             if (ret < 0) {
                 return std::make_shared<HttpResult>((int)HttpResult::Error::SEND_SOCKET_ERROR, nullptr,
@@ -408,6 +410,16 @@ namespace sylar {
                                                     " timeout_ms: " + std::to_string(timeout_ms));
             }
             return std::make_shared<HttpResult>((int)HttpResult::Error::OK, resp, "ok");
+        }
+
+        std::string HttpConnectionPool::toString() const {
+            std::stringstream ss;
+            ss << "host: " << m_host
+            << ", max_size: " << m_maxSize
+            << ", max_alivetime: " << m_maxAliveTime
+            << ", max_request: " << m_maxRequest
+            << ", total: " << m_total;
+            return ss.str();
         }
 
     }

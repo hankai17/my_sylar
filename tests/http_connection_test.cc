@@ -37,10 +37,24 @@ void test_chunk() {
 
 }
 
+void test_pool() {
+    sylar::http::HttpConnectionPool::ptr pool(new sylar::http::HttpConnectionPool(
+            "www.baidu.com", "", 80, 10, 1000 * 30, 5 ));
+    sylar::IOManager::GetThis()->addTimer(1000, [pool]() {
+        std::map<std::string, std::string> headers;
+        headers.insert(std::make_pair("Connection", "Keep-alive"));
+        auto r = pool->doGet("/", 300, headers);
+        SYLAR_LOG_DEBUG(g_logger) << "pool.use_count: " << pool.use_count()
+        << "pool status: " << pool->toString()
+        << " Status: " << (r->response ? HttpStatusToString(r->response->getStatus()) : r->toString());
+    }, true);
+}
+
 int main() {
-    sylar::IOManager iom(2, false, "io");
+    sylar::IOManager iom(1, false, "io");
     //iom.schedule(test);
-    iom.schedule(test_chunk);
+    //iom.schedule(test_chunk);
+    iom.schedule(test_pool);
     iom.stop();
     return 0;
 }

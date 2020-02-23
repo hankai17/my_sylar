@@ -130,6 +130,10 @@ add_executable(http_parser tests/http_parser.cc)
 add_dependencies(http_parser ${PROJECT_NAME})
 target_link_libraries(http_parser ${LIBS})
 
+add_executable(uri_test tests/uri_test.cc)
+add_dependencies(uri_test ${PROJECT_NAME})
+target_link_libraries(uri_test ${LIBS})
+
 ###############################
 add_executable(counter utils/counter.cc)
 add_dependencies(counter ${PROJECT_NAME})

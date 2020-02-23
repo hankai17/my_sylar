@@ -90,6 +90,8 @@ namespace sylar {
                                              const std::map<std::string, std::string>& headers = {}, const std::string& body = "");
             HttpResult::ptr doRequest(HttpRequest::ptr req, uint64_t timeout_ms);
 
+            std::string toString() const;
+
         private:
             static void ReleasePtr(HttpConnection* ptr, HttpConnectionPool* pool);
 
