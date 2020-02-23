@@ -81,7 +81,7 @@ namespace sylar {
         int error = getaddrinfo(node.c_str(), service_port, &hints, &results);
         if (error) {
             SYLAR_LOG_ERROR(g_logger) << "Address::Lookup getaddrinfo(" << node.c_str()
-                                      << ", " << service_port << "...) err=" << error << " errno=" << errno << " " << strerror(errno);
+                                      << ", " << service_port << "...) err=" << error << " errno=" << errno << " " << gai_strerror(errno);
             return false;
         }
 

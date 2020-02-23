@@ -80,6 +80,9 @@ namespace sylar {
     }
 
     FdCtx::ptr FdManager::get(int fd, bool auto_create) { // true是创建 false是已经有了 ???
+        if (fd == -1) {
+            return nullptr;
+        }
         RWMutexType::ReadLock lock(m_mutex);
         if ((int)m_datas.size() <= fd) {
             if (auto_create == false) {

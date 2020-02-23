@@ -159,6 +159,9 @@ namespace sylar {
         }
 
         RWMutexType::WriteLock lock(m_mutex);
+        if (m_timers.empty()) {
+            return;
+        }
         //暂不考虑更改系统问题
         Timer::ptr now_timer(new Timer(now_ms));
         auto it = m_timers.lower_bound(now_timer);

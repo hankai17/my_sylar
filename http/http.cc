@@ -148,7 +148,7 @@ namespace sylar {
         }
          */
 
-        std::ostream& HttpRequest::dump(std::ostream &os) const { // fragment consits of paras
+        std::ostream& HttpRequest::dump(std::ostream &os) const { // fragment behind all paras
             // GET / HTTP/1.1
             // Host: www.ifeng.com
 
