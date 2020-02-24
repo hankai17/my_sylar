@@ -346,6 +346,10 @@ ssize_t sendto(int s, const void* msg, size_t len, int flags, const struct socka
     return do_io(s, sendto_f, "sendto", sylar::IOManager::WRITE, SO_SNDTIMEO, msg, len, flags, to, tolen);
 }
 
+ssize_t sendmsg(int s, const struct msghdr *msg, int flags) {
+    return do_io(s, sendmsg_f, "sendmsg", sylar::IOManager::WRITE, SO_SNDTIMEO, msg, flags);
+}
+
 int close(int fd) {
     if (!sylar::t_hook_enable) {
         return close_f(fd);

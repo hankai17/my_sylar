@@ -1,5 +1,6 @@
 #include "stream.hh"
 #include <vector>
+#include <iostream>
 
 namespace sylar {
 
@@ -102,10 +103,14 @@ namespace sylar {
             return -1;
         }
         std::vector<iovec> iovs;
-        ba->getWriteBuffers(iovs, length);
+        ba->getReadBuffers(iovs, length);
         int ret = m_socket->send(&iovs[0], length);
         if (ret > 0) {
             ba->setPosition(ba->getPosition() + ret);
+        }
+        if (ret < 0) {
+            std::cout<<"errno: " << errno
+            << " strerrno: " << strerror(errno) << std::endl;
         }
         return ret;
     }

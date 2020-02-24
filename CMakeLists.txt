@@ -134,6 +134,10 @@ add_executable(uri_test tests/uri_test.cc)
 add_dependencies(uri_test ${PROJECT_NAME})
 target_link_libraries(uri_test ${LIBS})
 
+add_executable(tcp_proxy_test tests/tcp_proxy_test.cc)
+add_dependencies(tcp_proxy_test ${PROJECT_NAME})
+target_link_libraries(tcp_proxy_test ${LIBS})
+
 ###############################
 add_executable(counter utils/counter.cc)
 add_dependencies(counter ${PROJECT_NAME})

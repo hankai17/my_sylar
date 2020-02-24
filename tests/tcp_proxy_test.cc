@@ -1,0 +1,118 @@
+#include "log.hh"
+#include "iomanager.hh"
+#include "tcp_server.hh"
+#include "socket.hh"
+#include "address.hh"
+#include "bytearray.hh"
+#include "stream.hh"
+#include "hook.hh"
+
+#include <vector>
+
+sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
+
+class TcpProxy : public sylar::TcpServer {
+public:
+    typedef std::shared_ptr<TcpProxy> ptr;
+    TcpProxy(sylar::IOManager* worker = sylar::IOManager::GetThis(),
+            sylar::IOManager* accept_worker = sylar::IOManager::GetThis());
+protected:
+    virtual void handleClient(sylar::Socket::ptr client);
+private:
+
+};
+
+TcpProxy::TcpProxy(sylar::IOManager *worker, sylar::IOManager *accept_worker)
+: TcpServer(worker, accept_worker) {
+}
+
+void TcpProxy::handleClient(sylar::Socket::ptr cli_sock) {
+    sylar::IPAddress::ptr addr = sylar::IPv4Address::Create("127.0.0.1", 91);
+    sylar::Socket::ptr os_sock = sylar::Socket::CreateTCP(addr);
+    if(!os_sock->connect(addr)) {
+        SYLAR_LOG_DEBUG(g_logger) << "connect os failed: " << addr->toString();
+        return;
+    }
+    sylar::IOManager::GetThis()->schedule([cli_sock, os_sock, addr]() { // sock MUST ptr, IN ORDER TO 被意外释放导致fd关闭
+        //if(!os_sock->connect(addr)) {
+            //SYLAR_LOG_DEBUG(g_logger) << "connect os failed: " << addr->toString();
+            //return;
+        //}
+        //SYLAR_LOG_DEBUG(g_logger) << "os_sock.isConnect: " << os_sock->isConnected();
+        // 1 send cli buf to os & recv os buf send it to cli // |--->
+        // 2 Is buffer should member of TcpProxy ? // no, sylar ignore all buffer
+        sylar::ByteArray::ptr ba(new sylar::ByteArray);
+        ba->clear();
+
+        while(true) {
+            std::vector<iovec> iovs;
+            ba->getWriteBuffers(iovs, 1024);
+
+            int ret = cli_sock->recv(&iovs[0], iovs.size());
+            if (ret == 0) {
+                SYLAR_LOG_DEBUG(g_logger) << "client closed";
+                break;
+            } else if (ret < 0) {
+                SYLAR_LOG_DEBUG(g_logger) << "client recv errno: " << errno
+                                          << " strerrno: " << strerror(errno);
+                break;
+            }
+            SYLAR_LOG_DEBUG(g_logger) << "client read ret: " << ret;
+
+            sylar::SocketStream ss(os_sock);
+            int ret1 = ss.writeFixSize(ba, ret);
+            if (ret1 != ret) {
+                SYLAR_LOG_DEBUG(g_logger) << "send to server falid: " << errno
+                << " strerrno: " << strerror(errno);
+                break;
+            }
+            SYLAR_LOG_DEBUG(g_logger) << "send to os ret: " << ret1;
+            ba->setPosition(0);
+        }
+
+    });
+
+    // 1 recv os buf & send to cli // --->|
+    sylar::ByteArray::ptr ba(new sylar::ByteArray);
+    ba->clear();
+    while (true) {
+        //if (!os_sock->isConnected()) {
+            //SYLAR_LOG_DEBUG(g_logger) << "os sock is not connected";
+            //continue;
+        //}
+        SYLAR_LOG_DEBUG(g_logger) << "os sock connected";
+        std::vector<iovec> iovs;
+        ba->getWriteBuffers(iovs, 1024);
+        int ret = os_sock->recv(&iovs[0], iovs.size());
+        if (ret == 0) {
+            SYLAR_LOG_DEBUG(g_logger) << "server closed";
+            break;
+        } else if (ret < 0) {
+            SYLAR_LOG_DEBUG(g_logger) << "server recv errno: " << errno
+                                      << " strerrno: " << strerror(errno);
+            break;
+        }
+
+        sylar::SocketStream ss(cli_sock);
+        if (ss.writeFixSize(ba, ret) != ret) {
+            SYLAR_LOG_DEBUG(g_logger) << "send to cli falid: " << errno
+                                      << " strerrno: " << strerror(errno);
+            break;
+        }
+        ba->setPosition(0);
+    }
+}
+
+void test() {
+    TcpProxy::ptr tcpproxy(new TcpProxy);
+    sylar::IPAddress::ptr addr = sylar::IPv4Address::Create("127.0.0.1", 9527);
+    tcpproxy->bind(addr);
+    tcpproxy->start();
+}
+
+int main() {
+    sylar::IOManager iom(1, false, "io");
+    iom.schedule(test);
+    iom.stop();
+    return 0;
+}

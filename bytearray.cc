@@ -619,7 +619,7 @@ namespace sylar {
         return size;
     }
 
-    uint64_t ByteArray::getWriteBuffers(std::vector<iovec>& buffers, uint64_t len) { // 这么多字节长度(len bytes)来初始化n个iovec
+    uint64_t ByteArray::getWriteBuffers(std::vector<iovec>& buffers, uint64_t len) { // 这么多字节长度(len bytes)来初始化n个iovec 对应于ba的n个node
         if(len == 0) {
             return 0;
         }
@@ -650,3 +650,22 @@ namespace sylar {
     }
 
 }
+
+/*
+Default:
+m_basesize: 4K
+m_size: 0
+m_capacity: 4K
+m_postion: 0
+
+    Node(4K) ---> Node(4K) ---> Node(4K) --->...
+        |           |            |
+        |           |            |
+    |---------|------------|------------|
+    0 --------|------------|------------|
+
+Now:
+ m_basesize: 4K
+ m_postion: 0
+ m_capacity: 12K
+*/

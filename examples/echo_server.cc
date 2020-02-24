@@ -27,7 +27,16 @@ public:
                 << " strerrno: " << strerror(errno);
                 break;
             }
+
+            SYLAR_LOG_DEBUG(g_logger) << "ret: " << ret;
+            SYLAR_LOG_DEBUG(g_logger) << ba->getPosition();
+            SYLAR_LOG_DEBUG(g_logger) << ba->getReadSize();
+            SYLAR_LOG_DEBUG(g_logger) << ba->getSize();
             ba->setPosition(ba->getPosition() + ret);
+            SYLAR_LOG_DEBUG(g_logger) << ba->getPosition();
+            SYLAR_LOG_DEBUG(g_logger) << ba->getReadSize();
+            SYLAR_LOG_DEBUG(g_logger) << ba->getSize();
+            //SYLAR_LOG_DEBUG(g_logger) << ba->toHexString();
             ba->setPosition(0);
 
             //SYLAR_LOG_DEBUG(g_logger) << "recv ret: " << ret << " data: " << std::string((char*)iovs[0].iov_base, ret);
