@@ -29,13 +29,13 @@ public:
             }
 
             SYLAR_LOG_DEBUG(g_logger) << "ret: " << ret;
-            SYLAR_LOG_DEBUG(g_logger) << ba->getPosition();
-            SYLAR_LOG_DEBUG(g_logger) << ba->getReadSize();
-            SYLAR_LOG_DEBUG(g_logger) << ba->getSize();
+            SYLAR_LOG_DEBUG(g_logger) << "getPostion: " << ba->getPosition();
+            SYLAR_LOG_DEBUG(g_logger) << "getReadSize: " << ba->getReadSize();
+            SYLAR_LOG_DEBUG(g_logger) << "getSize: " << ba->getSize();
             ba->setPosition(ba->getPosition() + ret);
-            SYLAR_LOG_DEBUG(g_logger) << ba->getPosition();
-            SYLAR_LOG_DEBUG(g_logger) << ba->getReadSize();
-            SYLAR_LOG_DEBUG(g_logger) << ba->getSize();
+            SYLAR_LOG_DEBUG(g_logger) << "getPostion: " << ba->getPosition();
+            SYLAR_LOG_DEBUG(g_logger) << "getReadSize: " << ba->getReadSize();
+            SYLAR_LOG_DEBUG(g_logger) << "getSize: " << ba->getSize();
             //SYLAR_LOG_DEBUG(g_logger) << ba->toHexString();
             ba->setPosition(0);
 

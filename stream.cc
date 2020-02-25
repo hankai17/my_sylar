@@ -6,9 +6,9 @@ namespace sylar {
 
     int Stream::readFixSize(void* buffer, size_t length) {
         size_t offset = 0;
-        size_t left = length;
+        int64_t left = length;
         while (left > 0) {
-            size_t len = read((char*)buffer + offset, left);
+            int64_t len = read((char*)buffer + offset, left);
             if (len <= 0) {
                 return len;
             }
@@ -19,9 +19,9 @@ namespace sylar {
     }
 
     int Stream::readFixSize(ByteArray::ptr ba, size_t length) {
-        size_t left = length;
+        int64_t left = length;
         while (left > 0) {
-            size_t len = read(ba, left); // ba remember the m_postion
+            int64_t len = read(ba, left); // ba remember the m_postion
             if (len <= 0) {
                 return len;
             }
@@ -32,9 +32,9 @@ namespace sylar {
 
     int Stream::writeFixSize(const char* buffer, size_t length) {
         size_t offset = 0;
-        size_t left = length;
+        int64_t left = length;
         while (left > 0) {
-            size_t len = write((char*)buffer + offset, left);
+            int64_t len = write((char*)buffer + offset, left);
             if (len <= 0) {
                 return len;
             }
@@ -45,9 +45,9 @@ namespace sylar {
     }
 
     int Stream::writeFixSize(ByteArray::ptr ba, size_t length) {
-        size_t left = length;
+        int64_t left = length;
         while (left > 0) {
-            size_t len = write(ba, left);
+            int64_t len = write(ba, left);
             if (len <= 0) {
                 return len;
             }

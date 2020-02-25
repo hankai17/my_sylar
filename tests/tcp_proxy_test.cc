@@ -6,6 +6,7 @@
 #include "bytearray.hh"
 #include "stream.hh"
 #include "hook.hh"
+#include "buffer.hh"
 
 #include <vector>
 
@@ -41,13 +42,15 @@ void TcpProxy::handleClient(sylar::Socket::ptr cli_sock) {
         //SYLAR_LOG_DEBUG(g_logger) << "os_sock.isConnect: " << os_sock->isConnected();
         // 1 send cli buf to os & recv os buf send it to cli // |--->
         // 2 Is buffer should member of TcpProxy ? // no, sylar ignore all buffer
-        sylar::ByteArray::ptr ba(new sylar::ByteArray);
-        ba->clear();
+
+        //sylar::ByteArray::ptr ba(new sylar::ByteArray);
+        //ba->clear();
+        sylar::Buffer::ptr buffer(new sylar::Buffer);
 
         while(true) {
+            /*
             std::vector<iovec> iovs;
             ba->getWriteBuffers(iovs, 1024);
-
             int ret = cli_sock->recv(&iovs[0], iovs.size());
             if (ret == 0) {
                 SYLAR_LOG_DEBUG(g_logger) << "client closed";
@@ -57,8 +60,6 @@ void TcpProxy::handleClient(sylar::Socket::ptr cli_sock) {
                                           << " strerrno: " << strerror(errno);
                 break;
             }
-            SYLAR_LOG_DEBUG(g_logger) << "client read ret: " << ret;
-
             sylar::SocketStream ss(os_sock);
             int ret1 = ss.writeFixSize(ba, ret);
             if (ret1 != ret) {
@@ -67,20 +68,39 @@ void TcpProxy::handleClient(sylar::Socket::ptr cli_sock) {
                 break;
             }
             SYLAR_LOG_DEBUG(g_logger) << "send to os ret: " << ret1;
-            ba->setPosition(0);
+             */
+            int err;
+            ssize_t ret = buffer->orireadFd(cli_sock->getSocket(), &err);
+            if (ret <= 0) {
+                SYLAR_LOG_DEBUG(g_logger) << "client close";
+                break;
+            }
+            SYLAR_LOG_DEBUG(g_logger) << "read client ret: " << ret;
+            sylar::SocketStream ss(os_sock);
+            SYLAR_LOG_DEBUG(g_logger) << "before send buffer to os, buff->readableBytes: " << buffer->readableBytes();
+            ret = ss.writeFixSize(buffer->peek(), buffer->readableBytes());
+            if (ret != (ssize_t)buffer->readableBytes()) {
+                SYLAR_LOG_DEBUG(g_logger) << "send to server falid: " << errno
+                                          << " strerrno: " << strerror(errno);
+                break;
+            }
+            SYLAR_LOG_DEBUG(g_logger) << "after send buffer to os, ret: " << ret;
+            buffer->retrieveAll();
         }
 
     });
 
     // 1 recv os buf & send to cli // --->|
-    sylar::ByteArray::ptr ba(new sylar::ByteArray);
-    ba->clear();
+    //sylar::ByteArray::ptr ba(new sylar::ByteArray);
+    //ba->clear();
+    sylar::Buffer::ptr buffer(new sylar::Buffer);
     while (true) {
         //if (!os_sock->isConnected()) {
             //SYLAR_LOG_DEBUG(g_logger) << "os sock is not connected";
             //continue;
         //}
         SYLAR_LOG_DEBUG(g_logger) << "os sock connected";
+        /*
         std::vector<iovec> iovs;
         ba->getWriteBuffers(iovs, 1024);
         int ret = os_sock->recv(&iovs[0], iovs.size());
@@ -100,6 +120,22 @@ void TcpProxy::handleClient(sylar::Socket::ptr cli_sock) {
             break;
         }
         ba->setPosition(0);
+         */
+        int err;
+        ssize_t ret = buffer->orireadFd(os_sock->getSocket(), &err);
+        if (ret <= 0) {
+            SYLAR_LOG_DEBUG(g_logger) << "os close";
+            break;
+        }
+        SYLAR_LOG_DEBUG(g_logger) << "read os ret: " << ret;
+        sylar::SocketStream ss(cli_sock);
+        ret = ss.writeFixSize(buffer->peek(), buffer->readableBytes());
+        if (ret != (ssize_t)buffer->readableBytes()) {
+            SYLAR_LOG_DEBUG(g_logger) << "send to client falid: " << errno
+                                      << " strerrno: " << strerror(errno);
+            break;
+        }
+        buffer->retrieveAll();
     }
 }
 
