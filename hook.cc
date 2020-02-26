@@ -7,6 +7,7 @@
 #include "macro.hh"
 
 #include <dlfcn.h>
+#include <iostream>
 
 static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
 

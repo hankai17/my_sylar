@@ -27,8 +27,66 @@ TcpProxy::TcpProxy(sylar::IOManager *worker, sylar::IOManager *accept_worker)
 : TcpServer(worker, accept_worker) {
 }
 
+void handleClient2(sylar::Socket::ptr cli_sock) {  // SS is not tmp value
+    sylar::IPAddress::ptr addr = sylar::IPv4Address::Create("127.0.0.1", 90);
+    sylar::Socket::ptr os_sock = sylar::Socket::CreateTCP(addr);
+    if(!os_sock->connect(addr)) {
+        SYLAR_LOG_DEBUG(g_logger) << "connect os failed: " << addr->toString();
+        return;
+    }
+    sylar::SocketStream::ptr ss(new sylar::SocketStream(os_sock)); // 只有两端都关闭了 才从cw态转为fin 很明显如果链接过多就是问题
+    sylar::SocketStream::ptr cs(new sylar::SocketStream(cli_sock));
+
+    sylar::IOManager::GetThis()->schedule([cli_sock, os_sock, addr, ss]() {
+        sylar::Buffer::ptr buffer(new sylar::Buffer);
+
+        while(true) {
+            int err;
+            ssize_t ret = buffer->orireadFd(cli_sock->getSocket(), &err);
+            if (ret <= 0) {
+                SYLAR_LOG_DEBUG(g_logger) << "client close";
+                break;
+            }
+            SYLAR_LOG_DEBUG(g_logger) << "read client ret: " << ret;
+            SYLAR_LOG_DEBUG(g_logger) << "before send buffer to os, buff->readableBytes: " << buffer->readableBytes();
+
+            ret = ss->writeFixSize(buffer->peek(), buffer->readableBytes());
+            if (ret != (ssize_t)buffer->readableBytes()) {
+                SYLAR_LOG_DEBUG(g_logger) << "send to server falid: " << errno
+                                          << " strerrno: " << strerror(errno);
+                break;
+            }
+            SYLAR_LOG_DEBUG(g_logger) << "after send buffer to os, ret: " << ret;
+            buffer->retrieveAll();
+        }
+
+    });
+
+    sylar::Buffer::ptr buffer(new sylar::Buffer);
+    while (true) {
+        int err;
+        ssize_t ret = buffer->orireadFd(os_sock->getSocket(), &err);
+        if (ret < 0) {
+            SYLAR_LOG_DEBUG(g_logger) << "ret <0, errno: " << errno
+                                      << " strerror: " << strerror(errno);
+            break;
+        } else if (ret == 0) {
+            SYLAR_LOG_DEBUG(g_logger) << "os close";
+            break;
+        }
+        SYLAR_LOG_DEBUG(g_logger) << "read os ret: " << ret;
+        ret = cs->writeFixSize(buffer->peek(), buffer->readableBytes());
+        if (ret != (ssize_t)buffer->readableBytes()) {
+            SYLAR_LOG_DEBUG(g_logger) << "send to client falid: " << errno
+                                      << " strerrno: " << strerror(errno);
+            break;
+        }
+        buffer->retrieveAll();
+    }
+}
+
 void TcpProxy::handleClient(sylar::Socket::ptr cli_sock) {
-    sylar::IPAddress::ptr addr = sylar::IPv4Address::Create("127.0.0.1", 91);
+    sylar::IPAddress::ptr addr = sylar::IPv4Address::Create("127.0.0.1", 90);
     sylar::Socket::ptr os_sock = sylar::Socket::CreateTCP(addr);
     if(!os_sock->connect(addr)) {
         SYLAR_LOG_DEBUG(g_logger) << "connect os failed: " << addr->toString();
@@ -73,7 +131,8 @@ void TcpProxy::handleClient(sylar::Socket::ptr cli_sock) {
             int err;
             ssize_t ret = buffer->orireadFd(cli_sock->getSocket(), &err);
             if (ret <= 0) {
-                SYLAR_LOG_DEBUG(g_logger) << "client close";
+                SYLAR_LOG_DEBUG(g_logger) << "sock: " << cli_sock->getSocket() << "  client close";
+                cli_sock->close();
                 break;
             }
             SYLAR_LOG_DEBUG(g_logger) << "read client ret: " << ret;
@@ -100,7 +159,6 @@ void TcpProxy::handleClient(sylar::Socket::ptr cli_sock) {
             //SYLAR_LOG_DEBUG(g_logger) << "os sock is not connected";
             //continue;
         //}
-        SYLAR_LOG_DEBUG(g_logger) << "os sock connected";
         /*
         std::vector<iovec> iovs;
         ba->getWriteBuffers(iovs, 1024);
@@ -124,9 +182,14 @@ void TcpProxy::handleClient(sylar::Socket::ptr cli_sock) {
          */
         int err;
         ssize_t ret = buffer->orireadFd(os_sock->getSocket(), &err);
-        if (ret <= 0) {
-            SYLAR_LOG_DEBUG(g_logger) << "os close, errno: " << errno
-            << " strerror: " << strerror(errno);
+        if (ret < 0) {
+            os_sock->close();
+            SYLAR_LOG_DEBUG(g_logger) << "ret <0, errno: " << errno
+                                      << " strerror: " << strerror(errno);
+            break;
+        } else if (ret == 0) {
+            os_sock->close();
+            SYLAR_LOG_DEBUG(g_logger) << "os close";
             break;
         }
         SYLAR_LOG_DEBUG(g_logger) << "read os ret: " << ret;
