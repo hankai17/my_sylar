@@ -45,6 +45,8 @@ static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
 
     Socket::ptr Socket::CreateUDP(sylar::Address::ptr address) {
         Socket::ptr sock(new Socket(address->getFamily(), UDP, 0));
+        sock->newSock();
+        sock->m_isConnected = true;
         return sock;
     }
 
@@ -55,6 +57,8 @@ static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
 
     Socket::ptr Socket::CreateUDPSocket() {
         Socket::ptr sock(new Socket(IPv4, UDP, 0));
+        sock->newSock();
+        sock->m_isConnected = true;
         return sock;
     }
 
@@ -65,6 +69,8 @@ static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
 
     Socket::ptr Socket::CreateUDPSocket6() {
         Socket::ptr sock(new Socket(IPv6, UDP, 0));
+        sock->newSock();
+        sock->m_isConnected = true;
         return sock;
     }
 

@@ -46,6 +46,7 @@ set(LIB_SRC
         http/http_server.cc
         http/http_connection.cc
         uri.cc
+        daemon.cc
         )
 
 add_library(${PROJECT_NAME} SHARED ${LIB_SRC})
@@ -137,6 +138,14 @@ target_link_libraries(uri_test ${LIBS})
 add_executable(tcp_proxy_test tests/tcp_proxy_test.cc)
 add_dependencies(tcp_proxy_test ${PROJECT_NAME})
 target_link_libraries(tcp_proxy_test ${LIBS})
+
+add_executable(udp_test tests/udp_test.cc)
+add_dependencies(udp_test ${PROJECT_NAME})
+target_link_libraries(udp_test ${LIBS})
+
+add_executable(daemon_test tests/daemon_test.cc)
+add_dependencies(daemon_test ${PROJECT_NAME})
+target_link_libraries(daemon_test ${LIBS})
 
 ###############################
 add_executable(counter utils/counter.cc)

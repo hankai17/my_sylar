@@ -58,4 +58,12 @@ namespace sylar {
         gettimeofday(&time, NULL);
         return time.tv_sec * 1000 * 1000ul + time.tv_usec;
     }
+
+    std::string Time2Str(time_t ts, const std::string& format) {
+        struct tm tm;
+        localtime_r(&ts, &tm);
+        char buf[64];
+        strftime(buf, sizeof(buf), format.c_str(), &tm);
+        return buf;
+    }
 }
