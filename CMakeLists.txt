@@ -47,6 +47,7 @@ set(LIB_SRC
         http/http_connection.cc
         uri.cc
         daemon.cc
+        env.cc
         )
 
 add_library(${PROJECT_NAME} SHARED ${LIB_SRC})
@@ -146,6 +147,10 @@ target_link_libraries(udp_test ${LIBS})
 add_executable(daemon_test tests/daemon_test.cc)
 add_dependencies(daemon_test ${PROJECT_NAME})
 target_link_libraries(daemon_test ${LIBS})
+
+add_executable(env_test tests/env_test.cc)
+add_dependencies(env_test ${PROJECT_NAME})
+target_link_libraries(env_test ${LIBS})
 
 ###############################
 add_executable(counter utils/counter.cc)
