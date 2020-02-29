@@ -67,6 +67,11 @@ namespace sylar {
 
         private:
         };
+
+        WSFrameMessage::ptr WSRecvMessage(Stream* stream, bool client);
+        int32_t WSSendMessage(Stream* stream, WSFrameMessage::ptr msg, bool client, bool fin);
+        int32_t WSPing(Stream* stream);
+        int32_t WSPong(Stream* stream);
     }
 }
 

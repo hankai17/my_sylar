@@ -183,6 +183,9 @@ namespace sylar {
       bool hasHeader(const std::string& key, std::string* val = nullptr);
       bool hasCookie(const std::string& key, std::string* val = nullptr);
 
+      void setWebsocket(bool v) { m_isWebsocket = v; }
+      bool getWebsocket() const { return m_isWebsocket; }
+
       template <typename T>
       bool checkGetParaAs(const std::string& key, T& val/*in-out*/, const T& def = T()) {
         return checkGetAs(m_paras, key, val, def);
@@ -240,6 +243,7 @@ namespace sylar {
       std::string     m_query;
       std::string     m_fragment;
       std::string     m_body;
+      bool            m_isWebsocket;
 
       MapType         m_paras;
       MapType         m_headers;
@@ -275,6 +279,8 @@ namespace sylar {
       bool checkHeaderAs(const std::string& key, T& val/*in-out*/, const T& def = T()) {
         return checkGetAs(m_headers, key, val, def);
       }
+      void setWebsocket(bool v) { m_isWebsocket = v; }
+      bool getWebsocket() const { return m_isWebsocket; }
 
       std::ostream& dump(std::ostream& os/*in-return*/) const;
       std::string toString() const;
@@ -302,6 +308,7 @@ namespace sylar {
       std::string   m_reason;
       MapType       m_headers; // May be error: baidu.com has 3 Set-Cookie headers!
       bool          m_close;
+      bool          m_isWebsocket;
       std::string   m_body;
   };
 

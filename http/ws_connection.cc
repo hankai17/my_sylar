@@ -1,6 +1,7 @@
 #include "ws_connection.hh"
 #include "log.hh"
 #include "address.hh"
+#include "hash.hh"
 
 namespace sylar {
     namespace http {
@@ -27,7 +28,23 @@ namespace sylar {
         : HttpConnection(sock, owner) {
         }
 
-        std::pair<HttpResult::ptr, WSConnection::ptr> Create(Uri::ptr uri,
+        WSFrameMessage::ptr WSRecvMessage(Stream* stream, bool client) {
+
+        }
+
+        int32_t WSSendMessage(Stream* stream, WSFrameMessage::ptr msg, bool client, bool fin) {
+
+        }
+
+        int32_t WSPing(Stream* stream) {
+
+        }
+
+        int32_t WSPong(Stream* stream) {
+
+        }
+
+        std::pair<HttpResult::ptr, WSConnection::ptr> WSConnection::Create(Uri::ptr uri,
                                                              uint64_t timeout_ms,
                                                              const std::map<std::string, std::string>& headers) {
             Address::ptr addr = uri->createAddress();
@@ -90,10 +107,13 @@ namespace sylar {
                          nullptr, "may be timeout & peer closed: " + addr->toString() + " timeout_ms: " + std::to_string(timeout_ms)),
                                       nullptr);
             }
-
+            if (resp->getStatus() != HttpStatus::SWITCHING_PROTOCOLS) {
+                return std::make_pair(std::make_shared<HttpResult>(50, resp, "not upgrade success, not websocket server"), conn);
+            }
+            return std::make_pair(std::make_shared<HttpResult>((int)HttpResult::Error::OK, resp, "ok"), conn);
         }
 
-        std::pair<HttpResult::ptr, WSConnection::ptr> Create(const std::string& url,
+        std::pair<HttpResult::ptr, WSConnection::ptr> WSConnection::Create(const std::string& url,
                                                                     uint64_t timeout_ms,
                                                                     const std::map<std::string, std::string>& headers) {
             Uri::ptr uri = Uri::Create(url);
@@ -104,6 +124,25 @@ namespace sylar {
             return Create(uri, timeout_ms, headers);
         }
 
+        WSFrameMessage::ptr WSConnection::recvMessage() {
+            return WSRecvMessage(this, true);
+        }
+
+        int32_t WSConnection::sendMessage(WSFrameMessage::ptr msg, bool fin) {
+            return WSSendMessage(this, msg, true, fin);
+        }
+
+        int32_t WSConnection::sendMessage(const std::string& msg, int32_t opcode, bool fin) {
+            return WSSendMessage(this, std::make_shared<WSFrameMessage>(opcode, msg), true, fin);
+        }
+
+        int32_t WSConnection::ping() {
+            return WSPing(this);
+        }
+
+        int32_t WSConnection::pong() {
+            return WSPong(this);
+        }
 
     }
 }
