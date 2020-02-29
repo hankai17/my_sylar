@@ -56,6 +56,30 @@ namespace sylar {
         return length;
     }
 
+    int Stream::readFixSize(Buffer::ptr buf, size_t length) {
+        int64_t left = length;
+        while (left > 0) {
+            int64_t len = read(buf, left);
+            if (len <= 0) {
+                return len;
+            }
+            left -= len;
+        }
+        return length;
+    }
+
+    int Stream::writeFixSize(Buffer::ptr buf, size_t length) {
+        int64_t left = length;
+        while (left > 0) {
+            int64_t len = write(buf, left);
+            if (len <= 0) {
+                return len;
+            }
+            left -= len;
+        }
+        return length;
+    }
+
     SocketStream::SocketStream(Socket::ptr sock, bool owner)
     : m_socket(sock),
     m_owner(owner) {
@@ -112,6 +136,24 @@ namespace sylar {
             std::cout<<"errno: " << errno
             << " strerrno: " << strerror(errno) << std::endl;
         }
+        return ret;
+    }
+
+    int SocketStream::read(Buffer::ptr buf, size_t length) {
+        if (!isConnected()) {
+            return -1;
+        }
+        int err;
+        int ret = buf->orireadFd(m_socket->getSocket(), &err);
+        return ret;
+    }
+
+    int SocketStream::write(Buffer::ptr buf, size_t length) {
+        if (!isConnected()) {
+            return -1;
+        }
+        int err;
+        int ret = buf->writeFd(m_socket->getSocket(), length, &err);
         return ret;
     }
 

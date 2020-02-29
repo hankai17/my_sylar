@@ -4,6 +4,7 @@
 #include <memory>
 #include "bytearray.hh"
 #include "socket.hh"
+#include "buffer.hh"
 
 namespace sylar {
     class Stream {
@@ -12,13 +13,20 @@ namespace sylar {
         virtual ~Stream() {}; // Can not virutal ~Stream();
 
         virtual int read(void* buffer, size_t length) = 0;
-        virtual int read(ByteArray::ptr ba, size_t length) = 0;
-        virtual int readFixSize(void* buffer, size_t length);
-        virtual int readFixSize(ByteArray::ptr ba, size_t length);
         virtual int write(const char* buffer, size_t length) = 0;
-        virtual int write(ByteArray::ptr ba, size_t length) = 0;
+        virtual int readFixSize(void* buffer, size_t length);
         virtual int writeFixSize(const char* buffer, size_t length);
+
+        virtual int read(ByteArray::ptr ba, size_t length) = 0;
+        virtual int write(ByteArray::ptr ba, size_t length) = 0;
+        virtual int readFixSize(ByteArray::ptr ba, size_t length);
         virtual int writeFixSize(ByteArray::ptr ba, size_t length);
+
+        virtual int read(Buffer::ptr buf, size_t length) = 0;
+        virtual int write(Buffer::ptr buf, size_t length) = 0;
+        virtual int readFixSize(Buffer::ptr buf, size_t length);
+        virtual int writeFixSize(Buffer::ptr buf, size_t length);
+
         virtual void close() = 0;
     };
 
@@ -32,7 +40,10 @@ namespace sylar {
         virtual int read(ByteArray::ptr ba, size_t length) override;
         virtual int write(const char* buffer, size_t length) override;
         virtual int write(ByteArray::ptr ba, size_t length) override;
+        virtual int read(Buffer::ptr buf, size_t length) override;
+        virtual int write(Buffer::ptr buf, size_t length) override;
         virtual void close() override;
+
 
         Socket::ptr getSocket() const { return m_socket; }
         bool isConnected() const;

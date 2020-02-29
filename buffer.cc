@@ -221,6 +221,20 @@ namespace sylar {
         return n;
     }
 
+    ssize_t Buffer::writeFd(int fd, int length, int* savedErrno) {
+        if (length > readableBytes()) {
+            length = readableBytes();
+        }
+
+        ssize_t n = write(fd, peek(), length);
+        if (n < 0) {
+            *savedErrno = errno;
+        } else if (n <= length) {
+            m_readIndex += n;
+        }
+        return n;
+    }
+
 }
 
 // 诡辩

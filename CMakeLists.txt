@@ -59,6 +59,7 @@ set(LIB_SRC
         daemon.cc
         env.cc
         hash.cc
+        http/ws_connection.cc
         )
 
 add_library(${PROJECT_NAME} SHARED ${LIB_SRC})
