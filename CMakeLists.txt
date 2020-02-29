@@ -18,7 +18,17 @@ include_directories("./"
 
 find_library(YAMLCPP yaml-cpp /usr/local/lib/)
 find_library(THREAD pthread /usr/lib64/)
-set(LIBS ${PROJECT_NAME} pthread yaml-cpp dl)
+find_package(OpenSSL REQUIRED)
+if(OPENSSL_FOUND)
+    include_directories(${OPENSSL_INCLUDE_DIR})
+endif()
+
+set(LIBS ${PROJECT_NAME}
+        pthread
+        yaml-cpp
+        dl
+        ${OPENSSL_LIBRARIES}
+        )
 
 
 set(LIB_SRC
@@ -48,6 +58,7 @@ set(LIB_SRC
         uri.cc
         daemon.cc
         env.cc
+        hash.cc
         )
 
 add_library(${PROJECT_NAME} SHARED ${LIB_SRC})
