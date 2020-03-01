@@ -221,15 +221,47 @@ namespace sylar {
         return n;
     }
 
-    ssize_t Buffer::writeFd(int fd, int length, int* savedErrno) {
+    ssize_t Buffer::orireadFd(int fd, size_t length, int* savedErrno) {
+        SYLAR_ASSERT(length <= 65535);
+        if (length < writableBytes()) {
+            const ssize_t n = read(fd, begin() + m_writeIndex, length);
+            if (n < 0) {
+                *savedErrno = errno;
+            } else if (static_cast<size_t>(n) <= writableBytes()) {
+                m_writeIndex += n;
+            }
+            return n;
+        } else {
+            char extrabuf[65535] = {0};
+            struct iovec vec[2];
+            const size_t writable = writableBytes();
+            vec[0].iov_base = begin() + m_writeIndex;
+            vec[0].iov_len = writable;
+            vec[1].iov_base = extrabuf;
+            vec[1].iov_len = length - writable;
+            const ssize_t n = readv(fd, vec, 2);
+            if (n < 0) {
+                *savedErrno = errno;
+                //} else if (implicit_cast<size_t>(n) <= writable) {
+            } else if (static_cast<size_t>(n) <= writable) {
+                m_writeIndex += n;
+            } else {
+                m_writeIndex = m_buffer.size();
+                append(extrabuf, n - writable);
+            }
+            return n;
+        }
+    }
+
+    ssize_t Buffer::writeFd(int fd, size_t length, int* savedErrno) {
         if (length > readableBytes()) {
             length = readableBytes();
         }
 
-        ssize_t n = write(fd, peek(), length);
+        int64_t n = write(fd, peek(), length);
         if (n < 0) {
             *savedErrno = errno;
-        } else if (n <= length) {
+        } else if (static_cast<size_t>(n) <= length) {
             m_readIndex += n;
         }
         return n;

@@ -41,7 +41,7 @@ namespace sylar {
 
             int getOpcode() const { return m_opcode; }
             void setOpcode(int value) { m_opcode = value; }
-            const std::string& getData() const { return m_data; }
+            std::string& getData() { return m_data; }
             void setData(const std::string& data) { m_data = data; }
 
         private:

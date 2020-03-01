@@ -2,6 +2,11 @@
 #include "log.hh"
 #include "address.hh"
 #include "hash.hh"
+#include "http/http_parser.hh"
+#include "buffer.hh"
+#include "endian.hh"
+
+#include <string.h>
 
 namespace sylar {
     namespace http {
@@ -26,22 +31,159 @@ namespace sylar {
 
         WSConnection::WSConnection(sylar::Socket::ptr sock, bool owner)
         : HttpConnection(sock, owner) {
+            return;
         }
 
         WSFrameMessage::ptr WSRecvMessage(Stream* stream, bool client) {
+            std::string data;
+            int cur_len = 0;
+            int first_opcode_type = 0;
+            do {
+                WSFrameHead frameHead;
+                if (stream->readFixSize(&frameHead, sizeof(frameHead)) <= 0) {
+                    break;
+                }
+                SYLAR_LOG_DEBUG(g_logger) << frameHead.toString();
+                if (frameHead.opcode == WSFrameHead::PING_FRAME) {
+                    SYLAR_LOG_DEBUG(g_logger) << "PING";
+                    if (WSPong(stream) <= 0) {
+                        break;
+                    }
+                } else if (frameHead.opcode == WSFrameHead::PONG_FRAME) {
+                } else if (frameHead.opcode == WSFrameHead::CONTINUE
+                    || frameHead.opcode == WSFrameHead::TEXT_FRAME
+                    || frameHead.opcode == WSFrameHead::BIN_FRAME) {
+                    if (client && !frameHead.mask) {
+                        SYLAR_LOG_DEBUG(g_logger) << "client frame no mask";
+                        break;
+                    }
+                    uint64_t length;
+                    if (frameHead.payload < 125) {
+                        length = frameHead.payload;
+                    } else if (frameHead.payload == 126) {
+                        uint16_t len;
+                        if (stream->readFixSize(&len, sizeof(len)) <= 0) {
+                            break;
+                        }
+                        length = sylar::byteswapOnLittleEndian(len);
+                    } else if (frameHead.payload == 127) {
+                        uint64_t len;
+                        if (stream->readFixSize(&len, sizeof(len)) <= 0) {
+                            break;
+                        }
+                        length = sylar::byteswapOnLittleEndian(len);
+                    }
 
+                    char mask[4];
+                    if (frameHead.mask) {
+                        if (stream->readFixSize(mask, sizeof(mask)) <= 0) {
+                            break;
+                        }
+                    }
+                    data.resize(cur_len + length); // Just like vector's resize ?
+                    if (stream->readFixSize(&data[cur_len], length) <= 0) {
+                        break;
+                    }
+                    if (frameHead.mask) {
+                        for (size_t i = 0; i < length; i++) {
+                            data[cur_len + i] ^= mask[i % 4];
+                        }
+                    }
+                    cur_len += length;
+
+                    if (!first_opcode_type && frameHead.opcode != WSFrameHead::CONTINUE) {
+                        first_opcode_type = frameHead.opcode;
+                    }
+
+                    if (frameHead.fin == 1) {
+                        SYLAR_LOG_DEBUG(g_logger) << data;
+                        return WSFrameMessage::ptr(new WSFrameMessage(first_opcode_type, std::move(data)));
+                    }
+                } else {
+                    SYLAR_LOG_DEBUG(g_logger) << "invalid opcode: " << frameHead.opcode;
+                }
+            } while (true);
+            stream->close();
+            return nullptr;
         }
 
         int32_t WSSendMessage(Stream* stream, WSFrameMessage::ptr msg, bool client, bool fin) {
+            do {
+                WSFrameHead framehead;
+                memset(&framehead, 0, sizeof(framehead));
+                framehead.fin = fin;
+                framehead.opcode = msg->getOpcode();
+                framehead.mask = client;
+                uint64_t size = msg->getData().size();
+                if (size <= 125) {
+                    framehead.payload = size;
+                } else if (size < 65535) { // 16bit
+                    framehead.payload = 126;
+                } else { // 64bit
+                    framehead.payload = 127;
+                }
 
+                if (stream->writeFixSize(&framehead, sizeof(framehead)) <= 0) { // 立即发送不要攒
+                    break;
+                }
+
+                if (framehead.payload == 126) {
+                    uint16_t psize = size;
+                    psize = sylar::byteswapOnLittleEndian(psize);
+                    if (stream->writeFixSize(&psize, sizeof(psize)) <= 0) {
+                        break;
+                    }
+                } else if (framehead.payload == 127) {
+                    uint64_t psize = size;
+                    psize = sylar::byteswapOnLittleEndian(psize);
+                    if (stream->writeFixSize(&psize, sizeof(psize)) <= 0) {
+                        break;
+                    }
+                }
+                if (client) {
+                    char mask[4];
+                    uint32_t rand_value = rand();
+                    memcpy(mask, &rand_value, sizeof(rand_value));
+                    std::string& data = msg->getData();
+                    for (size_t i = 0; i < data.size(); i++) {
+                        data[i] ^= mask[i % 4];
+                    }
+                    if (stream->writeFixSize(mask, sizeof(mask)) <= 0) { // WHY here not byteswap ?
+                        break;
+                    }
+                }
+
+                if (stream->writeFixSize(msg->getData().c_str(), msg->getData().size()) <= 0) {
+                    break;
+                }
+                return size + sizeof(framehead);
+            } while (0);
+            stream->close(); // ?
+            return -1;
         }
 
         int32_t WSPing(Stream* stream) {
-
+            WSFrameHead frameHead;
+            memset(&frameHead, 0, sizeof(frameHead));
+            frameHead.fin = 1;
+            frameHead.opcode = WSFrameHead::PING_FRAME;
+            int32_t v;
+            if ((v = stream->writeFixSize(&frameHead, sizeof(frameHead))) <= 0) {
+                stream->close();
+            }
+            return v;
         }
 
         int32_t WSPong(Stream* stream) {
-
+            WSFrameHead frameHead;
+            memset(&frameHead, 0, sizeof(frameHead));
+            frameHead.fin = 1;
+            frameHead.opcode = WSFrameHead::PONG_FRAME;
+            int32_t v;
+            if ((v = stream->writeFixSize(&frameHead, sizeof(frameHead))) <= 0) {
+                stream->close();
+            }
+            return v;
         }
 
         std::pair<HttpResult::ptr, WSConnection::ptr> WSConnection::Create(Uri::ptr uri,

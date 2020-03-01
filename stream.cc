@@ -44,6 +44,10 @@ namespace sylar {
         return length;
     }
 
+    int Stream::writeFixSize(const void* buffer, size_t length) {
+        return writeFixSize(static_cast<const char*>(buffer), length);
+    }
+
     int Stream::writeFixSize(ByteArray::ptr ba, size_t length) {
         int64_t left = length;
         while (left > 0) {
@@ -144,7 +148,7 @@ namespace sylar {
             return -1;
         }
         int err;
-        int ret = buf->orireadFd(m_socket->getSocket(), &err);
+        int ret = buf->orireadFd(m_socket->getSocket(), length, &err);
         return ret;
     }
 

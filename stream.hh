@@ -16,6 +16,7 @@ namespace sylar {
         virtual int write(const char* buffer, size_t length) = 0;
         virtual int readFixSize(void* buffer, size_t length);
         virtual int writeFixSize(const char* buffer, size_t length);
+        virtual int writeFixSize(const void* buffer, size_t length);
 
         virtual int read(ByteArray::ptr ba, size_t length) = 0;
         virtual int write(ByteArray::ptr ba, size_t length) = 0;
