@@ -60,6 +60,7 @@ set(LIB_SRC
         env.cc
         hash.cc
         http/ws_connection.cc
+        http/ws_server.cc
         )
 
 add_library(${PROJECT_NAME} SHARED ${LIB_SRC})
@@ -163,6 +164,10 @@ target_link_libraries(daemon_test ${LIBS})
 add_executable(env_test tests/env_test.cc)
 add_dependencies(env_test ${PROJECT_NAME})
 target_link_libraries(env_test ${LIBS})
+
+add_executable(ws_test tests/ws_test.cc)
+add_dependencies(ws_test ${PROJECT_NAME})
+target_link_libraries(ws_test ${LIBS})
 
 ###############################
 add_executable(counter utils/counter.cc)

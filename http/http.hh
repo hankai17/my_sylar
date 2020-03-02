@@ -140,6 +140,7 @@ namespace sylar {
       bool operator() (const std::string& lv, const std::string& rv) const;
   };
 
+  class HttpResponse;
   class HttpRequest {
   public:
       typedef std::shared_ptr<HttpRequest> ptr;
@@ -186,6 +187,8 @@ namespace sylar {
       void setWebsocket(bool v) { m_isWebsocket = v; }
       bool getWebsocket() const { return m_isWebsocket; }
 
+      std::shared_ptr<HttpResponse> createResponse(); //HttpResponse::ptr createResponse();
+
       template <typename T>
       bool checkGetParaAs(const std::string& key, T& val/*in-out*/, const T& def = T()) {
         return checkGetAs(m_paras, key, val, def);
@@ -194,6 +197,11 @@ namespace sylar {
       template <typename T>
       bool checkGetHeaderAs(const std::string& key, T& val/*in-out*/, const T& def = T()) {
         return checkGetAs(m_headers, key, val, def);
+      }
+
+      template <typename T>
+      T GetHeaderAs(const std::string& key, const T& def = T()) {
+        return GetAs(m_headers, key, def);
       }
 
       template <typename T>
@@ -214,6 +222,7 @@ namespace sylar {
         }
         try {
           val = boost::lexical_cast<T>(it->second);
+          return true;
         } catch (...) {
           val = def;
         }

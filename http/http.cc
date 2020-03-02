@@ -100,6 +100,11 @@ namespace sylar {
             return true;
         }
 
+        std::shared_ptr<HttpResponse> HttpRequest::createResponse() {
+            HttpResponse::ptr resp(new HttpResponse(getVersion(), isClose()));
+            return resp;
+        }
+
         static const char* s_method_string[] = {
 #define XX(num, name, string) #string,
                 HTTP_METHOD_MAP(XX)
@@ -164,9 +169,11 @@ namespace sylar {
             << (uint32_t)(m_version & 0x0F)
             << "\r\n";
 
-            os << "Connection: " << (m_close ? "close" : "keep-alive") << "\r\n";
+            if (!m_isWebsocket) {
+                os << "Connection: " << (m_close ? "close" : "keep-alive") << "\r\n";
+            }
             for (const auto& i : m_headers) {
-                if (strcasecmp(i.first.c_str(), "connection") == 0) {
+                if ((strcasecmp(i.first.c_str(), "connection") == 0) && !m_isWebsocket) {
                     continue;
                 }
                 os << i.first << ": " << i.second << "\r\n";
