@@ -105,8 +105,8 @@ static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
         return -1;
     }
 
-    void Socket::setRecvTimeout(uint64_t v) {
-        struct timeval tv { int(v / 1000), int(v % 1000 / 1000) };
+    void Socket::setRecvTimeout(uint64_t v) { // in ms
+        struct timeval tv { int(v / 1000), int(v % 1000 * 1000) }; // para2 is us
         setOption(SOL_SOCKET, SO_RCVTIMEO, tv);
     }
 

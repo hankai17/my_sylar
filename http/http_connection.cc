@@ -35,8 +35,8 @@ namespace sylar {
             do {
                 int len = read(data + offset, buff_size - offset);
                 if (len <= 0) {
+                    //std::cout << "------------------>errno: " << errno << " strerrno: " << strerror(errno) << std::endl;
                     close();
-                    //std::cout << "errno: " << errno << " strerrno: " << strerror(errno) << std::endl;
                     return nullptr;
                 }
                 len += offset;

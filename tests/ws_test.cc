@@ -17,12 +17,24 @@ void test_ws_conn() {
 
     //std::map<std::string, std::string> headers;
     //headers.insert(std::make_pair());
-    auto p = sylar::http::WSConnection::Create("http://127.0.0.1:9527/1.c", 300);
-    //return std::make_pair(std::make_shared<HttpResult>((int)HttpResult::Error::OK, resp, "ok"), conn);
+    //auto p = sylar::http::WSConnection::Create("http://127.0.0.1:9527", 300);
+    auto p = sylar::http::WSConnection::Create("http://127.0.0.1:9527", 3000);
     SYLAR_LOG_DEBUG(g_logger) << p.first->toString();
+    if (p.second == nullptr) {
+        SYLAR_LOG_DEBUG(g_logger) << "create uri failed";
+        return;
+    }
+    // 先有一次http的recvResponse 再有recvMessage
+
+    sylar::http::WSConnection::ptr conn = p.second;
+    sylar::http::WSFrameMessage::ptr msg;
+    while( (msg = conn->recvMessage()) != nullptr) { // websocked一直维护着长连接 直到我读到10后仍while继续读 就超时
+        SYLAR_LOG_DEBUG(g_logger) << "recv: " << msg->getData();
+    }
 }
 
 // websocketd --address=0.0.0.0 --port=9527 --dir=/root
+// websocketd --address=0.0.0.0 --port=9527  ./count.sh
 
 int main() {
     sylar::IOManager iom(1, false, "io");

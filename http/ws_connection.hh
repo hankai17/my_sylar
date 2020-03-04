@@ -21,15 +21,13 @@ namespace sylar {
                 PING_FRAME  = 0x9,
                 PONG_FRAME  = 0xA
             };
-
-            bool fin: 1;
-            bool rsv1: 1;
-            bool rsv2: 1;
-            bool rsv3: 1;
             uint32_t opcode: 4;
-            bool mask: 1;
+            bool rsv3: 1;
+            bool rsv2: 1;
+            bool rsv1: 1;
+            bool fin: 1;
             uint32_t payload: 7;
-
+            bool mask: 1;
             std::string toString() const;
         };
 #pragma pack()

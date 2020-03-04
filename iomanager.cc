@@ -48,9 +48,9 @@ namespace sylar {
       events = (Event)(events & ~event); // 同时监听读写 但只来了写 那么events要置为读
       EventContext& ctx = getContext(event);
       if (ctx.cb) {
-          ctx.scheduler->schedule(&ctx.cb);
+          ctx.scheduler->schedule(&ctx.cb); // It's addr!
       } else {
-          ctx.scheduler->schedule(&ctx.fiber);
+          ctx.scheduler->schedule(&ctx.fiber); // It's ptr's addr!
       }
       ctx.scheduler = nullptr;
       return;

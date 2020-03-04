@@ -267,7 +267,7 @@ namespace sylar {
         }
 
         WSFrameMessage::ptr WSConnection::recvMessage() {
-            return WSRecvMessage(this, true);
+            return WSRecvMessage(this, false);
         }
 
         int32_t WSConnection::sendMessage(WSFrameMessage::ptr msg, bool fin) {
