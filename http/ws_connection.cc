@@ -53,7 +53,7 @@ namespace sylar {
                 } else if (frameHead.opcode == WSFrameHead::CONTINUE
                     || frameHead.opcode == WSFrameHead::TEXT_FRAME
                     || frameHead.opcode == WSFrameHead::BIN_FRAME) {
-                    if (client && !frameHead.mask) {
+                    if (!client && !frameHead.mask) {
                         SYLAR_LOG_DEBUG(g_logger) << "client frame no mask";
                         break;
                     }
@@ -267,7 +267,7 @@ namespace sylar {
         }
 
         WSFrameMessage::ptr WSConnection::recvMessage() {
-            return WSRecvMessage(this, false);
+            return WSRecvMessage(this, true);
         }
 
         int32_t WSConnection::sendMessage(WSFrameMessage::ptr msg, bool fin) {
