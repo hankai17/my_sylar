@@ -8,6 +8,8 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <openssl/err.h>
+#include <openssl/ssl.h>
 
 namespace sylar {
     class Socket : public std::enable_shared_from_this<Socket>, Nocopyable {
@@ -36,7 +38,7 @@ namespace sylar {
         static Socket::ptr CreateUnixUDPSocket();
 
         Socket(int family, int type, int protocol = 0);
-        ~Socket();
+        virtual ~Socket();
 
         int64_t getSendTimeout();
         void setSendTimeout(uint64_t v);
@@ -56,21 +58,21 @@ namespace sylar {
             return setOption(level, option, &result, sizeof(T));
         }
 
-        Socket::ptr accept();
-        bool bind(const Address::ptr addr); // Why not refer
-        bool connect(const Address::ptr addr, uint64_t timeout_ms = -1);
-        bool listen(int backlog = SOMAXCONN);
-        bool close();
+        virtual Socket::ptr accept();
+        virtual bool bind(const Address::ptr addr); // Why not refer
+        virtual bool connect(const Address::ptr addr, uint64_t timeout_ms = -1);
+        virtual bool listen(int backlog = SOMAXCONN);
+        virtual bool close();
 
-        int send(const void* buffer, size_t length, int flags = 0);
-        int send(iovec* buffers, size_t length, int flags = 0);
-        int sendTo(const void* buffer, size_t length, const Address::ptr to, int flags = 0);
-        int sendTo(iovec* buffers, size_t length, const Address::ptr to, int flags = 0);
+        virtual int send(const void* buffer, size_t length, int flags = 0);
+        virtual int send(iovec* buffers, size_t length, int flags = 0);
+        virtual int sendTo(const void* buffer, size_t length, const Address::ptr to, int flags = 0);
+        virtual int sendTo(iovec* buffers, size_t length, const Address::ptr to, int flags = 0);
 
-        int recv(void* buffer, size_t length, int flags = 0);
-        int recv(iovec* buffers, size_t length, int flags = 0);
-        int recvFrom(void* buffer, size_t length, Address::ptr from, int flags = 0);
-        int recvFrom(iovec* buffers, size_t length, Address::ptr from, int flags = 0);
+        virtual int recv(void* buffer, size_t length, int flags = 0);
+        virtual int recv(iovec* buffers, size_t length, int flags = 0);
+        virtual int recvFrom(void* buffer, size_t length, Address::ptr from, int flags = 0);
+        virtual int recvFrom(iovec* buffers, size_t length, Address::ptr from, int flags = 0);
 
         Address::ptr getRemoteAddress();
         Address::ptr getLocalAddress();
@@ -83,20 +85,20 @@ namespace sylar {
         int getError();
         int getSocket() const { return m_sock; }
 
-        std::ostream& dump(std::ostream& os) const;
-        std::string toString() const;
+        virtual std::ostream& dump(std::ostream& os) const;
+        virtual std::string toString() const;
 
         bool cancelRead();
         bool cancelWrite();
         bool cancelAccept();
         bool cancelAll();
 
-    private:
+    protected:
         void initSock();
         void newSock();
-        bool init(int sock);
+        virtual bool init(int sock);
 
-    private:
+    protected:
         int             m_sock;
         int             m_family;
         int             m_type;
@@ -105,6 +107,40 @@ namespace sylar {
         Address::ptr    m_localAddress;
         Address::ptr    m_remoteAddress;
 
+    };
+
+    class SSLSocket : public Socket {
+    public:
+        typedef std::shared_ptr<SSLSocket> ptr;
+        static SSLSocket::ptr CreateTCP(sylar::Address::ptr addr);
+        static SSLSocket::ptr CreateTCPSocket();
+        static SSLSocket::ptr CreateTCPSocket6();
+
+        SSLSocket(int family, int type, int protocol = 0);
+        virtual Socket::ptr accept() override;
+        virtual bool bind(const Address::ptr addr) override; // Why not refer
+        virtual bool connect(const Address::ptr addr, uint64_t timeout_ms = -1) override;
+        virtual bool listen(int backlog = SOMAXCONN) override;
+        virtual bool close() override;
+
+        virtual int send(const void* buffer, size_t length, int flags = 0) override;
+        virtual int send(iovec* buffers, size_t length, int flags = 0) override;
+        virtual int sendTo(const void* buffer, size_t length, const Address::ptr to, int flags = 0) override;
+        virtual int sendTo(iovec* buffers, size_t length, const Address::ptr to, int flags = 0) override;
+
+        virtual int recv(void* buffer, size_t length, int flags = 0) override;
+        virtual int recv(iovec* buffers, size_t length, int flags = 0) override;
+        virtual int recvFrom(void* buffer, size_t length, Address::ptr from, int flags = 0) override;
+        virtual int recvFrom(iovec* buffers, size_t length, Address::ptr from, int flags = 0) override;
+
+        bool loadCertificates(const std::string& cert_file, const std::string& key_file);
+        virtual std::ostream& dump(std::ostream& os) const override;
+
+    protected:
+        virtual bool init(int sock) override;
+    private:
+        std::shared_ptr<SSL_CTX>        m_ctx;
+        std::shared_ptr<SSL>            m_ssl;
     };
 }
 #endif

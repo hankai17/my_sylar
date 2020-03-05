@@ -97,7 +97,7 @@ namespace sylar {
                     SYLAR_ASSERT(it->fiber || it->cb);
 
                     ft = *it;
-                    m_fibers.erase(it);
+                    m_fibers.erase(it++);
                     ++m_activeFiberCount;
                     break;
                 }

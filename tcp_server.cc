@@ -26,7 +26,7 @@ namespace sylar {
     }
 
     bool TcpServer::bind(const std::vector<Address::ptr> &addrs,
-                         std::vector<Address::ptr> &fails) {
+                         std::vector<Address::ptr> &fails, bool ssl) {
         for (const auto& i : addrs) {
             Socket::ptr sock = Socket::CreateTCP(i);
             if (!sock->bind(i)) {
@@ -56,11 +56,11 @@ namespace sylar {
         return true;
     }
 
-    bool TcpServer::bind(Address::ptr addr) {
+    bool TcpServer::bind(Address::ptr addr, bool ssl) {
         std::vector<Address::ptr> addrs;
         std::vector<Address::ptr> fails;
         addrs.push_back(addr);
-        return bind(addrs, fails);
+        return bind(addrs, fails, ssl);
     }
 
     void TcpServer::startAccept(Socket::ptr sock) {

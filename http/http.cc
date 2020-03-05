@@ -16,7 +16,8 @@ namespace sylar {
         : m_method(HttpMethod::GET),
         m_version(version),
         m_close(close),
-        m_path("/") {
+        m_path("/"),
+        m_isWebsocket(false) {
         }
 
         std::string HttpRequest::getPara(const std::string& key, const std::string& def) const {
@@ -197,7 +198,8 @@ namespace sylar {
         HttpResponse::HttpResponse(uint8_t version, bool close)
         : m_status(HttpStatus::OK),
         m_version(version),
-        m_close(close) {
+        m_close(close),
+        m_isWebsocket(false) {
         }
 
         std::string HttpResponse::getHeader(const std::string& key, const std::string& def) const {
@@ -231,12 +233,14 @@ namespace sylar {
             << ((m_reason.empty()) ? HttpStatusToString(m_status) : m_reason) << "\r\n";
 
             for (const auto& i : m_headers) {
-                if (strcasecmp(i.first.c_str(), "connection") == 0) {
+                if (!m_isWebsocket && strcasecmp(i.first.c_str(), "connection") == 0) {
                     continue;
                 }
                 os << i.first << ": " << i.second << "\r\n";
             }
-            os << "Connection: " << ((m_close) ? "close" : "keep-alive") << "\r\n";
+            if (!m_isWebsocket) {
+                os << "Connection: " << ((m_close) ? "close" : "keep-alive") << "\r\n";
+            }
             if (!m_body.empty()) {
                 os << "Content-Length: " << m_body.size() << "\r\n\r\n";
                 //os << m_body;
