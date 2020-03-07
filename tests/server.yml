@@ -1,0 +1,9 @@
+http_servers:
+  - address: ["0.0.0.0:9527", "0.0.0.0:1936"]
+    keepalive: 1
+    timeout: 90
+    name: my_sylar/0.0
+  - address: ["eth3:9526"]
+    keepalive: 1
+    timeout: 90
+    name: my_sylar/0.0

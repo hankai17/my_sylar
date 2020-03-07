@@ -219,7 +219,7 @@ namespace sylar {
             :m_filename(filename) {
         reopen();
     }
-    int g_count = 0;
+
     void FileLogAppender::log(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) {
         if (level >= m_level) {
             uint64_t now = time(0);
@@ -228,8 +228,6 @@ namespace sylar {
                 m_lastTime = now;
             }
             MutexType::Lock lock(m_mutex);
-            g_count++;
-            std::cout<<"g_count: "<<g_count<<std::endl;
             m_filestream << m_formatter->format(logger, level, event);
             m_filestream.flush();
         }
@@ -254,6 +252,7 @@ namespace sylar {
     }
 
     void Logger::addAppender(LogAppender::ptr appender) {
+        MutexType::Lock lock(m_mutex);
         if (!appender->getFormatter()) {
             appender->setFormatter(m_formatter);
             appender->setLevel(m_level);
@@ -262,6 +261,7 @@ namespace sylar {
     }
 
     void Logger::delAppender(LogAppender::ptr appender) {
+        MutexType::Lock lock(m_mutex);
         for (auto it = m_appenders.begin(); it != m_appenders.end(); it++) {
             if (*it == appender) {
                 m_appenders.erase(it);

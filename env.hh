@@ -28,6 +28,7 @@ namespace sylar {
         bool setEnv(const std::string& key, const std::string& value);
         std::string getEnv(const std::string& key, const std::string& default_value = "");
         static Env* getEnvr() { return env; };
+        std::string getAbsolutPath(const std::string& path) const;
 
     private:
         class Garbo {

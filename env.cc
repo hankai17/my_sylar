@@ -17,13 +17,13 @@ namespace sylar {
         char path[1024] = {0};
         sprintf(link, "/proc/%d/exe", getpid()); // exe是个软链
         readlink(link, path, sizeof(path));
-        m_exe = path;
+        m_exe = path; // /root/CLionProjects/my_sylar/cmake-build-debug/env_test"
         /*
                 readlink /proc/3158/exe
                 /root/file/clion-2018.3.4/jre64/bin/java
         */
         auto pos = m_exe.find_last_of("/");
-        m_cwd = m_exe.substr(0, pos) + "/"; // 指向当前进程运行目录的一个符号链接
+        m_cwd = m_exe.substr(0, pos) + "/"; // /root/CLionProjects/my_sylar/cmake-build-debug/"
         m_program = argv[0];
         const char* now_key = nullptr;
         for (int i = 1; i < argc; i++) {
@@ -115,5 +115,15 @@ namespace sylar {
             return default_value;
         }
         return v;
+    }
+
+    std::string Env::getAbsolutPath(const std::string& path) const {
+        if (path.empty()) {
+            return "/";
+        }
+        if (path[0] == '/') {
+            return path;
+        }
+        return m_cwd + path;
     }
 }

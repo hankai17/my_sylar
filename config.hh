@@ -416,6 +416,7 @@ namespace sylar {
         }
 
         static void loadFromYaml(const YAML::Node& root);
+        static void loadFromConfDir(const std::string& path);
         static ConfigVarBase::ptr LookupBase(const std::string& name);
 
     private:

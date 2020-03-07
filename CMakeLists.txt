@@ -71,7 +71,7 @@ target_link_libraries(log_test ${LIBS})
 
 add_executable(config_test tests/config_test.cc)
 add_dependencies(config_test ${PROJECT_NAME})
-target_link_libraries(config_test ${PROJECT_NAME} ${YAMLCPP} ${THREAD})
+target_link_libraries(config_test ${LIBS})
 
 add_executable(thread_test tests/thread_test.cc)
 add_dependencies(thread_test ${PROJECT_NAME})

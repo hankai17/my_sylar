@@ -1,5 +1,6 @@
 #include "config.hh"
 #include "log.hh"
+#include "env.hh"
 #include <yaml-cpp/yaml.h>
 #include <vector>
 #include <iostream>
@@ -210,6 +211,10 @@ void test_log() {
     }
 }
 
+void test_loadconfig() {
+    sylar::Config::loadFromConfDir("conf");
+}
+
 int main(int argc, char** argv) {
     //sylar::Logger::ptr logger = sylar::Logger::getLoggerInstance();
     //logger->addAppender(sylar::LogAppender::ptr(new sylar::StdoutLogAppender)); // That should be replace by a class & this class communicate with config
@@ -218,7 +223,12 @@ int main(int argc, char** argv) {
     //test_config();
     //test_config1();
     //test_class();
-    test_log();
+    //test_log();
+
+    sylar::Env::getEnvr()->init(argc, argv);
+    test_loadconfig();
+    sleep(10);
+    test_loadconfig();
     return 0;
 }
 

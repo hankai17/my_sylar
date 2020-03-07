@@ -1,9 +1,16 @@
 #include "config.hh"
+#include "env.hh"
 #include <list>
+#include <map>
+#include <vector>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 namespace sylar {
 
     //Config::ConfigVarMap Config::m_config; //!!!
+    sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
 
     ConfigVarBase::ptr Config::LookupBase(const std::string &name) { // It just a simple judge
         auto it = Config::getMap().find(name);
@@ -54,6 +61,35 @@ namespace sylar {
         }
     }
 
+    static std::map<std::string, uint64_t> s_file2modifytime;
+    static sylar::Mutex s_mutex;
+
+    void Config::loadFromConfDir(const std::string& path) { // "conf"
+        std::string absolute_path = sylar::Env::getEnvr()->getAbsolutPath(path);
+        std::vector<std::string> files; // out such as /usr/loca/my_sylar/conf/1.yaml
+        FSUtil::ListAllFile(files, absolute_path, ".yml");
+        std::cout<< "absolute_path: " << absolute_path << "  files.size: " << files.size() << std::endl;
+
+        for (const auto& i : files) {
+            {
+                struct stat st;
+                lstat(i.c_str(), &st);
+                sylar::Mutex::Lock lock(s_mutex);
+                if (s_file2modifytime[i] == (uint64_t)st.st_mtime) {
+                    continue;
+                }
+                s_file2modifytime[i] = st.st_mtime;
+            }
+            try {
+                YAML::Node root = YAML::LoadFile(i);
+                loadFromYaml(root);
+                SYLAR_LOG_DEBUG(g_logger) << "LoadFile: " << i << " success";
+            } catch (...) {
+                SYLAR_LOG_DEBUG(g_logger) << "LoadFile: " << i << " failed";
+            }
+        }
+    }
+
     sylar::ConfigVar<std::vector<sylar::LoggerConfig> >::ptr g_log_config =
             sylar::Config::Lookup("logs", std::vector<sylar::LoggerConfig>{LoggerConfig("root")}, "sylar log");
     //sylar::ConfigVar<uint32_t>::ptr g_fiber_stack_size =
@@ -86,7 +122,7 @@ namespace sylar {
 
         LogConfigIniter() {
             g_log_config->addListener("logs", [this](const std::vector<sylar::LoggerConfig> &old_val, // Must have this
-                                                     const std::vector<sylar::LoggerConfig> &new_val) {
+                                                     const std::vector<sylar::LoggerConfig> &new_val) { // Is this thread safe ?
                 SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << "logs on_change_callback";
                 for (const auto &i : new_val) {
                     if (is_in_(i, old_val)) {
