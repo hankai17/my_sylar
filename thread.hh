@@ -9,6 +9,9 @@
 #include <semaphore.h>
 #include <bits/pthreadtypes.h>
 #include <atomic>
+#include <list>
+#include "nocopy.hh"
+#include "fiber.hh"
 
 namespace sylar {
     class Semaphore {
@@ -263,6 +266,25 @@ namespace sylar {
         std::string             m_name;
         pthread_t               m_thread = 0;
         Semaphore               m_semphore;
+    };
+
+    class Scheduler;
+    class FiberSemaphore : public Nocopyable {
+    public:
+        typedef std::shared_ptr<FiberSemaphore> ptr;
+        typedef SpinLock MutexType;
+        FiberSemaphore(size_t initalConcurrency = 0);
+        ~FiberSemaphore();
+        bool tryWait();
+        void wait();
+        void notify();
+        size_t getConcurrency() const { return m_concurrency; }
+        void reset() { m_concurrency = 0; }
+
+    private:
+        MutexType       m_mutex;
+        size_t          m_concurrency;
+        std::list<std::pair<Scheduler*, Fiber::ptr> >  m_waiters;
     };
 }
 
