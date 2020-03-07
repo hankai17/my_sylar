@@ -50,11 +50,18 @@ void test_pool() {
     }, true);
 }
 
+void test_https() {
+    auto r = sylar::http::HttpConnection::DoGet("https://www.baidu.com", 300);
+    SYLAR_LOG_DEBUG(g_logger) << "result: " << r->result
+    << " response: " << (r->response ? r->toString() : "");
+}
+
 int main() {
     sylar::IOManager iom(1, false, "io");
     //iom.schedule(test);
     //iom.schedule(test_chunk);
-    iom.schedule(test_pool);
+    //iom.schedule(test_pool);
+    iom.schedule(test_https);
     iom.stop();
     return 0;
 }

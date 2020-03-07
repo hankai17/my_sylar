@@ -28,7 +28,7 @@ namespace sylar {
     bool TcpServer::bind(const std::vector<Address::ptr> &addrs,
                          std::vector<Address::ptr> &fails, bool ssl) {
         for (const auto& i : addrs) {
-            Socket::ptr sock = Socket::CreateTCP(i);
+            Socket::ptr sock = ssl ? SSLSocket::CreateTCP(i) :Socket::CreateTCP(i);
             if (!sock->bind(i)) {
                 SYLAR_LOG_ERROR(g_logger) << "bind failed " << i->toString()
                 << " errno: " << errno
@@ -104,6 +104,18 @@ namespace sylar {
 
     void TcpServer::handleClient(Socket::ptr client) {
         SYLAR_LOG_DEBUG(g_logger) << "handleClient: " << client->toString();
+    }
+
+    bool TcpServer::loadCertificates(const std::string& cert_file, const std::string& key_file) {
+        for (const auto& i : m_socks) {
+            auto ssl_socket = std::dynamic_pointer_cast<SSLSocket>(i);
+            if (ssl_socket) {
+                if (!ssl_socket->loadCertificates(cert_file, key_file)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
 }

@@ -28,6 +28,7 @@ public:
     std::string getName() const { return m_name; }
     void setName(const std::string& v) { m_name= v; }
     bool isStop() { return m_isStop; }
+    bool loadCertificates(const std::string& cert_file, const std::string& key_file);
 
 protected:
     virtual void handleClient(Socket::ptr client); // 因为是protect所以外部不能用  这里用protect的目的是为了让继承类调这两个函数的
