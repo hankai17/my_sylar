@@ -61,6 +61,7 @@ set(LIB_SRC
         hash.cc
         http/ws_connection.cc
         http/ws_server.cc
+        worker.cc
         )
 
 add_library(${PROJECT_NAME} SHARED ${LIB_SRC})

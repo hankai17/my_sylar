@@ -11,6 +11,7 @@
 #include <string>
 #include <iomanip>
 #include <memory>
+#include <boost/lexical_cast.hpp>
 
 namespace sylar {
     pid_t GetThreadId();
@@ -37,6 +38,32 @@ namespace sylar {
         static bool Realpath(const std::string& path, std::string& rpath);
         static bool IsRunningPidfile(const std::string& pidfile);
     };
+
+    template <typename Map, typename K, typename V>
+    V GetParaValue(const Map& m, const K& k, const V& def = V()) {
+        auto it = m.find(k);
+        if (it == m.end()) {
+            return def;
+        }
+        try {
+            return boost::lexical_cast<V>(it->second);
+        } catch (...) {
+        }
+        return def;
+    }
+
+    template <typename Map, typename K, typename V>
+    bool GetParaValue(const Map& m, const K& k, V& v) {
+        auto it = m.find(k);
+        if (it == m.end()) {
+            return false;
+        }
+        try {
+            return boost::lexical_cast<V>(it->second);
+        } catch (...) {
+        }
+        return false;
+    }
 }
 
 #endif

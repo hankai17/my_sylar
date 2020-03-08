@@ -70,6 +70,32 @@ namespace sylar {
         }
         */
     }
+    void Scheduler::switchTo(int thread) {
+        SYLAR_ASSERT(Scheduler::GetThis());
+        if (Scheduler::GetThis() == this) {
+            if (thread == -1 || thread == sylar::GetThreadId()) {
+                return;
+            }
+        }
+        schedule(Fiber::GetThis(), thread);
+        Fiber::YeildToHold();
+    }
+
+    std::ostream& Scheduler::dump(std::ostream& os) {
+        os << "[Scheduler name: " << m_name
+        << " size: " << m_threadCounts
+        << " active_count: " << m_activeFiberCount
+        << " idle_count: "
+        << " stopping: " << m_stopping
+        << "]" << std::endl;
+        for (size_t i = 0; i < m_threadCounts; i++) {
+            if (i) {
+                os << ", ";
+            }
+            os << m_threadIds[i];
+        }
+        return os;
+    }
 
     void Scheduler::run() {
         SYLAR_LOG_INFO(g_logger) << "scheduler run";

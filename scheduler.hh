@@ -55,6 +55,8 @@ namespace sylar {
                 tickle();
             }
         }
+        void switchTo(int thread = -1);
+        std::ostream& dump(std::ostream& os);
 
     protected:
         virtual void tickle();
