@@ -2,9 +2,32 @@
 #include "config.hh"
 #include "util.hh"
 
+#include <map>
+#include <yaml-cpp/yaml.h>
+#include <string>
+
 namespace sylar {
     static sylar::ConfigVar<std::map<std::string, std::map<std::string, std::string> > >::ptr g_worker_config =
             sylar::Config::Lookup("workers", std::map<std::string, std::map<std::string, std::string> >(), "worker config");
+
+    /*
+    template <>
+    class Lexicalcast<std::string, std::map<std::string, std::map<std::string, std::string> > > {
+    };
+     */
+    // This is base type so dont rewrite it again
+
+    struct WorkerConfigIniter {
+        WorkerConfigIniter() {
+            g_worker_config->addListener("workers", [](const std::map<std::string, std::map<std::string, std::string> >& old_val,
+                    const std::map<std::string, std::map<std::string, std::string> >& new_val) {
+                const_cast<
+                    std::map<std::string, std::map<std::string, std::string> >&
+                    > (old_val) = new_val;
+            });
+        }
+    };
+    static WorkerConfigIniter __worker_config_init;
 
     Worker::Worker(uint32_t bath_size, sylar::Scheduler* s)
     : m_batchSize(bath_size),
@@ -35,6 +58,8 @@ namespace sylar {
         m_sem.notify();
     }
 
+    WorkerManager* WorkerManager::m_workermgr(new WorkerManager);
+
     WorkerManager::WorkerManager()
     : m_stop(false) {
     }
@@ -57,6 +82,9 @@ namespace sylar {
     IOManager::ptr WorkerManager::getAsIOManager(const std::string& name) {
         return std::dynamic_pointer_cast<IOManager>(get(name));
     }
+    // workers:
+    //    - io:
+    //      thread_num: 4
 
     bool WorkerManager::init() {
         auto workers = g_worker_config->getValue();

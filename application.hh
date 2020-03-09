@@ -1,13 +1,14 @@
-#ifndef __ENV_HH__
-#define __ENV_HH__
+#ifndef __APPLICATION_HH__
+#define __APPLICATION_HH__
 
 #include <memory>
-#include <string>
-#include <map>
 #include <vector>
+#include "iomanager.hh"
+#include "http/http_server.hh"
 #include "thread.hh"
 
 namespace sylar {
+
     class Env {
     public:
         typedef std::shared_ptr<Env> ptr;
@@ -48,6 +49,25 @@ namespace sylar {
         std::string         m_program;
         std::map<std::string, std::string> m_args;
         std::vector<std::pair<std::string, std::string> > m_helps;
+    };
+
+    class Application {
+    public:
+        typedef std::shared_ptr<Application> ptr;
+        static Application* GetInstance () { return s_instance; }
+        Application();
+        bool init(int argc, char** argv);
+        bool run();
+
+    private:
+        int main(int argc, char** argv);
+        int run_fiber();
+    private:
+        int                 m_argc = 0;
+        char**              m_argv = nullptr;
+        IOManager::ptr      m_mainIOmanager;
+        static Application* s_instance;
+        std::vector<sylar::http::HttpServer::ptr>  m_httpservers;
     };
 }
 

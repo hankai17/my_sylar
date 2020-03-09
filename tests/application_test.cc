@@ -1,5 +1,5 @@
 #include "log.hh"
-#include "env.hh"
+#include "application.hh"
 #include <unistd.h>
 #include <iostream>
 #include <fstream>
@@ -20,14 +20,14 @@ struct A {
     }
 };
 
-A a;
+//A a;
 
-int main(int argc, char** argv) {
+void test_env(int argc, char** argv) {
     sylar::Env::getEnvr()->addHelp("s", "start exe");
     sylar::Env::getEnvr()->addHelp("t", "stop exe");
     if (!sylar::Env::getEnvr()->init(argc, argv)) {
         sylar::Env::getEnvr()->printHelp();
-        return 0;
+        return;
     }
     sylar::Env::getEnvr()->printHelp();
     SYLAR_LOG_DEBUG(g_logger) << "exe: " << sylar::Env::getEnvr()->getExe();
@@ -36,5 +36,14 @@ int main(int argc, char** argv) {
     SYLAR_LOG_DEBUG(g_logger) << "get test: " << sylar::Env::getEnvr()->getEnv("test", "XXX");
     SYLAR_LOG_DEBUG(g_logger) << "set test NXX: " << sylar::Env::getEnvr()->setEnv("test", "NXX");
     SYLAR_LOG_DEBUG(g_logger) << "get test: " << sylar::Env::getEnvr()->getEnv("test", "XXX");
+}
+
+int main(int argc, char** argv) {
+    //test_env(argc, argv);
+
+    sylar::Application* app = sylar::Application::GetInstance();
+    app->init(argc, argv);
+    app->run();
+
     return 0;
 }

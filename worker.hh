@@ -35,7 +35,6 @@ namespace sylar {
 
     class WorkerManager {
     public:
-        WorkerManager();
         void add(Scheduler::ptr s);
         Scheduler::ptr get(const std::string& name);
         IOManager::ptr getAsIOManager(const std::string& name);
@@ -69,10 +68,14 @@ namespace sylar {
         bool isStoped() const { return m_stop; }
         std::ostream& dump(std::ostream& os);
         uint32_t getCount();
+        static WorkerManager* GetWorkMgr() { return m_workermgr; }
 
+    private:
+        WorkerManager();
     private:
         bool        m_stop;
         std::map<std::string, std::vector<Scheduler::ptr> > m_datas;
+        static WorkerManager* m_workermgr;
 
     };
 

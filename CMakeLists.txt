@@ -57,11 +57,11 @@ set(LIB_SRC
         http/http_connection.cc
         uri.cc
         daemon.cc
-        env.cc
         hash.cc
         http/ws_connection.cc
         http/ws_server.cc
         worker.cc
+        application.cc
         )
 
 add_library(${PROJECT_NAME} SHARED ${LIB_SRC})
@@ -162,9 +162,9 @@ add_executable(daemon_test tests/daemon_test.cc)
 add_dependencies(daemon_test ${PROJECT_NAME})
 target_link_libraries(daemon_test ${LIBS})
 
-add_executable(env_test tests/env_test.cc)
-add_dependencies(env_test ${PROJECT_NAME})
-target_link_libraries(env_test ${LIBS})
+add_executable(application_test tests/application_test.cc)
+add_dependencies(application_test ${PROJECT_NAME})
+target_link_libraries(application_test ${LIBS})
 
 add_executable(ws_test tests/ws_test.cc)
 add_dependencies(ws_test ${PROJECT_NAME})
