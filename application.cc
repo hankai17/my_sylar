@@ -166,7 +166,17 @@ namespace sylar {
     static sylar::ConfigVar<std::vector<HttpServerConf> >::ptr g_http_server =
             sylar::Config::Lookup("http_servers", std::vector<HttpServerConf> {}, "http server config");
 
-    //struct HttpServerConfigIniter {} // TODO
+    struct HttpServerConfigIniter {
+        HttpServerConfigIniter() {
+            g_http_server->addListener("http_servers", [](const std::vector<HttpServerConf>& old_val,
+                    const std::vector<HttpServerConf>& new_val) {
+                const_cast<
+                    std::vector<HttpServerConf>&
+                > (old_val) = new_val;
+            });
+        }
+    };
+    static HttpServerConfigIniter __httpserver_config_init;
     /*
     http_servers:
     - address: ["0.0.0.0:8090", "127.0.0.1:8091", "/tmp/test.sock"]
@@ -191,13 +201,13 @@ namespace sylar {
             YAML::Node node = YAML::Load(v);
             HttpServerConf conf;
             conf.keepalive = node["keepalive"].as<int>(conf.keepalive);
-            conf.timeout = node["keepalive"].as<int>(conf.timeout);
-            conf.ssl = node["keepalive"].as<int>(conf.ssl);
+            conf.timeout = node["timeout"].as<int>(conf.timeout);
+            conf.ssl = node["ssl"].as<int>(conf.ssl);
             conf.name = node["name"].as<std::string>(conf.name);
-            conf.cert_file = node["name"].as<std::string>(conf.cert_file);
-            conf.key_file = node["name"].as<std::string>(conf.key_file);
-            conf.accept_worker = node["name"].as<std::string>(conf.accept_worker);
-            conf.io_worker = node["name"].as<std::string>(conf.io_worker);
+            conf.cert_file = node["cert_file"].as<std::string>(conf.cert_file);
+            conf.key_file = node["key_file"].as<std::string>(conf.key_file);
+            conf.accept_worker = node["accept_worker"].as<std::string>(conf.accept_worker);
+            conf.io_worker = node["io_worker"].as<std::string>(conf.io_worker);
             if (node["addresses"].IsDefined()) {
                 for (const auto& i : node["addresses"]) {
                     conf.addresses.push_back(i.as<std::string>());
@@ -320,7 +330,7 @@ namespace sylar {
         sylar::WorkerManager::GetWorkMgr()->init();
         auto http_confs = g_http_server->getValue();
         for (const auto& i : http_confs) {
-            SYLAR_LOG_DEBUG(g_logger) << Lexicalcast<HttpServerConf, std::string>()(i);
+            SYLAR_LOG_ERROR(g_logger) << Lexicalcast<HttpServerConf, std::string>()(i);
             std::vector<Address::ptr> address;
             for (const auto& j : i.addresses) {
                 size_t pos = j.find(":");
