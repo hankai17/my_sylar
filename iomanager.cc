@@ -324,7 +324,7 @@ namespace sylar {
                 cbs.clear();
             }
 
-            SYLAR_LOG_ERROR(g_logger) << "epoll_ctl ret: " << ret;
+            SYLAR_LOG_DEBUG(g_logger) << "epoll_ctl ret: " << ret;
             for (int i = 0; i < ret; i++) {
                 epoll_event& event = events[i];
 

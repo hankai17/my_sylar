@@ -123,7 +123,7 @@ namespace sylar {
         LogConfigIniter() {
             g_log_config->addListener("logs", [this](const std::vector<sylar::LoggerConfig> &old_val, // Must have this
                                                      const std::vector<sylar::LoggerConfig> &new_val) { // Is this thread safe ?
-                SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << "logs on_change_callback";
+                //SYLAR_LOG_DEBUG(SYLAR_LOG_ROOT()) << "logs on_change_callback";
                 for (const auto &i : new_val) {
                     if (is_in_(i, old_val)) {
                         sylar::Logger::ptr logger = SYLAR_LOG_NAME(i.getLogName());
