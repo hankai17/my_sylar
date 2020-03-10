@@ -64,7 +64,7 @@ namespace sylar {
     static std::map<std::string, uint64_t> s_file2modifytime;
     static sylar::Mutex s_mutex;
 
-    void Config::loadFromConfDir(const std::string& path) { // "conf"
+    void Config::loadFromConfDir(const std::string& path, bool force) { // "conf"
         std::string absolute_path = sylar::Env::getEnvr()->getAbsolutPath(path);
         std::vector<std::string> files; // out such as /usr/loca/my_sylar/conf/1.yaml
         FSUtil::ListAllFile(files, absolute_path, ".yml");
@@ -75,7 +75,7 @@ namespace sylar {
                 struct stat st;
                 lstat(i.c_str(), &st);
                 sylar::Mutex::Lock lock(s_mutex);
-                if (s_file2modifytime[i] == (uint64_t)st.st_mtime) {
+                if (!force && s_file2modifytime[i] == (uint64_t)st.st_mtime) {
                     continue;
                 }
                 s_file2modifytime[i] = st.st_mtime;

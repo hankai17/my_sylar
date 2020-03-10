@@ -131,6 +131,10 @@ namespace sylar {
         return m_cwd + path;
     }
 
+    std::string Env::getConfPath() {
+        return getAbsolutPath(get("c", "conf"));
+    }
+
     static sylar::ConfigVar<std::string>::ptr g_server_work_path =
             sylar::Config::Lookup("server.work_path", std::string("/usr/local/my_sylar"), "server work path");
     static sylar::ConfigVar<std::string>::ptr g_server_pid_file =
