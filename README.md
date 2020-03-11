@@ -34,10 +34,11 @@
   - Centos6.9 64 bit + gcc7.1(最低gcc4.7)
   - [cmake 3.7.2](https://cmake.org/files/v3.7/cmake-3.7.2.tar.gz)
 - 编译安装
-
-  ```
   项目依赖[cmake 3.7.2](https://cmake.org/files/v3.7/cmake-3.7.2.tar.gz)
   [yaml解析](https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.3.tar.gz) 编译成动态库并安装
+
+  ```
+  
   git clone https://github.com/hankai17/my_sylar.git
   mkdir build && cd build
   cmake ..
