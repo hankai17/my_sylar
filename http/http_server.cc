@@ -1,6 +1,7 @@
 #include "http_server.hh"
 #include "http_parser.hh"
 #include "log.hh"
+#include "config.hh"
 #include <fnmatch.h>
 
 namespace sylar {
@@ -86,13 +87,15 @@ namespace sylar {
         : Servlet("NotFoundServlet") {
         }
 
+        class HttpServerConf;
+        extern sylar::ConfigVar<std::vector<HttpServerConf> >::ptr g_http_server; // TODO
         int32_t NotFoundServlet::handle(HttpRequest::ptr request, HttpResponse::ptr response,
                                         HttpSession::ptr session) {
             static const std::string& RSP_BODY = "<html><head><title>404 Not Found"
                                                  "</title></head><body><center><h1>404 Not Found</h1></center>"
                                                  "<hr><center>sylar/1.0.0</center></body></html>";
             response->setStatus(HttpStatus::NOT_FOUND);
-            response->setHeader("Server", "my_sylar/1.0.0");
+            response->setHeader("Server", "my_sylar");
             response->setHeader("Content-Type", "text/html");
             response->setBody(RSP_BODY);
             return 0;

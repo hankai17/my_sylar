@@ -68,7 +68,7 @@ namespace sylar {
         std::string absolute_path = sylar::Env::getEnvr()->getAbsolutPath(path);
         std::vector<std::string> files; // out such as /usr/loca/my_sylar/conf/1.yaml
         FSUtil::ListAllFile(files, absolute_path, ".yml");
-        std::cout<< "absolute_path: " << absolute_path << "  files.size: " << files.size() << std::endl;
+        //std::cout<< "absolute_path: " << absolute_path << "  files.size: " << files.size() << std::endl;
 
         for (const auto& i : files) {
             {

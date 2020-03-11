@@ -3,7 +3,7 @@ PROJECT(my_sylar)
 include(cmake/utils.cmake)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
-set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O0 -ggdb -g -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function")
+set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O0 -ggdb -g -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function -Wno-builtin-macro-redefined")
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 11)
 
@@ -60,6 +60,8 @@ set(LIB_SRC
         )
 
 add_library(${PROJECT_NAME} SHARED ${LIB_SRC})
+
+force_redefine_file_macro_for_sources(${PROJECT_NAME}) #__FILE__
 
 option(TEST "ON for complile test" OFF)
 if(TEST)

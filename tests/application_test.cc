@@ -42,8 +42,9 @@ int main(int argc, char** argv) {
     //test_env(argc, argv);
 
     sylar::Application* app = sylar::Application::GetInstance();
-    app->init(argc, argv);
+    if (!app->init(argc, argv)) {
+        return 0;
+    }
     app->run();
-
     return 0;
 }

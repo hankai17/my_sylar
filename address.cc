@@ -81,7 +81,7 @@ namespace sylar {
         int error = getaddrinfo(node.c_str(), service_port, &hints, &results);
         if (error) {
             SYLAR_LOG_ERROR(g_logger) << "Address::Lookup getaddrinfo(" << node.c_str()
-                                      << ", " << service_port << "...) err=" << error << " errno=" << errno << " " << gai_strerror(errno);
+                                      << ", " << service_port << "...) err=" << error << " errno=" << errno << " " << gai_strerror(error);
             return false;
         }
 
@@ -174,7 +174,7 @@ namespace sylar {
         int err = getaddrinfo(address, NULL, &hints, &results); // 都是阻塞的 默认解析IPV6和IPV4  如果设只解析IPV4速度则很快
         if (err) {
             SYLAR_LOG_ERROR(g_logger) << "IPAddress::Create(" << address
-                                      << ", " << port << ") err=" << err << " errno=" << errno << " " << strerror(errno);
+                                      << ", " << port << ") err=" << err << " errno=" << errno << " " << gai_strerror(err);
             return nullptr;
         }
 

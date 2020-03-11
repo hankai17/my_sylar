@@ -79,7 +79,7 @@ namespace sylar {
     std::string Env::get(const std::string& key, const std::string& default_value) {
         RWMutexType::ReadLock lock(m_mutex);
         auto it = m_args.find(key);
-        return it == m_args.end() ? default_value : it->second;
+        return (it == m_args.end() || it->second == "") ? default_value : it->second;
     }
 
     void Env::addHelp(const std::string& key, const std::string& desc) {
@@ -167,7 +167,7 @@ namespace sylar {
             addresses == conf.addresses;
         }
     };
-    static sylar::ConfigVar<std::vector<HttpServerConf> >::ptr g_http_server =
+    sylar::ConfigVar<std::vector<HttpServerConf> >::ptr g_http_server =
             sylar::Config::Lookup("http_servers", std::vector<HttpServerConf> {}, "http server config");
 
     struct HttpServerConfigIniter {
@@ -262,7 +262,7 @@ namespace sylar {
             return false;
         }
 
-        if (sylar::Env::getEnvr()->has("p")) {
+        if (sylar::Env::getEnvr()->has("h")) {
             sylar::Env::getEnvr()->printHelp();
             return false;
         }
@@ -334,7 +334,7 @@ namespace sylar {
         sylar::WorkerManager::GetWorkMgr()->init();
         auto http_confs = g_http_server->getValue();
         for (const auto& i : http_confs) {
-            SYLAR_LOG_ERROR(g_logger) << Lexicalcast<HttpServerConf, std::string>()(i);
+            SYLAR_LOG_DEBUG(g_logger) << Lexicalcast<HttpServerConf, std::string>()(i);
             std::vector<Address::ptr> address;
             for (const auto& j : i.addresses) {
                 size_t pos = j.find(":");
