@@ -6,6 +6,7 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O0 -ggdb -g -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function -Wno-builtin-macro-redefined")
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 11)
+enable_language(ASM)
 
 include_directories("./"
         "./tests"
@@ -57,6 +58,7 @@ set(LIB_SRC
         worker.cc
         application.cc
         module.cc
+        fcontext/fcontext.S
         )
 
 add_library(${PROJECT_NAME} SHARED ${LIB_SRC})

@@ -9,6 +9,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <signal.h>
 
 namespace sylar {
     //sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");

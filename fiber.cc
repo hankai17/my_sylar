@@ -55,9 +55,11 @@ namespace sylar {
         m_id = ++s_fiber_id;
         m_state = EXEC;
         SetThis(this);
+#if FIBER_CONTEXT_TYPE == FIBER_UCONTEXT
         if (getcontext(&m_ctx)) {
             SYLAR_ASSERT(false); // TODO sylar_assert2
         }
+#endif
         ++s_fiber_count;
         SYLAR_LOG_DEBUG(g_logger) << "Fiber::Fiber";
     }
@@ -69,6 +71,8 @@ namespace sylar {
         m_stacksize = stacksize ? stacksize :  g_fiber_stack_size->getValue();
 
         m_stack = StackAllocator::Alloc(m_stacksize);
+
+#if FIBER_CONTEXT_TYPE == FIBER_UCONTEXT
         if (getcontext(&m_ctx)) {
             SYLAR_ASSERT(false); // TODO sylar_assert2
         }
@@ -81,6 +85,13 @@ namespace sylar {
         } else {
             makecontext(&m_ctx, &Fiber::CallMainFunc, 0);
         }
+#elif FIBER_CONTEXT_TYPE == FIBER_FCONTEXT
+        if (!use_caller) {
+            m_ctx = make_fcontext((char*)m_stack + m_stacksize, m_stacksize, &Fiber::MainFunc);
+        } else {
+            m_ctx = make_fcontext((char*)m_stack + m_stacksize, m_stacksize, &Fiber::CallMainFunc);
+        }
+#endif
 
         SYLAR_LOG_DEBUG(g_logger) << "Fiber::Fiber id: " << m_id; // Not use s_fiber_id
     }
@@ -89,32 +100,48 @@ namespace sylar {
         SetThis(this);
         SYLAR_ASSERT(m_state != EXEC);
         m_state = EXEC;
+#if FIBER_CONTEXT_TYPE == FIBER_UCONTEXT
         if (swapcontext(&Scheduler::GetMainFiber()->m_ctx, &m_ctx)) {
             SYLAR_ASSERT(false);
         }
+#elif FIBER_CONTEXT_TYPE == FIBER_FCONTEXT
+        jump_fcontext(&Scheduler::GetMainFiber()->m_ctx, m_ctx, 0);
+#endif
     }
 
     void Fiber::swapOut() {
         SetThis(Scheduler::GetMainFiber());
+#if FIBER_CONTEXT_TYPE == FIBER_UCONTEXT
         if (swapcontext(&m_ctx, &Scheduler::GetMainFiber()->m_ctx)) {
                 SYLAR_ASSERT(false);
         }
+#elif FIBER_CONTEXT_TYPE == FIBER_FCONTEXT
+        jump_fcontext(&m_ctx, Scheduler::GetMainFiber()->m_ctx, 0);
+#endif
     }
 
     void Fiber::call() {
         SetThis(this);
         SYLAR_ASSERT(m_state != EXEC);
         m_state = EXEC;
+#if FIBER_CONTEXT_TYPE == FIBER_UCONTEXT
         if (swapcontext(&t_main_thread_fiber->m_ctx, &m_ctx)) {
             SYLAR_ASSERT(false);
         }
+#elif FIBER_CONTEXT_TYPE == FIBER_FCONTEXT
+        jump_fcontext(&t_main_thread_fiber->m_ctx, m_ctx, 0);
+#endif
     }
 
     void Fiber::back() {
         SetThis(t_main_thread_fiber.get());
+#if FIBER_CONTEXT_TYPE == FIBER_UCONTEXT
         if (swapcontext(&m_ctx, &t_main_thread_fiber->m_ctx)) {
             SYLAR_ASSERT(false);
         }
+#elif FIBER_CONTEXT_TYPE == FIBER_FCONTEXT
+        jump_fcontext(&m_ctx, t_main_thread_fiber->m_ctx, 0);
+#endif
     }
 
     void Fiber::YeildToReady() { // Why need this
@@ -153,6 +180,7 @@ namespace sylar {
                      || m_state == EXCEPT
                      || m_state == INIT);
         m_cb = cb;
+#if FIBER_CONTEXT_TYPE == FIBER_UCONTEXT
         if (getcontext(&m_ctx)) {
             SYLAR_ASSERT("getcontext");
         }
@@ -162,6 +190,9 @@ namespace sylar {
         m_ctx.uc_stack.ss_size = m_stacksize;
 
         makecontext(&m_ctx, &Fiber::MainFunc, 0);
+#elif FIBER_CONTEXT_TYPE == FIBER_FCONTEXT
+        m_ctx = make_fcontext((char*)m_stack + m_stacksize, m_stacksize, &Fiber::MainFunc);
+#endif
         m_state = INIT;
     }
 
@@ -169,7 +200,11 @@ namespace sylar {
         return s_fiber_count;
     }
 
+#if FIBER_CONTEXT_TYPE == FIBER_UCONTEXT
     void Fiber::MainFunc() {
+#elif FIBER_CONTEXT_TYPE == FIBER_FCONTEXT
+    void Fiber::MainFunc(intptr_t vp) {
+#endif
         Fiber::ptr cur = GetThis();
         SYLAR_ASSERT(cur);
         try {
@@ -196,7 +231,11 @@ namespace sylar {
         SYLAR_ASSERT(false);
     }
 
+#if FIBER_CONTEXT_TYPE == FIBER_UCONTEXT
     void Fiber::CallMainFunc() {
+#elif FIBER_CONTEXT_TYPE == FIBER_FCONTEXT
+    void Fiber::CallMainFunc(intptr_t vp) {
+#endif
         Fiber::ptr cur = GetThis();
         SYLAR_ASSERT(cur);
         try {
