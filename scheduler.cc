@@ -148,7 +148,7 @@ namespace sylar {
                 --m_activeFiberCount;
                 cb_fiber.reset();
             } else {
-                SYLAR_LOG_INFO(g_logger) << "idle fiber";
+                //std::cout << "idle fiber" << std::endl;
                 if (idle_fiber->getState() == Fiber::TERM) {
                     //std::cout<< "idle end, we should break and end the fiber_system. Otherwise it will swapout the mainfun end and core" << std::endl;
                     break;

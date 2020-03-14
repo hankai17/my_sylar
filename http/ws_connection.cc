@@ -57,7 +57,7 @@ namespace sylar {
                         SYLAR_LOG_DEBUG(g_logger) << "client frame no mask";
                         break;
                     }
-                    uint64_t length;
+                    uint64_t length = 0;
                     if (frameHead.payload < 125) {
                         length = frameHead.payload;
                     } else if (frameHead.payload == 126) {

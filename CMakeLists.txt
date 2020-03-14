@@ -3,7 +3,7 @@ PROJECT(my_sylar)
 include(cmake/utils.cmake)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
-set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O0 -ggdb -g -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function -Wno-builtin-macro-redefined")
+set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O3 -ggdb -g -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function -Wno-builtin-macro-redefined")
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 11)
 enable_language(ASM)
@@ -74,7 +74,7 @@ my_sylar_add_executable(fiber_test tests/fiber_test.cc ${PROJECT_NAME} "${LIBS}"
 my_sylar_add_executable(scheduler_test tests/scheduler_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(iomanager_test tests/iomanager_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(timer_test tests/timer_test.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(pingpong_test tests/pingpong_bench.cc ${PROJECT_NAME} "${LIBS}")
+#my_sylar_add_executable(pingpong_test tests/pingpong_bench.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(address_test tests/address_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(hook_test tests/hook_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(socket_test tests/socket_test.cc ${PROJECT_NAME} "${LIBS}")
@@ -92,9 +92,11 @@ my_sylar_add_executable(tcp_proxy_test tests/tcp_proxy_test.cc ${PROJECT_NAME} "
 my_sylar_add_executable(udp_test tests/udp_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(daemon_test tests/daemon_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(ws_test tests/ws_test.cc ${PROJECT_NAME} "${LIBS}")
+my_sylar_add_executable(application_test tests/application_test.cc ${PROJECT_NAME} "${LIBS}")
 ###############################
 my_sylar_add_executable(counter utils/counter.cc ${PROJECT_NAME} "${LIBS}")
 endif()
-my_sylar_add_executable(application_test tests/application_test.cc ${PROJECT_NAME} "${LIBS}")
+my_sylar_add_executable(pingpong_test tests/pingpong_bench.cc ${PROJECT_NAME} "${LIBS}")
+my_sylar_add_executable(normal_test tests/normal_test.cc ${PROJECT_NAME} "${LIBS}")
 
 #valgrind --tool=memcheck --track-origins=yes --leak-check=full --show-leak-kinds=all ./scheduler_test

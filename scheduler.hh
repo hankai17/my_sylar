@@ -26,6 +26,7 @@ namespace sylar {
 
         void start();
         void stop();
+        bool hasIdleFiber() const { return m_activeIdleFiberCount > 0; }
 
         template <typename T>
         void schedule(T t, int thread = -1) {

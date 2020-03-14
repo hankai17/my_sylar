@@ -56,13 +56,14 @@ namespace sylar {
       return;
     }
 
-    IOManager::IOManager(size_t threads, bool use_caller, const std::string &name)
-    :Scheduler(threads, use_caller, name) {
+    IOManager::IOManager(size_t threads, bool use_caller, const std::string &name, bool need_start)
+    :Scheduler(threads, use_caller, name),
+    m_needstart(need_start) {
         m_epfd = epoll_create(5000);
         SYLAR_ASSERT(m_epfd > 0);
 
-        if (1) {
-            int ret = pipe(m_tickleFds);
+        if (1) { // more fast
+            int ret = pipe(m_tickleFds); // default 65536 if date in pipe more than 65536 it will block
             SYLAR_ASSERT(!ret)
 
             epoll_event event;
@@ -72,6 +73,7 @@ namespace sylar {
 
             //ret = fcntl(m_tickleFds[0], F_SETFL, 0, O_NONBLOCK);
             ret = fcntl(m_tickleFds[0], F_SETFL, O_NONBLOCK);
+            //ret = fcntl(m_tickleFds[1], F_SETFL, O_NONBLOCK);
             SYLAR_ASSERT(!ret)
 
             ret = epoll_ctl(m_epfd, EPOLL_CTL_ADD, m_tickleFds[0], &event);
@@ -91,6 +93,12 @@ namespace sylar {
         }
 
         contextResize(32);
+        if (!need_start) {
+            start();
+        }
+    }
+
+    void IOManager::fake_start() {
         start();
     }
 
@@ -255,22 +263,20 @@ namespace sylar {
     }
 
     void IOManager::tickle() {
-        //if (hasIdleThread) {
-        //}
-        //std::cout<<"iomanager tickle......"<<std::endl;
+        if (!hasIdleFiber()) {
+            return;
+        }
         if (1) {
             int ret = write(m_tickleFds[1], "M", 1);
             SYLAR_ASSERT(ret == 1);
         } else {
             uint64_t m = 1;
             int ret = write(m_wakeupFd, &m, sizeof(uint64_t));
-            //std::cout<<"write eventfd errno: " << strerror(errno) << std::endl;
             SYLAR_ASSERT(ret == 8);
         }
     }
 
     void IOManager::onTimerInsertedAtFront() {
-        //std::cout<<"timer tickle..."<<std::endl;
         tickle();
     }
 
@@ -308,9 +314,7 @@ namespace sylar {
                     next_timeout = MAX_TIMEOUT;
                 }
 
-                //std::cout<<"-------------->before epoll"<<std::endl;
                 ret = epoll_wait(m_epfd, events, 4, next_timeout);
-                //std::cout<<"<--------------after epoll"<<std::endl;
                 if (ret < 0 && errno == EINTR) {
                 } else {
                     break;
@@ -324,7 +328,7 @@ namespace sylar {
                 cbs.clear();
             }
 
-            SYLAR_LOG_DEBUG(g_logger) << "epoll_ctl ret: " << ret;
+            //SYLAR_LOG_DEBUG(g_logger) << "epoll_ctl ret: " << ret;
             for (int i = 0; i < ret; i++) {
                 epoll_event& event = events[i];
 
@@ -345,7 +349,6 @@ namespace sylar {
 
                 FdContext* fd_ctx = (FdContext*)event.data.ptr;
                 FdContext::MutexType::Lock lock(fd_ctx->mutex);
-                //std::cout << "1events: " << event.events << std::endl;
                 if (event.events & (EPOLLERR | EPOLLHUP)) {
                     event.events |= (EPOLLIN | EPOLLOUT) & fd_ctx->events; //702889d05447d889c9f79b3c94c3e61c3d675be5
                 }
@@ -367,9 +370,9 @@ namespace sylar {
 
                 int ret = epoll_ctl(m_epfd, op, fd_ctx->fd, &event);
                 if (ret) {
-                    SYLAR_LOG_ERROR(g_logger) << "epoll_ctl(" << m_epfd << ", "
-                    << op << ", " << fd_ctx->fd << ", " << event.events << "):"
-                    << ret << " (" << errno << ") (" << strerror(errno) << ")";
+                    //SYLAR_LOG_ERROR(g_logger) << "epoll_ctl(" << m_epfd << ", "
+                    //<< op << ", " << fd_ctx->fd << ", " << event.events << "):"
+                    //<< ret << " (" << errno << ") (" << strerror(errno) << ")";
                     continue;
                 }
 

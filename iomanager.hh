@@ -39,13 +39,14 @@ namespace sylar {
         };
 
     public:
-        IOManager(size_t threads = 1, bool use_caller = true, const std::string& name = "");
+        IOManager(size_t threads = 1, bool use_caller = true, const std::string& name = "", bool need_start = false);
         ~IOManager();
 
         int addEvent(int fd, Event event, std::function<void()> cb = nullptr);
         bool delEvent(int fd, Event event);
         bool cancelEvent(int fd, Event event);
         bool cancelAll(int fd);
+        void fake_start();
 
         static IOManager* GetThis();
         bool stopping(uint64_t& timeout);
@@ -59,11 +60,12 @@ namespace sylar {
         void contextResize(size_t size);
 
     private:
-        int m_epfd = 0;
-        int m_tickleFds[2];
-        int m_wakeupFd = -1;
-        std::atomic<size_t> m_pendingEventCount = {0};
+        bool        m_needstart;
+        int         m_epfd = 0;
+        int         m_tickleFds[2];
+        int         m_wakeupFd = -1;
         RWMutexType m_mutex;
+        std::atomic<size_t> m_pendingEventCount = {0};
         std::vector<FdContext*> m_fdContexts;
     };
 
