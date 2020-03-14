@@ -202,6 +202,12 @@ main(int argc, char **argv)
 }
 
 /*
+writes初值是整个程序额定的写的总次数
+fired是 写的次数
+count是 读的字节
+*/
+
+/*
 gcc bench.c -levent
 
 ./a.out -n 10000 -a 1 -w 10000

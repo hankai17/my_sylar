@@ -6,6 +6,7 @@
 #include "util.hh"
 
 #include <atomic>
+#include <sys/mman.h>
 
 namespace sylar {
     static thread_local Fiber* t_fiber = nullptr;
@@ -17,7 +18,7 @@ namespace sylar {
     sylar::ConfigVar<uint32_t>::ptr g_fiber_stack_size =
             sylar::Config::Lookup<uint32_t>("fiber.stacksize", 1024 * 1024, "fiber stack size"); // If stacksize == 1K it will coredown
 
-    class MallocStackAllocator {
+    class MallocStackAllocator { // 0
     public:
         static void* Alloc(size_t size) {
             return malloc(size);
@@ -28,7 +29,65 @@ namespace sylar {
         }
     };
 
+    class MMapStackAllocator {
+    public:
+        static void* Alloc(size_t size) {
+            return mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
+        }
+        static void Dealloc(void* p, size_t size) {
+            munmap(p, size);
+        }
+    };
+
     using StackAllocator = MallocStackAllocator;
+    //using StackAllocator = MMapStackAllocator;
+
+    class FiberPool { // 1
+    public:
+        FiberPool(size_t max_size)
+        : m_maxSize(max_size) {
+        }
+        ~FiberPool() {
+            for (const auto& i : m_mems) {
+                free(i);
+            }
+        }
+        void* Alloc(size_t size);
+        void Dealloc(void* ptr);
+    private:
+        struct MemItem {
+            size_t  size;
+            char    data[];
+        };
+
+        size_t      m_maxSize;
+        std::list<MemItem*>  m_mems;
+    };
+
+    void* FiberPool::Alloc(size_t size) {
+        for (auto it = m_mems.begin(); it != m_mems.end(); it++) {
+            if ((*it)->size >= size) {
+                auto p = (*it)->data;
+                m_mems.erase(it);
+                return p;
+            }
+        }
+        MemItem* item = (MemItem*)malloc(sizeof(size_t) + size);
+        item->size = size;
+        return item->data;
+    }
+
+    void FiberPool::Dealloc(void* ptr) {
+        MemItem* item = (MemItem*)((char*)ptr - sizeof(size_t));
+        m_mems.push_front(item); // Push front may faster
+        if (m_mems.size() > m_maxSize) {
+            MemItem* item1 = m_mems.back();
+            m_mems.pop_back();
+            free(item1);
+        }
+    }
+
+    static thread_local FiberPool s_fiber_pool(1024);
 
     void Fiber::SetThis(sylar::Fiber *f) {
         t_fiber = f;
