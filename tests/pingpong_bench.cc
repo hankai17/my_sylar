@@ -24,15 +24,12 @@ void fd_test(int idx) {
         if (g_writes > 0) {
           int widx = idx + 1;
           if (widx >= numPipes) {
-            //widx -= numPipes;
-            //close
             flower_end = sylar::GetCurrentUs();
             SYLAR_LOG_DEBUG(g_logger) << "flower_end: " << flower_end;
             SYLAR_LOG_DEBUG(g_logger) << "elapse: " << flower_end - flower_start;
           } else {
               if (idx == 0) {
                   flower_start = sylar::GetCurrentUs();
-                  //SYLAR_LOG_DEBUG(g_logger) << "flower_sta: " << flower_start;
               }
               ::send(g_pipes[2 * widx + 1], "m", 1, 0);
               //SYLAR_LOG_DEBUG(g_logger) << "fd: " << g_pipes[idx * 2] << " read callback " << ", send fd: "
@@ -40,8 +37,8 @@ void fd_test(int idx) {
               g_writes--;
           }
           g_fired++;
-          sylar::IOManager::GetThis()->delEvent(g_pipes[idx * 2], sylar::IOManager::READ);
-          //close(g_pipes[idx * 2]); // "close()" consume more time!
+          //sylar::IOManager::GetThis()->delEvent(g_pipes[idx * 2], sylar::IOManager::READ);
+          //close(g_pipes[idx * 2]); // "close()" consume more time! // Because of libevent not close fd too, So there noted it;
           //close(g_pipes[idx * 2 + 1]);
           //SYLAR_LOG_DEBUG(g_logger) << "delEvent fd: " << g_pipes[idx * 2] << "  close it and " << g_pipes[idx * 2 + 1];
         }
@@ -52,7 +49,7 @@ void fd_test(int idx) {
 int main(int argc, char* argv[]) {
     numPipes = 10000;
     numActive = 1;
-    numWrites = 10000; // result 150ms however libevent2 15ms. 10 Times slow
+    numWrites = 10000; // 35ms(remove so many system log) however libevent2 15ms
     g_fired = 0; // Sum send bytes
 
     int c;
@@ -98,24 +95,22 @@ int main(int argc, char* argv[]) {
     int space = numPipes / numActive;
     space *= 2;
     for (int i = 0; i < numActive; i++, g_fired++) {
-        int ret = send(g_pipes[i * space + 1], "e", 1, 0);
+        send(g_pipes[i * space + 1], "M", 1, 0);
         g_fired++;
-        SYLAR_LOG_DEBUG(g_logger) << "init send fd: " << g_pipes[i * space + 1] << ", ret: " << ret;
+        //SYLAR_LOG_DEBUG(g_logger) << "init send fd: " << g_pipes[i * space + 1] << ", ret: " << ret;
     }
 
-    //sylar::IOManager io(1, false, "iomanager", true); // 200ms too slow
-    sylar::IOManager io(1, false, "iomanager"); // -O0 150ms // -O3 90ms
-    //sleep(2);
-    SYLAR_LOG_DEBUG(g_logger) << "schedu: " << sylar::GetCurrentUs();
+    sylar::IOManager io(1, false, "iomanager");
     for (int i = 0; i < numPipes; ++i) {
       io.schedule(std::bind(fd_test, i));
     }
     /*
-    sleep(5); //
+    sleep(5);
+    // now all fd in tree We can send fire  // all is 55ms
     for (int i = 0; i < numActive; i++, g_fired++) {
-        int ret = send(g_pipes[i * space + 1], "e", 1, 0);
+        send(g_pipes[i * space + 1], "e", 1, 0);
         g_fired++;
-        SYLAR_LOG_DEBUG(g_logger) << "init send fd: " << g_pipes[i * space + 1] << ", ret: " << ret;
+        //SYLAR_LOG_DEBUG(g_logger) << "init send fd: " << g_pipes[i * space + 1] << ", ret: " << ret;
     }
      */
     io.stop();
@@ -125,7 +120,7 @@ int main(int argc, char* argv[]) {
 
 
 /*
- * Jemalloc so stable: always 60ns. However malloc always 60ns and 90ns
+ * If use jemalloc It is stable: always 34ms. However malloc always 35ms
  *
 [root@localhost cmake-build-debug]# ldd pingpong_test
 linux-vdso.so.1 =>  (0x00007ffdd2d08000)

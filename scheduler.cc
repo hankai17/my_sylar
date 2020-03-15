@@ -35,7 +35,11 @@ namespace sylar {
             SYLAR_ASSERT(GetThis() == nullptr); // Only has a global scheduler
             setThis();
 
-            m_rootFiber.reset(new Fiber(std::bind(&Scheduler::run, this), 0, use_caller));
+#if FIBER_MEM_TYPE == FIBER_MEM_NORMAL
+            m_rootFiber.reset(new Fiber(std::bind(&Scheduler::run, this), 0, true));
+#elif FIBER_MEM_TYPE == FIBER_MEM_POOL
+            m_rootFiber.reset(NewFiber(std::bind(&Scheduler::run, this), 0, true), FreeFiber);
+#endif
             sylar::Thread::SetName(m_name);
 
             t_kernel_fiber = m_rootFiber.get();
@@ -105,7 +109,11 @@ namespace sylar {
             t_kernel_fiber = Fiber::GetThis().get();
         }
 
+#if FIBER_MEM_TYPE == FIBER_MEM_NORMAL
         Fiber::ptr idle_fiber(new Fiber(std::bind(&Scheduler::idle, this)));
+#elif FIBER_MEM_TYPE == FIBER_MEM_POOL
+        Fiber::ptr idle_fiber(NewFiber(std::bind(&Scheduler::idle, this)), FreeFiber);
+#endif
         Fiber::ptr cb_fiber;
         FiberAndThread ft;
 
@@ -143,12 +151,15 @@ namespace sylar {
                 }
                 ft.reset();
             } else if (ft.cb) {
+#if FIBER_MEM_TYPE == FIBER_MEM_NORMAL
                 cb_fiber.reset(new Fiber(ft.cb));
+#elif FIBER_MEM_TYPE == FIBER_MEM_POOL
+                cb_fiber.reset(NewFiber(ft.cb), FreeFiber);
+#endif
                 cb_fiber->swapIn(); // If simple noblock cb, next line the fiber will destruction
                 --m_activeFiberCount;
                 cb_fiber.reset();
             } else {
-                //std::cout << "idle fiber" << std::endl;
                 if (idle_fiber->getState() == Fiber::TERM) {
                     //std::cout<< "idle end, we should break and end the fiber_system. Otherwise it will swapout the mainfun end and core" << std::endl;
                     break;

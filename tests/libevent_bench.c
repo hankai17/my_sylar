@@ -124,7 +124,7 @@ run_once(void)
 	}
 
 	evutil_timersub(&te, &ts, &te);
-
+    //sleep(20);  // At that time libevent not close fd yet
 	return (&te);
 }
 

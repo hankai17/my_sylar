@@ -29,7 +29,7 @@ namespace sylar {
         }
     };
 
-    class MMapStackAllocator {
+    class MMapStackAllocator { // 1
     public:
         static void* Alloc(size_t size) {
             return mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
@@ -42,7 +42,7 @@ namespace sylar {
     using StackAllocator = MallocStackAllocator;
     //using StackAllocator = MMapStackAllocator;
 
-    class FiberPool { // 1
+    class FiberPool { // 2
     public:
         FiberPool(size_t max_size)
         : m_maxSize(max_size) {
@@ -87,7 +87,22 @@ namespace sylar {
         }
     }
 
-    static thread_local FiberPool s_fiber_pool(1024);
+    static thread_local FiberPool s_fiber_pool(1024); // Because of thread_local so We do not need mutex
+
+    Fiber* NewFiber(std::function<void()> cb, size_t stacksize, bool use_caller) {
+        stacksize = stacksize ? stacksize :  g_fiber_stack_size->getValue();
+        Fiber* p = (Fiber*)s_fiber_pool.Alloc(sizeof(Fiber) + stacksize);
+        return new (p) Fiber(cb, stacksize, use_caller);
+    }
+
+    Fiber* NewFiber() {
+        Fiber* p = (Fiber*)malloc(sizeof(Fiber));
+        return new (p) Fiber(); // placement new
+    }
+
+    void FreeFiber(Fiber* ptr) {
+        s_fiber_pool.Dealloc(ptr);
+    }
 
     void Fiber::SetThis(sylar::Fiber *f) {
         t_fiber = f;
@@ -97,7 +112,11 @@ namespace sylar {
         if (t_fiber) {
             return t_fiber->shared_from_this(); // Not use std::make_shared<Fiber>(*t_fiber);  // Unspoken words: t_fiber already became a sharedptr
         }
+#if FIBER_MEM_TYPE == FIBER_MEM_NORMAL
         Fiber::ptr main_fiber(new Fiber);
+#elif FIBER_MEM_TYPE == FIBER_MEM_POOL
+        Fiber::ptr main_fiber(NewFiber());
+#endif
         t_main_thread_fiber = main_fiber;
         SYLAR_ASSERT(t_fiber == main_fiber.get());
         return t_fiber->shared_from_this();
@@ -127,9 +146,12 @@ namespace sylar {
             : m_id(++s_fiber_id),
               m_cb(cb) {
         ++s_fiber_count;
+#if FIBER_MEM_TYPE == FIBER_MEM_NORMAL
         m_stacksize = stacksize ? stacksize :  g_fiber_stack_size->getValue();
-
         m_stack = StackAllocator::Alloc(m_stacksize);
+#elif FIBER_MEM_TYPE == FIBER_MEM_POOL
+        m_stacksize = stacksize;
+#endif
 
 #if FIBER_CONTEXT_TYPE == FIBER_UCONTEXT
         if (getcontext(&m_ctx)) {
@@ -152,7 +174,7 @@ namespace sylar {
         }
 #endif
 
-        SYLAR_LOG_DEBUG(g_logger) << "Fiber::Fiber id: " << m_id; // Not use s_fiber_id
+        SYLAR_LOG_DEBUG(g_logger) << "Fiber::Fiber id: " << m_id; // Not use s_fiber_id // Consumer much time!
     }
 
     void Fiber::swapIn() {
@@ -224,7 +246,10 @@ namespace sylar {
             SYLAR_ASSERT(m_state == INIT
                          || m_state == TERM
                          || m_state == EXCEPT)
+#if FIBER_MEM_TYPE == FIBER_MEM_NORMAL
             StackAllocator::Dealloc(m_stack, m_stacksize);
+#elif FIBER_MEM_TYPE == FIBER_MEM_POOL
+#endif
         } else {
             // TODO
             //SYLAR_ASSERT(!m_cb);

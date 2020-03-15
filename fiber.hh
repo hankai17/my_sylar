@@ -15,10 +15,24 @@
 #include "fcontext/fcontext.hh"
 #endif
 
+#define FIBER_MEM_NORMAL 1
+#define FIBER_MEM_POOL 2
+#define FIBER_MEM_TYPE FIBER_MEM_POOL
+//#define FIBER_MEM_TYPE FIBER_MEM_NORMAL
+
 namespace sylar {
+    class Fiber;
+    Fiber* NewFiber(std::function<void()> cb, size_t stacksize = 0, bool use_caller = false);
+    Fiber* NewFiber();
+    void FreeFiber(Fiber* ptr);
+
     class Fiber : public std::enable_shared_from_this<Fiber> {
     public:
         friend class Scheduler;
+        friend Fiber* NewFiber(std::function<void()> cb, size_t stacksize, bool use_caller);
+        friend Fiber* NewFiber();
+        friend void FreeFiber(Fiber* ptr);
+
         typedef std::shared_ptr<Fiber> ptr;
         enum State {
             INIT,
@@ -65,8 +79,12 @@ namespace sylar {
 #elif FIBER_CONTEXT_TYPE == FIBER_FCONTEXT
         fcontext_t m_ctx = nullptr;
 #endif
-        void *m_stack = nullptr;
         std::function<void()> m_cb;
+#if FIBER_MEM_TYPE == FIBER_MEM_POOL
+        char    m_stack[];
+#elif FIBER_MEM_TYPE == FIBER_MEM_NORMAL
+        void*   m_stack = nullptr;
+#endif
     };
 }
 
