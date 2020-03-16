@@ -48,8 +48,8 @@ void fd_test(int idx) {
 
 int main(int argc, char* argv[]) {
     numPipes = 10000;
-    numActive = 1;
-    numWrites = 10000; // 35ms(remove so many system log) however libevent2 15ms
+    numActive = 20; // If active more than 1(more flowers) it will better libevent
+    numWrites = 10000; // 35ms(remove so many system log) however libevent2 15ms // if use fiber poll that is 33ms
     g_fired = 0; // Sum send bytes
 
     int c;

@@ -17,8 +17,8 @@
 
 #define FIBER_MEM_NORMAL 1
 #define FIBER_MEM_POOL 2
-//#define FIBER_MEM_TYPE FIBER_MEM_POOL
-#define FIBER_MEM_TYPE FIBER_MEM_NORMAL
+#define FIBER_MEM_TYPE FIBER_MEM_POOL
+//#define FIBER_MEM_TYPE FIBER_MEM_NORMAL
 
 namespace sylar {
     class Fiber;
