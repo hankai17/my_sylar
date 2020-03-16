@@ -45,6 +45,7 @@
 
 ## QA
  - 该库性能怎么样？
+ 参考pingpong_bench.cc libevent_bench.c 在击鼓传花测试中 在花朵少的情况下my_sylar会低于libevent
 
 
 ## 联系方式
