@@ -115,7 +115,7 @@ namespace sylar {
 #if FIBER_MEM_TYPE == FIBER_MEM_NORMAL
         Fiber::ptr main_fiber(new Fiber);
 #elif FIBER_MEM_TYPE == FIBER_MEM_POOL
-        Fiber::ptr main_fiber(NewFiber());
+        Fiber::ptr main_fiber(NewFiber(), FreeFiber);
 #endif
         t_main_thread_fiber = main_fiber;
         SYLAR_ASSERT(t_fiber == main_fiber.get());
@@ -174,7 +174,7 @@ namespace sylar {
         }
 #endif
 
-        SYLAR_LOG_DEBUG(g_logger) << "Fiber::Fiber id: " << m_id; // Not use s_fiber_id // Consumer much time!
+        //SYLAR_LOG_DEBUG(g_logger) << "Fiber::Fiber id: " << m_id; // Not use s_fiber_id // Consumer much time!
     }
 
     void Fiber::swapIn() {
