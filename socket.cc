@@ -310,6 +310,14 @@ static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
         return true;
     }
 
+    bool Socket::reconnect(uint64_t timeout_ms) {
+        if (!m_localAddress) {
+            SYLAR_LOG_ERROR(g_logger) << "localAddress is null";
+            return false;
+        }
+        return connect(m_localAddress, timeout_ms);
+    }
+
     bool Socket::listen(int backlog) {
         if (!isVaild()) {
             SYLAR_LOG_ERROR(g_logger) << "listen error sock=-1";

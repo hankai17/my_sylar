@@ -61,6 +61,7 @@ namespace sylar {
         virtual Socket::ptr accept();
         virtual bool bind(const Address::ptr addr); // Why not refer
         virtual bool connect(const Address::ptr addr, uint64_t timeout_ms = -1);
+        virtual bool reconnect(uint64_t timeout_ms = -1);
         virtual bool listen(int backlog = SOMAXCONN);
         virtual bool close();
 

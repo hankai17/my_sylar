@@ -3,7 +3,7 @@ PROJECT(my_sylar)
 include(cmake/utils.cmake)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
-set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O3 -ggdb -g -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function -Wno-builtin-macro-redefined")
+set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O0 -ggdb -g -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function -Wno-builtin-macro-redefined")
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 11)
 enable_language(ASM)
@@ -60,6 +60,8 @@ set(LIB_SRC
         application.cc
         module.cc
         fcontext/fcontext.S
+        protocol.cc
+        utils/crypto_utils.cc
         )
 
 add_library(${PROJECT_NAME} SHARED ${LIB_SRC})
@@ -99,5 +101,6 @@ my_sylar_add_executable(counter utils/counter.cc ${PROJECT_NAME} "${LIBS}")
 endif()
 my_sylar_add_executable(pingpong_test tests/pingpong_bench.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(normal_test tests/normal_test.cc ${PROJECT_NAME} "${LIBS}")
+my_sylar_add_executable(crypto_test tests/crypto_test.cc ${PROJECT_NAME} "${LIBS}")
 
 #valgrind --tool=memcheck --track-origins=yes --leak-check=full --show-leak-kinds=all ./scheduler_test

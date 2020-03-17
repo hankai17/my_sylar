@@ -128,6 +128,14 @@ namespace sylar {
         std::atomic<size_t>         m_activeIdleFiberCount = {0};
         bool                        m_autostop = true; // For system test
     };
+
+    class SchedulerSwitcher : public Nocopyable {
+    public:
+        SchedulerSwitcher(Scheduler* target = nullptr);
+        ~SchedulerSwitcher();
+    private:
+        Scheduler*  m_caller;
+    };
 }
 
 #endif
