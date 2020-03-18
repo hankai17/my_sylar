@@ -62,6 +62,9 @@ set(LIB_SRC
         fcontext/fcontext.S
         protocol.cc
         utils/crypto_utils.cc
+        ns/ns_protocol.cc
+        #################
+        dns.cc
         )
 
 add_library(${PROJECT_NAME} SHARED ${LIB_SRC})
