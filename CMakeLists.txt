@@ -65,6 +65,7 @@ set(LIB_SRC
         ns/ns_protocol.cc
         #################
         dns.cc
+        rock/rock.cc
         )
 
 add_library(${PROJECT_NAME} SHARED ${LIB_SRC})
@@ -99,11 +100,12 @@ my_sylar_add_executable(udp_test tests/udp_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(daemon_test tests/daemon_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(ws_test tests/ws_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(application_test tests/application_test.cc ${PROJECT_NAME} "${LIBS}")
-###############################
+my_sylar_add_executable(crypto_test tests/crypto_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(counter utils/counter.cc ${PROJECT_NAME} "${LIBS}")
+###############################
 endif()
 my_sylar_add_executable(pingpong_test tests/pingpong_bench.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(normal_test tests/normal_test.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(crypto_test tests/crypto_test.cc ${PROJECT_NAME} "${LIBS}")
+my_sylar_add_executable(rock_test tests/rock_test.cc ${PROJECT_NAME} "${LIBS}")
 
 #valgrind --tool=memcheck --track-origins=yes --leak-check=full --show-leak-kinds=all ./scheduler_test

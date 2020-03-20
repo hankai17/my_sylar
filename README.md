@@ -50,4 +50,3 @@
 
 ## 联系方式
 - 邮箱：<hankai17@126.com>
-- https://jocent.me/2017/06/25/dns-protocol-implementation.html

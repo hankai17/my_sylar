@@ -281,7 +281,7 @@ namespace sylar {
             }
 
             if (m_connectCb) {
-                if (m_connectCb(shared_from_this())) {
+                if (!m_connectCb(shared_from_this())) {
                     innerClose();
                     m_waitsem.notify();
                     m_waitsem.notify();
@@ -331,7 +331,7 @@ namespace sylar {
 
     void AsyncSocketStream::Ctx::doRsp() {
         Scheduler* sch = scheduler;
-        if (sylar::Atomic::compareAndSwapBool(scheduler, sch, (Scheduler*)nullptr)) {
+        if (!sylar::Atomic::compareAndSwapBool(scheduler, sch, (Scheduler*)nullptr)) {
             return;
         }
         if (!sch || !fiber) {
