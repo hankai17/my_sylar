@@ -115,7 +115,7 @@ namespace sylar {
 #if FIBER_MEM_TYPE == FIBER_MEM_NORMAL
         Fiber::ptr main_fiber(new Fiber);
 #elif FIBER_MEM_TYPE == FIBER_MEM_POOL
-        Fiber::ptr main_fiber(NewFiber(), FreeFiber);
+        Fiber::ptr main_fiber(NewFiber());
 #endif
         t_main_thread_fiber = main_fiber;
         SYLAR_ASSERT(t_fiber == main_fiber.get());
@@ -242,6 +242,9 @@ namespace sylar {
 
     Fiber::~Fiber() {
         --s_fiber_id;
+#if FIBER_MEM_TYPE == FIBER_MEM_POOL
+        return;
+#endif
         if (m_stack) {
             SYLAR_ASSERT(m_state == INIT
                          || m_state == TERM
