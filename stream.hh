@@ -106,7 +106,7 @@ public std::enable_shared_from_this<AsyncSocketStream> {
         void setDisConnectCb(disconnect_callback cb) { m_disConnectCb = cb; }
 
         template <typename T>
-        T setData(const T& v) { m_data = v; }
+        void setData(const T& v) { m_data = v; }
 
         template <typename T>
         T getData() const {

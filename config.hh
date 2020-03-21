@@ -390,8 +390,8 @@ namespace sylar {
 
         template <typename T>
         static typename ConfigVar<T>::ptr Lookup(const std::string& name) {
-            std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::shared_ptr<sylar::ConfigVarBase>, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>>, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::shared_ptr<sylar::ConfigVarBase>>>>::iterator it;
-            it = getMap().find(name);
+            //std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::shared_ptr<sylar::ConfigVarBase>, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>>, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::shared_ptr<sylar::ConfigVarBase>>>>::iterator it;
+            auto it = getMap().find(name);
             if (it == getMap().end()) {
                 return nullptr;
             }

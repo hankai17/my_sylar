@@ -32,7 +32,8 @@
 - 编译安装
   项目依赖[cmake 3.7.2](https://cmake.org/files/v3.7/cmake-3.7.2.tar.gz)
   [yaml解析](https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.3.tar.gz) 编译成动态库并安装
-  Boost
+  Boost: yum install boost-devel.x86_64
+  Protobuf: yum install protobuf-devel.x86_64
 
   ```
   
