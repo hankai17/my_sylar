@@ -24,7 +24,7 @@ set(LIBS ${PROJECT_NAME}
         yaml-cpp
         dl
         ${OPENSSL_LIBRARIES}
-        jemalloc
+        #jemalloc
         )
 
 set(LIB_SRC
