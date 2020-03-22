@@ -97,7 +97,7 @@ namespace sylar {
 
                     if (frameHead.fin == 1) {
                         SYLAR_LOG_DEBUG(g_logger) << data;
-                        return WSFrameMessage::ptr(new WSFrameMessage(first_opcode_type, std::move(data)));
+                        return WSFrameMessage::ptr(new WSFrameMessage(first_opcode_type, data));
                     }
                 } else {
                     SYLAR_LOG_DEBUG(g_logger) << "invalid opcode: " << frameHead.opcode;

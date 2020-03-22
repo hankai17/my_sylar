@@ -107,5 +107,6 @@ endif()
 my_sylar_add_executable(pingpong_test tests/pingpong_bench.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(normal_test tests/normal_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(rock_test tests/rock_test.cc ${PROJECT_NAME} "${LIBS}")
+my_sylar_add_executable(singleton_test tests/singleton_test.cc ${PROJECT_NAME} "${LIBS}")
 
 #valgrind --tool=memcheck --track-origins=yes --leak-check=full --show-leak-kinds=all ./scheduler_test
