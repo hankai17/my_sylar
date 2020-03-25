@@ -1,6 +1,12 @@
 #include "ns/ares.hh"
 #include <string.h>
 #include <stdlib.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/time.h>
 #include "util.hh"
 #include "log.hh"
 #include "iomanager.hh"
@@ -24,47 +30,6 @@ namespace sylar {
         return ((size_t)(q - p) > len && !strncmp(p, opt, len)) ? &p[len] : NULL;
     }
 
-    static int set_search(AresChannel::ptr channel, const char* str) {
-        int n;
-        const char* p, *q;
-
-        /* Count the domains given. */
-        n = 0;
-        p = str;
-        while (*p) {
-            while (*p && !isspace((unsigned char)*p))
-                p++;
-            while (isspace((unsigned char)*p))
-                p++;
-            n++;
-        }
-
-        channel->domains = malloc(n * sizeof(char *));
-        if (!channel->domains && n)
-            return ARES_ENOMEM;
-
-        /* Now copy the domains. */
-        n = 0;
-        p = str;
-        while (*p) {
-            channel->ndomains = n;
-            q = p;
-            while (*q && !isspace((unsigned char)*q))
-                q++;
-            channel->domains[n] = malloc(q - p + 1);
-            if (!channel->domains[n])
-                return ARES_ENOMEM;
-            memcpy(channel->domains[n], p, q - p);
-            channel->domains[n][q - p] = 0;
-            p = q;
-            while (isspace((unsigned char)*p))
-                p++;
-            n++;
-        }
-        channel->ndomains = n;
-        return ARES_SUCCESS;
-    }
-
     static int config_nameserver(std::vector<ServerState::ptr>& servers, char* str) {
         ServerState::ptr newserv(new ServerState);
         struct in_addr addr;
@@ -78,7 +43,7 @@ namespace sylar {
 
     static int init_by_resolv_conf(AresChannel* channel) {
         int status = 0;
-        std::vector<ServerState> servers;
+        std::vector<ServerState::ptr> servers;
         {
             char* p;
             std::string line;
@@ -89,9 +54,10 @@ namespace sylar {
                 return 0;
             }
             while (getline(ifs, line)) {
-                if ((p = try_config(line.c_str(), "domain")) )
-                    status = set_search(channel, p);
-                else if ((p = try_config(line.c_str(), "nameserver")) )
+                if ((p = try_config(const_cast<char*>(line.c_str()), "domain")) )
+                    ;
+                    //status = set_search(channel, p);
+                if ((p = try_config(const_cast<char*>(line.c_str()), "nameserver")) )
                     status = config_nameserver(servers, p);
                 else
                     status = ARES_SUCCESS;
@@ -99,14 +65,15 @@ namespace sylar {
                     break;
             }
         }
+        if(servers.size()) {
+            channel->setServers(std::move(servers));
+        }
 
         if(status != ARES_EOF) {
             return status;
         }
 
-        if(servers.size()) {
-            channel->m_servers = std::move(servers);
-        }
+        return 0;
     }
     ///////////////////////////////////////////////////////////////////////////
 
@@ -135,7 +102,7 @@ namespace sylar {
             ares_closesocket(s);
             return -1;
         }
-        m_tcp_socket = s;
+        tcp_socket = s;
         return 0;
     }
 
@@ -149,24 +116,26 @@ namespace sylar {
         memset(&sockin, 0, sizeof(sockin));
         sockin.sin_family = AF_INET;
         sockin.sin_addr = addr;
-        sockin.sin_port = udp_port;
+        sockin.sin_port = port;
         if(connect(s, (struct sockaddr *) &sockin, sizeof(sockin)) == -1) {
             ares_closesocket(s);
             return -1;
         }
-        m_udp_socket = s;
+        udp_socket = s;
         return 0;
     }
 
     int AresChannel::aresRegistFds() {
         for(const auto& i : m_servers) {
-            if(i->udp_socket != -1) {
+            if(i->udp_socket > 0) {
                 sylar::IOManager::GetThis()->addEvent(i->udp_socket, IOManager::READ,
-                        std::bind(&AresChannel::AresUDPCallBack, this));
+                        std::bind(&AresChannel::AresUDPCallBack, this, i->udp_socket));
             }
-            if(i->tcp_socket != -1) {
-                sylar::IOManager::GetThis()->addEvent(i->tcp_socket, IOManager::READ,
-                        std::bind(&AresChannel::AresTCPCallBack, this));
+            if(i->tcp_socket > 0) {
+                //sylar::IOManager::GetThis()->addEvent(i->tcp_socket, IOManager::READ,
+                        //std::bind(&AresChannel::AresTCPCallBack, this));
+                //sylar::IOManager::GetThis()->addEvent(i->tcp_socket, IOManager::WRITE,
+                 //                                     std::bind(&AresChannel::AresTCPCallBack, this));
             }
         }
         return 0;
@@ -197,24 +166,22 @@ namespace sylar {
     : AresOptions() {
     }
 
+    AresChannel::~AresChannel() {
+    }
+
     void AresChannel::init() {
         struct timeval tv;
         init_by_resolv_conf(this);
         gettimeofday(&tv, NULL);
-        next_id = (unsigned short) (tv.tv_sec ^ tv.tv_usec ^ getpid()) & 0xffff;
-        queries = NULL;
+        m_nextId = (unsigned short) (tv.tv_sec ^ tv.tv_usec ^ getpid()) & 0xffff;
     }
 
-    void AresChannel::AresCallBack() {
-
-    }
-
-    void AresChannnel::nextServer(Query::ptr query) {
+    void AresChannel::nextServer(Query::ptr query) {
         query->server_idx++;
-        for(; query->try_count < channel->m_tries; query->try_count++) { // try小于全局定义的次数
+        for(; query->try_count < m_tries; query->try_count++) { // try小于全局定义的次数
             for(; query->server_idx < getServerSize(); query->server_idx++) {
                 if(!query->skip_server[query->server_idx]) {
-                    aresSend(query);
+                    ares_send(query);
                     return;
                 }
             }
@@ -226,42 +193,40 @@ namespace sylar {
         //end_query(channel, query, query->error_status, NULL, 0);
     }
 
-    void AresChannel::ares_send(Query::ptr query, time_t now) {
-        struct ServerState* server;
-
-        server = &servers[query->server_idx];
+    void AresChannel::ares_send(Query::ptr query) {
+        ServerState::ptr server = m_servers[query->server_idx];
         if(query->using_tcp) {
-            if (server->tcp_socket == -1) {
-                if (openTcpSocket(m_tcp_port) == -1) {
+            if (server->tcp_socket < 0) {
+                if (server->openTcpSocket(m_tcp_port) == -1) {
                     query->skip_server[query->server_idx] = 1;
-                    nextServer(query, now);
+                    nextServer(query);
                     return;
                 }
             }
             SendRequest::ptr sendreq(new SendRequest);
-            sendreq->data = &query->tcpbuf[0];
-            sendreq->len = query->tcplen;
+            sendreq->data = &query->m_tcpbuf[0];
+            sendreq->len = query->m_tcpbuf.size();
             query->timeout = 0;
-        }
-        else {
-            if(server->udp_socket == -1) {
-                if (openUdpSocket(m_udp_port) == -1) {
+        } else {
+            if(server->udp_socket < 0) {
+                if (server->openUdpSocket(m_udp_port) == -1) {
                     query->skip_server[query->server_idx] = 1;
-                    nextServer(query, now);
+                    nextServer(query);
                     return;
                 }
             }
             if(send(server->udp_socket, query->qbuf, query->qlen, 0) == -1) {
                 query->skip_server[query->server_idx] = 1;
-                nextServer(query, now);
+                nextServer(query);
                 return;
             }
-            query->timeout = now + ((query->try == 0) ? m_timeout : m_timeout << query->try_count / getServer().size());
+            aresRegistFds();
+            query->timeout = time(0) + ((query->try_count == 0) ? m_timeout : m_timeout << query->try_count / getServerSize());
         }
     }
 
     int AresChannel::ares_mkquery(const char* name, int dnsclass, int type, unsigned short id, int rd,
-            std::vector<unsigned char>& buf) {
+            std::vector<uint8_t>& buf/*in-out*/) {
         int len;
         unsigned char *q;
         const char *p;
@@ -269,7 +234,7 @@ namespace sylar {
         /* Compute the length of the encoded name so we can check buflen.
          * Start counting at 1 for the zero-length label at the end. */
         len = 1;
-        for(p = name; *p; p++) {
+        for (p = name; *p; p++) {
             if (*p == '\\' && *(p + 1) != 0) p++;
             len++;
         }
@@ -280,7 +245,7 @@ namespace sylar {
         if(*name && *(p - 1) != '.')  //顶级域必须有点结尾
             len++;
 
-        buf.resize(len + HFIXEDSZ + QFIXEDSZ)
+        buf.resize(len + HFIXEDSZ + QFIXEDSZ);
 
         /* Set up the header. */
         q = &buf[0];
@@ -330,7 +295,7 @@ namespace sylar {
         return ARES_SUCCESS;
     }
 
-    static int name_length(const uint8_t* encoded, const uint_8* abuf, int alen) { //返回压缩前 域名长度 包括点
+    static int name_length(const uint8_t* encoded, const uint8_t* abuf, int alen) { //返回压缩前 域名长度 包括点
         int n = 0, offset, indir = 0;
 
         if(encoded == abuf + alen) return -1;
@@ -365,7 +330,7 @@ namespace sylar {
         return (n) ? n - 1 : n;
     }
 
-    int AresChannel::aresExpandName(uint8_t* encoded, const uint8_t* abuf, int alen,
+    int AresChannel::aresExpandName(uint8_t* encoded, uint8_t* abuf, int alen,
             std::vector<uint8_t>& s, int* enclen) {
         int len, indir = 0;
         const uint8_t* p;
@@ -401,13 +366,13 @@ namespace sylar {
             *enclen = p + 1 - encoded;
 
         /* Nuke the trailing period if we wrote one. */
-        if (q > *s)
+        if (q > &s[0])
             *(q - 1) = 0;
 
         return ARES_SUCCESS;
     }
 
-    void AresChannel::aresSend(std::vector<unsigned char>& qbuf) {
+    void AresChannel::aresSend(std::vector<uint8_t>& qbuf) {
         int qlen = qbuf.size();
         if(qlen < HFIXEDSZ || qlen >= (1 << 16)) {
             SYLAR_LOG_ERROR(g_logger) << "qlen too small or too max " << qlen;
@@ -417,100 +382,93 @@ namespace sylar {
         Query::ptr query(new Query);
         query->qid = DNS_HEADER_QID(qbuf);
         query->timeout = 0;
-        query->skip_server.resize(getServer().size());
+        query->skip_server.resize(getServerSize());
 
         query->m_tcpbuf.resize(qlen + 2);
-        query->tcpbuf[0] = (qlen >> 8) & 0xff; // net endian
-        query->tcpbuf[1] = qlen & 0xff;
-        memcpy(&query->tcpbuf[0] + 2, qbuf, qlen);
+        query->m_tcpbuf[0] = (qlen >> 8) & 0xff; // net endian
+        query->m_tcpbuf[1] = qlen & 0xff;
+        memcpy(&query->m_tcpbuf[0] + 2, &qbuf[0], qlen);
 
-        query->qbuf = &query->tcpbuf[0] + 2;
+        query->qbuf = &query->m_tcpbuf[0] + 2;
         query->qlen = qlen;
-        query->callback = callback;
 
         query->try_count = 0;
         query->server_idx = 0;
-        for (size_t i = 0; i < getServer().size(); i++)
+        for (int i = 0; i < getServerSize(); i++) {
             query->skip_server[i] = 0;
-        query->using_tcp = (flags & ARES_FLAG_USEVC) || qlen > PACKETSZ;
+        }
+        query->using_tcp = (m_flags & ARES_FLAG_USEVC) || qlen > PACKETSZ;
         query->error_status = ARES_ECONNREFUSED;
 
-        m_queries.push_back(query);
-
+        m_queries.insert(std::make_pair(query->qid, query));
         time_t now;
         time(&now);
-        ares_send(query, now);
+        ares_send(query);
     }
 
-    void AresChannel::aresQuery(const char* name, int dnsclass, int type) {
-        std::vector<unsigned char> qbuf;
+    int AresChannel::aresQuery(const char* name, int dnsclass, int type) {
+        std::vector<uint8_t> qbuf;
         int rd, status;
 
-        /* Compose the query. */
-        rd = !(flags & ARES_FLAG_NORECURSE);
-        status = ares_mkquery(name, dnsclass, type, next_id, rd, qbuf);
-        channel->next_id++;
+        rd = !(m_flags & ARES_FLAG_NORECURSE);
+        status = ares_mkquery(name, dnsclass, type, m_nextId, rd, qbuf);
+        m_nextId++;
         if(status != ARES_SUCCESS) {
-            return;
+            return -1;
         }
-
         aresSend(qbuf);
+        return m_nextId - 1;
     }
 
-    void AresChannel::aresGethostbyname(const char* name, int family) {
-        aresQuery(name, C_IN, T_A);
+    void AresChannel::aresGethostbyname(const char* name) {
+        int id = aresQuery(name, C_IN, T_A);
+        Query::ptr query = m_queries[id];
+        query->fiber = sylar::Fiber::GetThis();
+        sylar::Fiber::YeildToHold();
+        SYLAR_LOG_DEBUG(g_logger) << "get there";
     }
 
-    int AresChannel::aresParseResponse(uint8_t* abuf, int alen, struct hostent** host) {
+    int AresChannel::aresParseReply(uint8_t* abuf, int alen, struct hostent* host) {
         int status, i, rr_type, rr_class, rr_len, naddrs;
         int naliases;
-        long len;
-        const unsigned char *aptr;
-        char *hostname, *rr_name, *rr_data, **aliases;
-        struct in_addr *addrs;
-        struct hostent *hostent;
-        *host = NULL;
+        int len;
+        uint8_t* aptr;
+        std::vector<uint8_t> rr_data;
+        std::vector<uint8_t> rr_name;
+        std::vector<uint8_t> hostname;
+        std::vector<in_addr> addrs;
+        std::vector<std::string> aliases;
 
         if(alen < HFIXEDSZ) {
-            SYLAR_LOG_ERROR(g_logger) << "aresParseResponse alen too short: " << alen;
+            SYLAR_LOG_ERROR(g_logger) << "aresParseReply alen too short: " << alen;
             return ARES_EBADRESP;
         }
 
         uint32_t qdcount = DNS_HEADER_QDCOUNT(abuf);
         uint32_t ancount = DNS_HEADER_ANCOUNT(abuf);
         if(qdcount != 1) {
-            SYLAR_LOG_ERROR(g_logger) << "aresParseResponse qdcount " << qdcount;
+            SYLAR_LOG_ERROR(g_logger) << "aresParseReply qdcount " << qdcount;
             return ARES_EBADRESP;
         }
 
         aptr = abuf + HFIXEDSZ;
-        status = aresExpandName(aptr, abuf, alen, &hostname, &len);
+        status = aresExpandName(aptr, abuf, alen, hostname, &len);
         if(status != ARES_SUCCESS) return status;
         if(aptr + len + QFIXEDSZ > abuf + alen) {
-            free(hostname);
             return ARES_EBADRESP;
         }
         aptr += len + QFIXEDSZ; //In ans
 
         /* Allocate addresses and aliases; ancount gives an upper bound for both. */
-        addrs = malloc(ancount * sizeof(struct in_addr));
-        if (!addrs) {
-            free(hostname);
-            return ARES_ENOMEM;
-        }
-        aliases = malloc((ancount + 1) * sizeof(char *));
-        if(!aliases) {
-            free(hostname);
-            free(addrs);
-            return ARES_ENOMEM;
-        }
+        addrs.resize(ancount);
+        aliases.resize(ancount + 1);
         naddrs = 0;
         naliases = 0;
 
         /* Examine each answer resource record (RR) in turn. */
         for(i = 0; i < (int)ancount; i++) {
             /* Decode the RR up to the data field. */
-            status = aresExpandName(aptr, abuf, alen, &rr_name, &len);
+            status = aresExpandName(aptr, abuf, alen, rr_name, &len);
             if(status != ARES_SUCCESS) break;
             aptr += len;
             if(aptr + RRFIXEDSZ > abuf + alen) {
@@ -522,7 +480,8 @@ namespace sylar {
             rr_len = DNS_RR_LEN(aptr);
             aptr += RRFIXEDSZ;
 
-            if(rr_class == C_IN && rr_type == T_A && rr_len == sizeof(struct in_addr) && strcasecmp(rr_name, hostname) == 0) {
+            if(rr_class == C_IN && rr_type == T_A && rr_len == sizeof(struct in_addr)
+                    && strcasecmp((const char*) &rr_name[0], (const char*)&hostname[0]) == 0) {
                 memcpy(&addrs[naddrs], aptr, sizeof(struct in_addr));
                 naddrs++;
                 status = ARES_SUCCESS;
@@ -530,15 +489,15 @@ namespace sylar {
 
             if(rr_class == C_IN && rr_type == T_CNAME) { //cname 则把具体的域名 放到alias数组中
                 /* Record the RR name as an alias. */
-                aliases[naliases] = rr_name;
-                naliases++
+                aliases.push_back(std::string((char*)&rr_name[0], rr_name.size()));
+                naliases++;
                 /* Decode the RR data and replace the hostname with it. */
-                status = aresExpandName(aptr, abuf, alen, &rr_data, &len);
+                status = aresExpandName(aptr, abuf, alen, rr_data, &len);
                 if(status != ARES_SUCCESS) break;
-                free(hostname);
-                hostname = rr_data;
-            } else
-                free(rr_name);
+                memcpy(&hostname[0], &rr_data[0], rr_data.size());
+            } else {
+                rr_name.clear();
+            }
 
             aptr += rr_len;
             if(aptr > abuf + alen) {
@@ -550,200 +509,23 @@ namespace sylar {
         if(status == ARES_SUCCESS && naddrs == 0) status = ARES_ENODATA;
         if(status == ARES_SUCCESS) { //只要有a记录 就当做是成功
             /* We got our answer.  Allocate memory to build the host entry. */
-            aliases[naliases] = NULL;
-            hostent = malloc(sizeof(struct hostent));
-            if(hostent) {
-                hostent->h_addr_list = malloc((naddrs + 1) * sizeof(char *));
-                if(hostent->h_addr_list) {
+            if(host) {
+                host->h_addr_list = (char**)malloc((naddrs + 1) * sizeof(char *));
+                if(host->h_addr_list) {
                     /* Fill in the hostent and return successfully. */
-                    hostent->h_name = hostname;
-                    hostent->h_aliases = aliases;
-                    hostent->h_addrtype = AF_INET;
-                    hostent->h_length = sizeof(struct in_addr);
+                    host->h_name = (char*)&hostname[0];
+                    //host->h_aliases = &aliases[0];
+                    host->h_addrtype = AF_INET;
+                    host->h_length = sizeof(struct in_addr);
                     for (i = 0; i < naddrs; i++)
-                        hostent->h_addr_list[i] = (char *) &addrs[i];
-                    hostent->h_addr_list[naddrs] = NULL;
-                    *host = hostent;
+                        host->h_addr_list[i] = (char *) &addrs[i];
+                    host->h_addr_list[naddrs] = NULL;
                     return ARES_SUCCESS;
                 }
-                free(hostent);
             }
             status = ARES_ENOMEM;
         }
-        for(i = 0; i < naliases; i++)
-            free(aliases[i]);
-        free(aliases);
-        free(addrs);
-        free(hostname);
         return status;
-    }
-
-    int AresChannel::aresParsePtrReply(const unsigned char *abuf, int alen, const void *addr, int addrlen, int family, struct hostent **host) {
-        unsigned int qdcount, ancount;
-        int status, i, rr_type, rr_class, rr_len;
-        long len;
-        const unsigned char *aptr;
-        char *ptrname, *hostname, *rr_name, *rr_data;
-        struct hostent *hostent;
-
-        /* Set *host to NULL for all failure cases. */
-        *host = NULL;
-
-        /* Give up if abuf doesn't have room for a header. */
-        if (alen < HFIXEDSZ)
-            return ARES_EBADRESP;
-
-        /* Fetch the question and answer count from the header. */
-        qdcount = DNS_HEADER_QDCOUNT(abuf);
-        ancount = DNS_HEADER_ANCOUNT(abuf);
-        if (qdcount != 1)
-            return ARES_EBADRESP;
-
-        /* Expand the name from the question, and skip past the question. */
-        aptr = abuf + HFIXEDSZ;
-        status = ares_expand_name(aptr, abuf, alen, &ptrname, &len);
-        if (status != ARES_SUCCESS)
-            return status;
-        if (aptr + len + QFIXEDSZ > abuf + alen)
-        {
-            free(ptrname);
-            return ARES_EBADRESP;
-        }
-        aptr += len + QFIXEDSZ;
-
-        /* Examine each answer resource record (RR) in turn. */
-        hostname = NULL;
-        for (i = 0; i < (int)ancount; i++)
-        {
-            /* Decode the RR up to the data field. */
-            status = ares_expand_name(aptr, abuf, alen, &rr_name, &len);
-            if (status != ARES_SUCCESS)
-                break;
-            aptr += len;
-            if (aptr + RRFIXEDSZ > abuf + alen)
-            {
-                status = ARES_EBADRESP;
-                break;
-            }
-            rr_type = DNS_RR_TYPE(aptr);
-            rr_class = DNS_RR_CLASS(aptr);
-            rr_len = DNS_RR_LEN(aptr);
-            aptr += RRFIXEDSZ;
-
-            if (rr_class == C_IN && rr_type == T_PTR
-                && strcasecmp(rr_name, ptrname) == 0)
-            {
-                /* Decode the RR data and set hostname to it. */
-                status = ares_expand_name(aptr, abuf, alen, &rr_data, &len);
-                if (status != ARES_SUCCESS)
-                    break;
-                if (hostname)
-                    free(hostname);
-                hostname = rr_data;
-            }
-
-            if (rr_class == C_IN && rr_type == T_CNAME)
-            {
-                /* Decode the RR data and replace ptrname with it. */
-                status = ares_expand_name(aptr, abuf, alen, &rr_data, &len);
-                if (status != ARES_SUCCESS)
-                    break;
-                free(ptrname);
-                ptrname = rr_data;
-            }
-
-            free(rr_name);
-            aptr += rr_len;
-            if (aptr > abuf + alen)
-            {
-                status = ARES_EBADRESP;
-                break;
-            }
-        }
-
-        if (status == ARES_SUCCESS && !hostname)
-            status = ARES_ENODATA;
-        if (status == ARES_SUCCESS)
-        {
-            /* We got our answer.  Allocate memory to build the host entry. */
-            hostent = malloc(sizeof(struct hostent));
-            if (hostent)
-            {
-                hostent->h_addr_list = malloc(2 * sizeof(char *));
-                if (hostent->h_addr_list)
-                {
-                    hostent->h_addr_list[0] = malloc(addrlen);
-                    if (hostent->h_addr_list[0])
-                    {
-                        hostent->h_aliases = malloc(sizeof (char *));
-                        if (hostent->h_aliases)
-                        {
-                            /* Fill in the hostent and return successfully. */
-                            hostent->h_name = hostname;
-                            hostent->h_aliases[0] = NULL;
-                            hostent->h_addrtype = family;
-                            hostent->h_length = addrlen;
-                            memcpy(hostent->h_addr_list[0], addr, addrlen);
-                            hostent->h_addr_list[1] = NULL;
-                            *host = hostent;
-                            free(ptrname);
-                            return ARES_SUCCESS;
-                        }
-                        free(hostent->h_addr_list[0]);
-                    }
-                    free(hostent->h_addr_list);
-                }
-                free(hostent);
-            }
-            status = ARES_ENOMEM;
-        }
-        if (hostname)
-            free(hostname);
-        free(ptrname);
-        return status;
-    }
-
-    void AresChannel::readTCPData(time_t now) {
-        int count;
-        for (size_t i = 0; i < getServer().size(); i++) {
-            ServerState::ptr server = m_servers[i];
-            if (server->tcp_socket == -1)
-                continue;
-
-            count = recv(server->tcp_socket,
-                         &server->tcp_buffer[0],
-                         server->tcp_buffer.size(), 0);
-            if (count <= 0) {
-                continue;
-            }
-
-            server->tcp_buffer_pos += count;
-            if (server->tcp_buffer_pos == server->tcp_length) {
-                processAnswer(&server->tcp_buffer[0], server->tcp_length,
-                               i, 1, now);
-                server->tcp_lenbuf_pos = 0;
-            }
-        }
-    }
-
-    void AresChannel::endQuery(Query::ptr query, int status, unsigned char* abuf, int alen) {
-        int i;
-
-        //query->callback(query->arg, status, abuf, alen);
-        for (const auto &i : m_queries) {
-            if (i == query) break;
-        }
-        *q = query->next;
-        free(query->tcpbuf);
-        free(query->skip_server);
-        free(query);
-
-        /* Simple cleanup policy: if no queries are remaining, close all
-         * network sockets unless STAYOPEN is set.
-         */
-        if (!m_queries && !(flags & ARES_FLAG_STAYOPEN)) {
-            for (i = 0; i < getServer().size(); i++) ares__close_sockets(&channel->servers[i]);
-        }
     }
 
     void AresChannel::processAnswer(uint8_t* abuf, int alen, int whichserver, int tcp) {
@@ -756,7 +538,7 @@ namespace sylar {
         int tc = DNS_HEADER_TC(abuf);
         int rcode = DNS_HEADER_RCODE(abuf);
 
-        auto it = m_queries.find(id)
+        auto it = m_queries.find(id);
         if (it == m_queries.end()) {
             SYLAR_LOG_ERROR(g_logger) << "m_queries not has this id: "
             << id;
@@ -764,10 +546,10 @@ namespace sylar {
         }
         Query::ptr query = it->second;
 
-        if ((tc || alen > PACKETSZ) && !tcp && !(flags & ARES_FLAG_IGNTC)) { //如果包里明确有trunc 或 包长大于512字节
+        if ((tc || alen > PACKETSZ) && !tcp && !(m_flags & ARES_FLAG_IGNTC)) { //如果包里明确有trunc 或 包长大于512字节
             if (!query->using_tcp) {
                 query->using_tcp = 1;
-                aresSend(query);  //在收到trunc响应包后 立即用tcp请求 跟pdns一致
+                ares_send(query);  //在收到trunc响应包后 立即用tcp请求 跟pdns一致
             }
             return;
         }
@@ -776,7 +558,7 @@ namespace sylar {
             alen = PACKETSZ;
         }
 
-        if (!(flags & ARES_FLAG_NOCHECKRESP)) {
+        if (!(m_flags & ARES_FLAG_NOCHECKRESP)) {
             if (rcode == SERVFAIL || rcode == NOTIMP || rcode == REFUSED) {
                 query->skip_server[whichserver] = 1;
                 if (query->server_idx == whichserver) {
@@ -793,100 +575,12 @@ namespace sylar {
              */
         }
 
-        end_query(query, ARES_SUCCESS, abuf, alen);
+        aresParseReply(abuf, alen, &query->host);
+        sylar::Scheduler::GetThis()->schedule(query->fiber);
     }
 
-/* If any TCP sockets select true for writing, write out queued data
- * we have for them.
- */
-    void AresChannel::writeTcpData(fd_set *write_fds, time_t now) {
-        struct server_state *server;
-        struct send_request *sendreq;
-        struct iovec *vec;
-        int i, n, count;
-
-        for (i = 0; i < channel->nservers; i++)
-        {
-            /* Make sure server has data to send and is selected in write_fds. */
-            server = &channel->servers[i];
-            if (!server->qhead || server->tcp_socket == -1
-                || !FD_ISSET(server->tcp_socket, write_fds))
-                continue;
-
-            /* Count the number of send queue items. */
-            n = 0;
-            for (sendreq = server->qhead; sendreq; sendreq = sendreq->next)
-                n++;
-
-            /* Allocate iovecs so we can send all our data at once. */
-            vec = malloc(n * sizeof(struct iovec));
-            if (vec)
-            {
-                /* Fill in the iovecs and send. */
-                n = 0;
-                for (sendreq = server->qhead; sendreq; sendreq = sendreq->next)
-                {
-                    vec[n].iov_base = (char *) sendreq->data;
-                    vec[n].iov_len = sendreq->len;
-                    n++;
-                }
-                count = writev(server->tcp_socket, vec, n);
-                free(vec);
-                if (count < 0)
-                {
-                    handle_error(channel, i, now);
-                    continue;
-                }
-
-                /* Advance the send queue by as many bytes as we sent. */
-                while (count)
-                {
-                    sendreq = server->qhead;
-                    if ((size_t)count >= sendreq->len)
-                    {
-                        count -= sendreq->len;
-                        server->qhead = sendreq->next;
-                        if (server->qhead == NULL)
-                            server->qtail = NULL;
-                        free(sendreq);
-                    }
-                    else
-                    {
-                        sendreq->data += count;
-                        sendreq->len -= count;
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                /* Can't allocate iovecs; just send the first request. */
-                sendreq = server->qhead;
-
-                count = send(server->tcp_socket, sendreq->data, sendreq->len, 0);
-
-                if (count < 0)
-                {
-                    handle_error(channel, i, now);
-                    continue;
-                }
-
-                /* Advance the send queue by as many bytes as we sent. */
-                if ((size_t)count == sendreq->len)
-                {
-                    server->qhead = sendreq->next;
-                    if (server->qhead == NULL)
-                        server->qtail = NULL;
-                    free(sendreq);
-                }
-                else
-                {
-                    sendreq->data += count;
-                    sendreq->len -= count;
-                }
-            }
-        }
-    }
+    //void AresChannel::writeTcpData(fd_set *write_fds, time_t now);
+    //void AresChannel::readTCPData(time_t now);
 
 
 }

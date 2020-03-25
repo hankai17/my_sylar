@@ -7,6 +7,7 @@
 #include <functional>
 #include <sys/types.h>
 #include <netinet/in.h>
+#include <netdb.h>
 #include <unordered_map>
 #include "thread.hh"
 
@@ -121,11 +122,126 @@
 #define	INADDR_NONE 0xffffffff
 #endif
 
+typedef enum __ns_opcode {
+	ns_o_query = 0,         /* Standard query. */
+	ns_o_iquery = 1,        /* Inverse query (deprecated/unsupported). */
+	ns_o_status = 2,        /* Name server status query (unsupported). */
+	/* Opcode 3 is undefined/reserved. */
+			ns_o_notify = 4,        /* Zone change notification. */
+	ns_o_update = 5,        /* Zone update message. */
+	ns_o_max = 6
+} ns_opcode;
+
+typedef enum __ns_class {
+	ns_c_invalid = 0,       /* Cookie. */
+	ns_c_in = 1,            /* Internet. */
+	ns_c_2 = 2,             /* unallocated/unsupported. */
+	ns_c_chaos = 3,         /* MIT Chaos-net. */
+	ns_c_hs = 4,            /* MIT Hesiod. */
+	/* Query class values which do not appear in resource records */
+			ns_c_none = 254,        /* for prereq. sections in update requests */
+	ns_c_any = 255,         /* Wildcard match. */
+	ns_c_max = 65536
+} ns_class;
+
+typedef enum __ns_type {
+	ns_t_invalid = 0,       /* Cookie. */
+	ns_t_a = 1,             /* Host address. */
+	ns_t_ns = 2,            /* Authoritative server. */
+	ns_t_md = 3,            /* Mail destination. */
+	ns_t_mf = 4,            /* Mail forwarder. */
+	ns_t_cname = 5,         /* Canonical name. */
+	ns_t_soa = 6,           /* Start of authority zone. */
+	ns_t_mb = 7,            /* Mailbox domain name. */
+	ns_t_mg = 8,            /* Mail group member. */
+	ns_t_mr = 9,            /* Mail rename name. */
+	ns_t_null = 10,         /* Null resource record. */
+	ns_t_wks = 11,          /* Well known service. */
+	ns_t_ptr = 12,          /* Domain name pointer. */
+	ns_t_hinfo = 13,        /* Host information. */
+	ns_t_minfo = 14,        /* Mailbox information. */
+	ns_t_mx = 15,           /* Mail routing information. */
+	ns_t_txt = 16,          /* Text strings. */
+	ns_t_rp = 17,           /* Responsible person. */
+	ns_t_afsdb = 18,        /* AFS cell database. */
+	ns_t_x25 = 19,          /* X_25 calling address. */
+	ns_t_isdn = 20,         /* ISDN calling address. */
+	ns_t_rt = 21,           /* Router. */
+	ns_t_nsap = 22,         /* NSAP address. */
+	ns_t_nsap_ptr = 23,     /* Reverse NSAP lookup (deprecated). */
+	ns_t_sig = 24,          /* Security signature. */
+	ns_t_key = 25,          /* Security key. */
+	ns_t_px = 26,           /* X.400 mail mapping. */
+	ns_t_gpos = 27,         /* Geographical position (withdrawn). */
+	ns_t_aaaa = 28,         /* Ip6 Address. */
+	ns_t_loc = 29,          /* Location Information. */
+	ns_t_nxt = 30,          /* Next domain (security). */
+	ns_t_eid = 31,          /* Endpoint identifier. */
+	ns_t_nimloc = 32,       /* Nimrod Locator. */
+	ns_t_srv = 33,          /* Server Selection. */
+	ns_t_atma = 34,         /* ATM Address */
+	ns_t_naptr = 35,        /* Naming Authority PoinTeR */
+	ns_t_kx = 36,           /* Key Exchange */
+	ns_t_cert = 37,         /* Certification record */
+	ns_t_a6 = 38,           /* IPv6 address (deprecates AAAA) */
+	ns_t_dname = 39,        /* Non-terminal DNAME (for IPv6) */
+	ns_t_sink = 40,         /* Kitchen sink (experimentatl) */
+	ns_t_opt = 41,          /* EDNS0 option (meta-RR) */
+	ns_t_tsig = 250,        /* Transaction signature. */
+	ns_t_ixfr = 251,        /* Incremental zone transfer. */
+	ns_t_axfr = 252,        /* Transfer zone of authority. */
+	ns_t_mailb = 253,       /* Transfer mailbox records. */
+	ns_t_maila = 254,       /* Transfer mail agent records. */
+	ns_t_any = 255,         /* Wildcard match. */
+	ns_t_zxfr = 256,        /* BIND-specific, nonstandard. */
+	ns_t_max = 65536
+} ns_type;
+
+typedef enum __ns_rcode {
+	ns_r_noerror = 0,       /* No error occurred. */
+	ns_r_formerr = 1,       /* Format error. */
+	ns_r_servfail = 2,      /* Server failure. */
+	ns_r_nxdomain = 3,      /* Name error. */
+	ns_r_notimpl = 4,       /* Unimplemented. */
+	ns_r_refused = 5,       /* Operation refused. */
+	/* these are for BIND_UPDATE */
+			ns_r_yxdomain = 6,      /* Name exists */
+	ns_r_yxrrset = 7,       /* RRset exists */
+	ns_r_nxrrset = 8,       /* RRset does not exist */
+	ns_r_notauth = 9,       /* Not authoritative for zone */
+	ns_r_notzone = 10,      /* Zone of record different from zone section */
+	ns_r_max = 11,
+	/* The following are TSIG extended errors */
+			ns_r_badsig = 16,
+	ns_r_badkey = 17,
+	ns_r_badtime = 18
+} ns_rcode;
+
+#define SERVFAIL        ns_r_servfail
+#define NOTIMP          ns_r_notimpl
+#define REFUSED         ns_r_refused
+#undef NOERROR /* it seems this is already defined in winerror.h */
+#define NOERROR         ns_r_noerror
+#define FORMERR         ns_r_formerr
+#define NXDOMAIN        ns_r_nxdomain
+
+#define T_PTR          ns_t_ptr
+#define T_A            ns_t_a
+#define C_IN           ns_c_in
+#define QUERY          ns_o_query
+#define MAXLABEL   63
+#define INDIR_MASK 0xc0
+#define RRFIXEDSZ  10
+#define T_CNAME                ns_t_cname
+
+#define PACKETSZ   512     /* maximum packet size */
+#define HFIXEDSZ   12
+#define QFIXEDSZ   4
 #define PATH_RESOLV_CONF	"/etc/resolv.conf"
 #define PATH_HOSTS			"/etc/hosts"
 
 typedef std::function<void(void* arg, int status, unsigned char* abuf, int alen)> ares_cb;
-typedef std::function<void(void* arg, int status, struct hostent* hostent)> ares_host_cb
+typedef std::function<void(void* arg, int status, struct hostent* hostent)> ares_host_cb;
 
 namespace sylar {
 	struct AresOptions {
@@ -133,11 +249,11 @@ namespace sylar {
 		int 	m_timeout = -1;
 		int 	m_tries = 2;
 		int 	m_ndots = -1;
-		uint16_t m_udp_port = 53; // ns's port default 53
-		uint16_t m_tcp_port = 53;
-		struct in_addr*	servers = NULL;
+		uint16_t m_udp_port = htons(53); // ns's port default 53
+		uint16_t m_tcp_port = htons(53);
+		struct in_addr*	servers = nullptr;
 		int 	m_nservers = -1;
-		std::string m_lookups = NULL;
+		std::string m_lookups;
 		std::vector<std::string> m_domains = {};
 	};
 
@@ -151,15 +267,12 @@ namespace sylar {
 	class ServerState {
 	public:
 		typedef std::shared_ptr<ServerState> ptr;
-		ServerState();
-
 		int getTCPFd() const { return tcp_socket; }
 		int getUDPFd() const { return udp_socket; }
 		int openTcpSocket(uint16_t port);
 		int openUdpSocket(uint16_t port);
 		int aresFds(fd_set* read_fds, fd_set* write_fds);
 
-	private:
 		int udp_socket;
 		int tcp_socket;
 
@@ -184,11 +297,13 @@ namespace sylar {
 		time_t 	 		timeout;
 		int 			qlen;
 
-		std::string		m_tcpbuf;
-		const unsigned char* qbuf; //Arguments passed to ares_send() (qbuf points into tcpbuf)
+		std::vector<uint8_t> m_tcpbuf;
+		const unsigned char* qbuf; // qbuf points into tcpbuf
 
 		std::vector<int> skip_server;
-		ares_callback 	callback;
+		ares_cb 	callback;
+		Fiber::ptr		fiber;
+		struct hostent  host;
 
 		int 			try_count;
 		int 			server_idx; // which one in resolve.conf
@@ -207,39 +322,30 @@ namespace sylar {
 		typedef std::shared_ptr<AresChannel> ptr;
 		typedef RWMutex RWMutexType;
 		AresChannel();
-		~AresChannel() {}
+		~AresChannel();
 		void init();
-		std::vector<ServerState>& getServer() const { return m_servers; }
 		int getServerSize() { return m_servers.size(); }
+		void setServers(std::vector<ServerState::ptr>&& v) { m_servers = v; }
 
-		int AresChannel::aresRegistFds();
+		int ares_mkquery(const char* name, int dnsclass, int type, unsigned short id, int rd,
+				std::vector<uint8_t>& buf/*in-out*/);
 
-		void AresCallBack();
-		void nextServer(Query::ptr query, time_t now);
-		void ares_send(Channel::ptr channel, Query::ptr query, time_t now);
-		void aresSend(std::vector<unsigned char>& qbuf);
-		void aresQuery(const char* name, int dnsclass, int type);
-		void aresGethostbyname(const char* name, int family);
+		void aresGethostbyname(const char* name);
+		int aresQuery(const char* name, int dnsclass, int type);
+		void aresSend(std::vector<uint8_t>& qbuf/*in*/);
+		void ares_send(Query::ptr query);
+		void nextServer(Query::ptr query);
 
-		struct timeval *ares_timeout(ares_channel channel, struct timeval *maxtv, struct timeval *tvbuf);
-		void ares_process(ares_channel channel, fd_set *read_fds, fd_set *write_fds);
-		int ares_mkquery(const char* name, int dnsclass, int type, unsigned short id, int rd);
-		int aresExpandName(const unsigned char *encoded, const unsigned char *abuf, int alen, char **s, long *enclen);
-		int aresParseReply(const unsigned char *abuf, int alen, struct hostent **host);
-		int aresParsePtrReply(const unsigned char *abuf, int alen, const void *addr, int addrlen, int family, struct hostent **host);
+		int aresRegistFds();
+		void AresUDPCallBack(int fd);
 
-		void ares__close_sockets(struct server_state *server);
+		void processAnswer(uint8_t* abuf, int alen, int whichserver, int tcp);
+		int aresParseReply(uint8_t* abuf, int alen, struct hostent* host);
+		int aresExpandName(uint8_t* encoded, uint8_t* abuf, int alen, std::vector<uint8_t>& s, int* enclen);
 
-		void readTcpData(fd_set *read_fds, time_t now);
-		void readUdpPackets(fd_set *read_fds, time_t now);
-		void processAnswer(unsigned char *abuf, int alen, int whichserver, int tcp, int now);
-		void endQuery(Query::ptr query, int status, unsigned char* abuf, int alen);
-
-		struct apattern* sortlist;
-		int 				nsort;
 	private:
 		RWMutexType			m_mutex;
-		uint16_t 			next_id;
+		uint16_t 			m_nextId;
 		std::vector<ServerState::ptr> 		m_servers;
 		std::unordered_map<uint16_t, Query::ptr> m_queries;
 	};
