@@ -25,54 +25,30 @@ namespace sylar {
         return s;
     }
 
-    static const char* try_option(const char* p, const char* q, const char* opt) {
-        size_t len = strlen(opt);
-        return ((size_t)(q - p) > len && !strncmp(p, opt, len)) ? &p[len] : NULL;
-    }
-
-    static int config_nameserver(std::vector<ServerState::ptr>& servers, char* str) {
-        ServerState::ptr newserv(new ServerState);
-        struct in_addr addr;
-        addr.s_addr = inet_addr(str); //Add a nameserver entry, if this is a valid address
-        if (addr.s_addr == INADDR_NONE)
-            return ARES_SUCCESS;
-        newserv->addr = addr;
-        servers.push_back(newserv);
-        return ARES_SUCCESS;
-    }
-
     static int init_by_resolv_conf(AresChannel* channel) {
-        int status = 0;
-        std::vector<ServerState::ptr> servers;
+        std::map<int, std::map<sylar::Address::ptr, Socket::ptr> > servers;
         {
             char* p;
             std::string line;
             std::ifstream ifs;
+            int i = 0;
             if (!sylar::FSUtil::OpenForRead(ifs, PATH_RESOLV_CONF, std::ios::binary)) {
                 SYLAR_LOG_ERROR(g_logger) << "Can not open " << PATH_RESOLV_CONF << " errno: "
                 << errno << " strerrno: " << strerror(errno);
                 return 0;
             }
             while (getline(ifs, line)) {
-                if ((p = try_config(const_cast<char*>(line.c_str()), "domain")) )
-                    ;
-                    //status = set_search(channel, p);
-                if ((p = try_config(const_cast<char*>(line.c_str()), "nameserver")) )
-                    status = config_nameserver(servers, p);
-                else
-                    status = ARES_SUCCESS;
-                if (status != ARES_SUCCESS)
-                    break;
+                if ((p = try_config(const_cast<char*>(line.c_str()), "domain")) ) {
+                    continue;
+                } else if ((p = try_config(const_cast<char*>(line.c_str()), "nameserver")) ) {
+                    servers[i].insert(std::make_pair(sylar::IPAddress::Create(p, 53), nullptr));
+                    i++;
+                }
             }
         }
         if(servers.size()) {
             channel->setServers(std::move(servers));
         }
-
-        if(status != ARES_EOF) {
-            return status;
-        }
-
         return 0;
     }
     ///////////////////////////////////////////////////////////////////////////
@@ -99,7 +75,7 @@ namespace sylar {
         sockin.sin_addr = addr;
         sockin.sin_port = port;
         if(connect(s, (struct sockaddr *)&sockin, sizeof(sockin)) == -1 && errno != EINPROGRESS) {
-            ares_closesocket(s);
+            close(s);
             return -1;
         }
         tcp_socket = s;
@@ -118,7 +94,7 @@ namespace sylar {
         sockin.sin_addr = addr;
         sockin.sin_port = port;
         if(connect(s, (struct sockaddr *) &sockin, sizeof(sockin)) == -1) {
-            ares_closesocket(s);
+            close(s);
             return -1;
         }
         udp_socket = s;
@@ -162,11 +138,8 @@ namespace sylar {
         processAnswer(&buf[0], count, which_server, 0);
     }
 
-    AresChannel::AresChannel()
-    : AresOptions() {
-    }
-
-    AresChannel::~AresChannel() {
+    AresChannel::AresChannel(IOManager* worker, IOManager* receiver)
+    : UdpServer(worker, receiver) {
     }
 
     void AresChannel::init() {
@@ -190,14 +163,15 @@ namespace sylar {
             if(query->using_tcp)
                 break;
         }
-        //end_query(channel, query, query->error_status, NULL, 0);
     }
 
     void AresChannel::ares_send(Query::ptr query) {
-        ServerState::ptr server = m_servers[query->server_idx];
+        auto server = m_servers[query->server_idx];
+        auto it = server.begin();
         if(query->using_tcp) {
-            if (server->tcp_socket < 0) {
-                if (server->openTcpSocket(m_tcp_port) == -1) {
+            if (it->second == nullptr) {
+                it->second = bind(nullptr);
+                if (false) {
                     query->skip_server[query->server_idx] = 1;
                     nextServer(query);
                     return;
@@ -208,14 +182,15 @@ namespace sylar {
             sendreq->len = query->m_tcpbuf.size();
             query->timeout = 0;
         } else {
-            if(server->udp_socket < 0) {
-                if (server->openUdpSocket(m_udp_port) == -1) {
+            if(it->second == nullptr) {
+                it->second = bind(nullptr);
+                if (false) {
                     query->skip_server[query->server_idx] = 1;
                     nextServer(query);
                     return;
                 }
             }
-            if(send(server->udp_socket, query->qbuf, query->qlen, 0) == -1) {
+            if (it->second->sendTo(query->qbuf, query->qlen, it->first) == -1) {
                 query->skip_server[query->server_idx] = 1;
                 nextServer(query);
                 return;
@@ -225,7 +200,7 @@ namespace sylar {
         }
     }
 
-    int AresChannel::ares_mkquery(const char* name, int dnsclass, int type, unsigned short id, int rd,
+    int AresChannel::ares_mkquery(const char* name, int dnsclass, int type, uint16_t id, int rd,
             std::vector<uint8_t>& buf/*in-out*/) {
         int len;
         unsigned char *q;
@@ -372,10 +347,10 @@ namespace sylar {
         return ARES_SUCCESS;
     }
 
-    void AresChannel::aresSend(std::vector<uint8_t>& qbuf) {
+    void AresChannel::aresSend(const std::vector<uint8_t>& qbuf) {
         int qlen = qbuf.size();
         if(qlen < HFIXEDSZ || qlen >= (1 << 16)) {
-            SYLAR_LOG_ERROR(g_logger) << "qlen too small or too max " << qlen;
+            SYLAR_LOG_ERROR(g_logger) << "aresSend qlen too small or too max " << qlen;
             return;
         }
 
@@ -401,28 +376,32 @@ namespace sylar {
         query->error_status = ARES_ECONNREFUSED;
 
         m_queries.insert(std::make_pair(query->qid, query));
-        time_t now;
-        time(&now);
         ares_send(query);
     }
 
-    int AresChannel::aresQuery(const char* name, int dnsclass, int type) {
-        std::vector<uint8_t> qbuf;
-        int rd, status;
-
-        rd = !(m_flags & ARES_FLAG_NORECURSE);
-        status = ares_mkquery(name, dnsclass, type, m_nextId, rd, qbuf);
-        m_nextId++;
+    uint16_t AresChannel::aresQuery(const std::string& name, int dnsclass, int type) {
+        std::vector<uint8_t> qbuf; //in-out
+        int rd = !(m_flags & ARES_FLAG_NORECURSE);
+        uint16_t messageId = m_nextId++;
+        int status = ares_mkquery(name.c_str(), dnsclass, type, messageId, rd, qbuf);
         if(status != ARES_SUCCESS) {
             return -1;
         }
         aresSend(qbuf);
-        return m_nextId - 1;
+        return messageId;
     }
 
-    void AresChannel::aresGethostbyname(const char* name) {
-        int id = aresQuery(name, C_IN, T_A);
-        Query::ptr query = m_queries[id];
+    void AresChannel::aresGethostbyname(const std::string& name) {
+        uint16_t messageId = aresQuery(name);
+        if (messageId < 0) {
+            SYLAR_LOG_ERROR(g_logger) << "aresGethostbyname failed: messageId < 0";
+            return;
+        }
+        Query::ptr query = m_queries[messageId];
+        if (!query) {
+            SYLAR_LOG_ERROR(g_logger) << "aresGethostbyname not exist this query";
+            return;
+        }
         query->fiber = sylar::Fiber::GetThis();
         sylar::Fiber::YeildToHold();
         SYLAR_LOG_DEBUG(g_logger) << "get there";
@@ -582,5 +561,3 @@ namespace sylar {
     //void AresChannel::writeTcpData(fd_set *write_fds, time_t now);
     //void AresChannel::readTCPData(time_t now);
 
-
-}

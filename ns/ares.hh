@@ -9,7 +9,10 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <unordered_map>
+#include <atomic>
 #include "thread.hh"
+#include "tcp_server.hh"
+#include "address.hh"
 
 #define ARES_SUCCESS		0
 
@@ -113,9 +116,6 @@
 #define DNS_RR_SET_CLASS(r)		DNS__SET16BIT((r) + 2, v)
 #define DNS_RR_SET_TTL(r)		DNS__SET32BIT((r) + 4, v)
 #define DNS_RR_SET_LEN(r)		DNS__SET16BIT((r) + 8, v)
-
-#define ares_closesocket(x) close(x)
-
 #define	DEFAULT_TIMEOUT		5
 #define DEFAULT_TRIES		4
 #ifndef INADDR_NONE
@@ -244,18 +244,6 @@ typedef std::function<void(void* arg, int status, unsigned char* abuf, int alen)
 typedef std::function<void(void* arg, int status, struct hostent* hostent)> ares_host_cb;
 
 namespace sylar {
-	struct AresOptions {
-		int 	m_flags = 16;
-		int 	m_timeout = -1;
-		int 	m_tries = 2;
-		int 	m_ndots = -1;
-		uint16_t m_udp_port = htons(53); // ns's port default 53
-		uint16_t m_tcp_port = htons(53);
-		struct in_addr*	servers = nullptr;
-		int 	m_nservers = -1;
-		std::string m_lookups;
-		std::vector<std::string> m_domains = {};
-	};
 
 	class SendRequest { // Only use for tcp
 	public:
@@ -271,22 +259,11 @@ namespace sylar {
 		int getUDPFd() const { return udp_socket; }
 		int openTcpSocket(uint16_t port);
 		int openUdpSocket(uint16_t port);
-		int aresFds(fd_set* read_fds, fd_set* write_fds);
 
 		int udp_socket;
 		int tcp_socket;
 
-		/* Mini-buffer for reading the length word */
-		unsigned char tcp_lenbuf[2];
-		int tcp_lenbuf_pos;
-		int tcp_length;
-
-		std::vector<unsigned char> tcp_buffer;
-		int tcp_buffer_pos;
-
 		/* TCP output queue */
-		std::list<SendRequest::ptr>  m_sends;
-
 		struct in_addr addr; // init by read resolve.conf
 	};
 
@@ -311,28 +288,23 @@ namespace sylar {
 		int 			error_status;
 	};
 
-	/* An IP address pattern; matches an IP address X if X & mask == addr */
-	struct apattern {
-		struct in_addr addr;
-		struct in_addr mask;
-	};
-
-	class AresChannel : public AresOptions {
+	class AresChannel : UdpServer {
 	public:
 		typedef std::shared_ptr<AresChannel> ptr;
 		typedef RWMutex RWMutexType;
-		AresChannel();
-		~AresChannel();
+		AresChannel(sylar::IOManager* worker = sylar::IOManager::GetThis(),
+				sylar::IOManager* receiver = sylar::IOManager::GetThis());
+		~AresChannel() {}
 		void init();
+		void setServers(std::map<int, std::map<Address::ptr, Socket::ptr> >&& v) { m_servers = v; }
 		int getServerSize() { return m_servers.size(); }
-		void setServers(std::vector<ServerState::ptr>&& v) { m_servers = v; }
 
-		int ares_mkquery(const char* name, int dnsclass, int type, unsigned short id, int rd,
-				std::vector<uint8_t>& buf/*in-out*/);
+		int ares_mkquery(const char* name, int dnsclass, int type, uint16_t id, int rd,
+				std::vector<uint8_t>& buf);
 
-		void aresGethostbyname(const char* name);
-		int aresQuery(const char* name, int dnsclass, int type);
-		void aresSend(std::vector<uint8_t>& qbuf/*in*/);
+		void aresGethostbyname(const std::string& name);
+		uint16_t aresQuery(const std::string& name, int dnsclass = C_IN, int type = T_A);
+		void aresSend(const std::vector<uint8_t>& qbuf);
 		void ares_send(Query::ptr query);
 		void nextServer(Query::ptr query);
 
@@ -345,9 +317,14 @@ namespace sylar {
 
 	private:
 		RWMutexType			m_mutex;
-		uint16_t 			m_nextId;
-		std::vector<ServerState::ptr> 		m_servers;
-		std::unordered_map<uint16_t, Query::ptr> m_queries;
+		int 				m_flags = 16;
+		int 				m_timeout = -1;
+		int 				m_tries = 2;
+		uint16_t 			m_udp_port = htons(53);
+		uint16_t 			m_tcp_port = htons(53);
+		std::atomic<uint16_t> 						m_nextId;
+		std::map<int, std::map<Address::ptr, Socket::ptr> >	m_servers; // resolv.conf's addr
+		std::unordered_map<uint16_t, Query::ptr> 	m_queries;
 	};
 
 }

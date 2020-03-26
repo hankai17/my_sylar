@@ -118,4 +118,80 @@ namespace sylar {
         return true;
     }
 
+    UdpServer::UdpServer(IOManager* worker, IOManager* receiver)
+    : m_worker(worker),
+    m_receiver(receiver),
+    m_recvTimeout(g_tcp_server_read_timeout->getValue()),
+    m_name("sylar/1.0.0"),
+    m_isStop(true) {
+    }
+
+    Socket::ptr UdpServer::bind(Address::ptr addr, bool is_bind, bool ssl) {
+        Socket::ptr sock = ssl ? Socket::CreateUDPSocket() : SSLSocket::CreateUDPSocket();
+        if (is_bind) {
+            if(!sock->bind(addr)) {
+                SYLAR_LOG_ERROR(g_logger) << "UdpServer bind err errno: " << errno
+                << " strerrno: " << strerror(errno);
+            }
+        }
+        m_socks.push_back(sock);
+        return sock;
+    }
+
+    bool UdpServer::start() {
+        if (!m_isStop) {
+            return true;
+        }
+        m_isStop = false;
+        for (const auto& i : m_socks) {
+            m_receiver->schedule(std::bind(&UdpServer::startReceiver,
+                                               shared_from_this(), i));
+        }
+        return true;
+    }
+
+    void UdpServer::stop() {
+        m_isStop = true;
+        auto self = shared_from_this();
+        m_receiver->schedule([this, self](){
+            for (const auto& i : m_socks) {
+                i->cancelAll();
+                i->close();
+            }
+            m_socks.clear();
+        });
+    }
+
+    bool UdpServer::loadCertificates(const std::string& cert_file, const std::string& key_file) {
+        for (const auto& i : m_socks) {
+            auto ssl_socket = std::dynamic_pointer_cast<SSLSocket>(i);
+            if (ssl_socket) {
+                if (!ssl_socket->loadCertificates(cert_file, key_file)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    void UdpServer::handleClient(Socket::ptr client) {
+        ;
+    }
+
+    void UdpServer::startReceiver(Socket::ptr sock) {
+        /*
+        while (!m_isStop) {
+            // read m_socket
+            // parse readed buf & schedule to worker
+        }
+         */
+    }
+
+    UdpServer::~UdpServer() {
+        for (const auto& i : m_socks) {
+            i->close();
+        }
+        m_socks.clear();
+    }
+
 }
