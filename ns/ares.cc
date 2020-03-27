@@ -1,4 +1,3 @@
-#include "ns/ares.hh"
 #include <string.h>
 #include <stdlib.h>
 #include <sys/socket.h>
@@ -7,6 +6,9 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/time.h>
+#include <iostream>
+
+#include "ns/ares.hh"
 #include "util.hh"
 #include "log.hh"
 #include "iomanager.hh"
@@ -14,39 +16,39 @@
 namespace sylar {
     static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
 
-    static char* try_config(char* s, const char* opt) {
+    static char *try_config(char *s, const char *opt) {
         size_t len;
         len = strlen(opt);
-        if (strncmp(s, opt, len) != 0 || !isspace((unsigned char)s[len]))
+        if (strncmp(s, opt, len) != 0 || !isspace((unsigned char) s[len]))
             return NULL;
         s += len;
-        while (isspace((unsigned char)*s))
+        while (isspace((unsigned char) *s))
             s++;
         return s;
     }
 
-    static int init_by_resolv_conf(AresChannel* channel) {
+    static int init_by_resolv_conf(AresChannel *channel) {
         std::map<int, std::map<sylar::Address::ptr, Socket::ptr> > servers;
         {
-            char* p;
+            char *p;
             std::string line;
             std::ifstream ifs;
             int i = 0;
             if (!sylar::FSUtil::OpenForRead(ifs, PATH_RESOLV_CONF, std::ios::binary)) {
                 SYLAR_LOG_ERROR(g_logger) << "Can not open " << PATH_RESOLV_CONF << " errno: "
-                << errno << " strerrno: " << strerror(errno);
+                                          << errno << " strerrno: " << strerror(errno);
                 return 0;
             }
             while (getline(ifs, line)) {
-                if ((p = try_config(const_cast<char*>(line.c_str()), "domain")) ) {
+                if ((p = try_config(const_cast<char *>(line.c_str()), "domain"))) {
                     continue;
-                } else if ((p = try_config(const_cast<char*>(line.c_str()), "nameserver")) ) {
-                    servers[i].insert(std::make_pair(sylar::IPAddress::Create(p, 53), nullptr));
+                } else if ((p = try_config(const_cast<char *>(line.c_str()), "nameserver"))) {
+                    servers[i].insert(std::make_pair(IPAddress::Create(p, 53), nullptr));
                     i++;
                 }
             }
         }
-        if(servers.size()) {
+        if (servers.size()) {
             channel->setServers(std::move(servers));
         }
         return 0;
@@ -57,7 +59,7 @@ namespace sylar {
         int s, flags;
         struct sockaddr_in sockin;
         s = socket(AF_INET, SOCK_STREAM, 0);
-        if(s == -1)
+        if (s == -1)
             return -1;
         flags = fcntl(s, F_GETFL, 0);
         if (flags == -1) {
@@ -65,7 +67,7 @@ namespace sylar {
             return -1;
         }
         flags |= O_NONBLOCK;
-        if(fcntl(s, F_SETFL, flags) == -1) {
+        if (fcntl(s, F_SETFL, flags) == -1) {
             close(s);
             return -1;
         }
@@ -74,7 +76,7 @@ namespace sylar {
         sockin.sin_family = AF_INET;
         sockin.sin_addr = addr;
         sockin.sin_port = port;
-        if(connect(s, (struct sockaddr *)&sockin, sizeof(sockin)) == -1 && errno != EINPROGRESS) {
+        if (connect(s, (struct sockaddr *) &sockin, sizeof(sockin)) == -1 && errno != EINPROGRESS) {
             close(s);
             return -1;
         }
@@ -87,13 +89,13 @@ namespace sylar {
         struct sockaddr_in sockin;
         /* Acquire a socket. */
         s = socket(AF_INET, SOCK_DGRAM, 0);
-        if(s == -1) return -1;
+        if (s == -1) return -1;
         /* Connect to the server. */
         memset(&sockin, 0, sizeof(sockin));
         sockin.sin_family = AF_INET;
         sockin.sin_addr = addr;
         sockin.sin_port = port;
-        if(connect(s, (struct sockaddr *) &sockin, sizeof(sockin)) == -1) {
+        if (connect(s, (struct sockaddr *) &sockin, sizeof(sockin)) == -1) {
             close(s);
             return -1;
         }
@@ -101,74 +103,42 @@ namespace sylar {
         return 0;
     }
 
-    int AresChannel::aresRegistFds() {
-        for(const auto& i : m_servers) {
-            if(i->udp_socket > 0) {
-                sylar::IOManager::GetThis()->addEvent(i->udp_socket, IOManager::READ,
-                        std::bind(&AresChannel::AresUDPCallBack, this, i->udp_socket));
-            }
-            if(i->tcp_socket > 0) {
-                //sylar::IOManager::GetThis()->addEvent(i->tcp_socket, IOManager::READ,
-                        //std::bind(&AresChannel::AresTCPCallBack, this));
-                //sylar::IOManager::GetThis()->addEvent(i->tcp_socket, IOManager::WRITE,
-                 //                                     std::bind(&AresChannel::AresTCPCallBack, this));
-            }
-        }
-        return 0;
-    }
-
-    void AresChannel::AresUDPCallBack(int fd) {
-        std::vector<uint8_t> buf;
-        buf.resize(PACKETSZ + 1);
-        int which_server = -1;
-
-        int count = recv(fd, &buf[0], buf.size(), 0);
-        if (count <= 0) {
-            SYLAR_LOG_ERROR(g_logger) << "UDP recv faild errno: " << errno
-            << " strerrno: " << strerror(errno);
-            return;
-        }
-        for (size_t i = 0; i < m_servers.size(); i++) {
-            if (m_servers[i]->getTCPFd() == fd ||
-                m_servers[i]->getUDPFd() == fd) {
-                which_server = i;
-                break;
-            }
-        }
-        processAnswer(&buf[0], count, which_server, 0);
-    }
-
-    AresChannel::AresChannel(IOManager* worker, IOManager* receiver)
-    : UdpServer(worker, receiver) {
+    AresChannel::AresChannel(IOManager *worker, IOManager *receiver)
+            : UdpServer(worker, receiver) {
     }
 
     void AresChannel::init() {
         struct timeval tv;
         init_by_resolv_conf(this);
+        if (m_servers.size()) {
+            for (auto& i : m_servers) {
+                auto &j = i.second;
+                j.begin()->second = bind(nullptr);
+            }
+        }
         gettimeofday(&tv, NULL);
         m_nextId = (unsigned short) (tv.tv_sec ^ tv.tv_usec ^ getpid()) & 0xffff;
     }
 
     void AresChannel::nextServer(Query::ptr query) {
         query->server_idx++;
-        for(; query->try_count < m_tries; query->try_count++) { // try小于全局定义的次数
-            for(; query->server_idx < getServerSize(); query->server_idx++) {
-                if(!query->skip_server[query->server_idx]) {
+        for (; query->try_count < m_tries; query->try_count++) { // try小于全局定义的次数
+            for (; query->server_idx < getServerSize(); query->server_idx++) {
+                if (!query->skip_server[query->server_idx]) {
                     ares_send(query);
                     return;
                 }
             }
             query->server_idx = 0;
-
-            if(query->using_tcp)
-                break;
+            //if(query->using_tcp)
+            //break;
         }
     }
 
     void AresChannel::ares_send(Query::ptr query) {
         auto server = m_servers[query->server_idx];
         auto it = server.begin();
-        if(query->using_tcp) {
+        if (query->using_tcp) {
             if (it->second == nullptr) {
                 it->second = bind(nullptr);
                 if (false) {
@@ -182,7 +152,7 @@ namespace sylar {
             sendreq->len = query->m_tcpbuf.size();
             query->timeout = 0;
         } else {
-            if(it->second == nullptr) {
+            if (it->second == nullptr) {
                 it->second = bind(nullptr);
                 if (false) {
                     query->skip_server[query->server_idx] = 1;
@@ -195,13 +165,13 @@ namespace sylar {
                 nextServer(query);
                 return;
             }
-            aresRegistFds();
-            query->timeout = time(0) + ((query->try_count == 0) ? m_timeout : m_timeout << query->try_count / getServerSize());
+            query->timeout =
+                    time(0) + ((query->try_count == 0) ? m_timeout : m_timeout << query->try_count / getServerSize());
         }
     }
 
-    int AresChannel::ares_mkquery(const char* name, int dnsclass, int type, uint16_t id, int rd,
-            std::vector<uint8_t>& buf/*in-out*/) {
+    int AresChannel::ares_mkquery(const char *name, int dnsclass, int type, uint16_t id, int rd,
+                                  std::vector<uint8_t> &buf/*in-out*/) {
         int len;
         unsigned char *q;
         const char *p;
@@ -217,7 +187,7 @@ namespace sylar {
          * thus n + 1 length fields, unless the name is empty or ends with a
          * period.  So add 1 unless name is empty or ends with a period.
          */
-        if(*name && *(p - 1) != '.')  //顶级域必须有点结尾
+        if (*name && *(p - 1) != '.')  //顶级域必须有点结尾
             len++;
 
         buf.resize(len + HFIXEDSZ + QFIXEDSZ);
@@ -231,26 +201,26 @@ namespace sylar {
         DNS_HEADER_SET_QDCOUNT(q, 1);
 
         /* A name of "." is a screw case for the loop below, so adjust it. */
-        if(strcmp(name, ".") == 0)
+        if (strcmp(name, ".") == 0)
             name++;
 
         /* Start writing out the name after the header. */
         q += HFIXEDSZ;
-        while(*name) {
-            if(*name == '.') return ARES_EBADNAME;
+        while (*name) {
+            if (*name == '.') return ARES_EBADNAME;
 
             /* Count the number of bytes in this label. */
             len = 0;
-            for(p = name; *p && *p != '.'; p++) {
-                if(*p == '\\' && *(p + 1) != 0)
+            for (p = name; *p && *p != '.'; p++) {
+                if (*p == '\\' && *(p + 1) != 0)
                     p++;
                 len++;
             }
-            if(len > MAXLABEL) return ARES_EBADNAME;
+            if (len > MAXLABEL) return ARES_EBADNAME;
 
             /* Encode the length and copy the data. */
             *q++ = len;
-            for(p = name; *p && *p != '.'; p++) {
+            for (p = name; *p && *p != '.'; p++) {
                 if (*p == '\\' && *(p + 1) != 0)
                     p++;
                 *q++ = *p;
@@ -270,26 +240,26 @@ namespace sylar {
         return ARES_SUCCESS;
     }
 
-    static int name_length(const uint8_t* encoded, const uint8_t* abuf, int alen) { //返回压缩前 域名长度 包括点
+    static int name_length(const uint8_t *encoded, const uint8_t *abuf, int alen) { //返回压缩前 域名长度 包括点
         int n = 0, offset, indir = 0;
 
-        if(encoded == abuf + alen) return -1;
+        if (encoded == abuf + alen) return -1;
 
-        while(*encoded) {
-            if((*encoded & INDIR_MASK) == INDIR_MASK) { //0xc0
+        while (*encoded) {
+            if ((*encoded & INDIR_MASK) == INDIR_MASK) { //0xc0
                 /* Check the offset and go there. */
-                if(encoded + 1 >= abuf + alen) return -1;
+                if (encoded + 1 >= abuf + alen) return -1;
                 offset = (*encoded & ~INDIR_MASK) << 8 | *(encoded + 1);
-                if(offset >= alen) return -1;
+                if (offset >= alen) return -1;
                 encoded = abuf + offset;
 
                 /* If we've seen more indirects than the message length,
                  * then there's a loop.
                  */
-                if(++indir > alen) return -1;
+                if (++indir > alen) return -1;
             } else {
                 offset = *encoded;
-                if(encoded + offset + 1 >= abuf + alen) return -1;
+                if (encoded + offset + 1 >= abuf + alen) return -1;
                 encoded++;
                 while (offset--) {
                     n += (*encoded == '.' || *encoded == '\\') ? 2 : 1;
@@ -305,22 +275,22 @@ namespace sylar {
         return (n) ? n - 1 : n;
     }
 
-    int AresChannel::aresExpandName(uint8_t* encoded, uint8_t* abuf, int alen,
-            std::vector<uint8_t>& s, int* enclen) {
+    int AresChannel::aresExpandName(uint8_t *encoded, uint8_t *abuf, int alen,
+                                    std::vector<uint8_t> &s, int *enclen) {
         int len, indir = 0;
-        const uint8_t* p;
+        const uint8_t *p;
 
         len = name_length(encoded, abuf, alen); //仅是assert作用 感觉很多余?
-        if(len == -1) return ARES_EBADNAME;
+        if (len == -1) return ARES_EBADNAME;
 
         s.resize(len + 1);
-        uint8_t* q = &s[0];
+        uint8_t *q = &s[0];
 
         /* No error-checking necessary; it was all done by name_length(). */
         p = encoded;
-        while(*p) { //拷贝
-            if((*p & INDIR_MASK) == INDIR_MASK) {
-                if(!indir) {
+        while (*p) { //拷贝
+            if ((*p & INDIR_MASK) == INDIR_MASK) {
+                if (!indir) {
                     *enclen = p + 2 - encoded;
                     indir = 1;
                 }
@@ -328,8 +298,8 @@ namespace sylar {
             } else {
                 len = *p;
                 p++;
-                while(len--) {
-                    if(*p == '.' || *p == '\\')
+                while (len--) {
+                    if (*p == '.' || *p == '\\')
                         *q++ = '\\';
                     *q++ = *p;
                     p++;
@@ -337,7 +307,7 @@ namespace sylar {
                 *q++ = '.';
             }
         }
-        if(!indir)
+        if (!indir)
             *enclen = p + 1 - encoded;
 
         /* Nuke the trailing period if we wrote one. */
@@ -347,9 +317,9 @@ namespace sylar {
         return ARES_SUCCESS;
     }
 
-    void AresChannel::aresSend(const std::vector<uint8_t>& qbuf) {
+    void AresChannel::aresSend(const std::vector<uint8_t> &qbuf) {
         int qlen = qbuf.size();
-        if(qlen < HFIXEDSZ || qlen >= (1 << 16)) {
+        if (qlen < HFIXEDSZ || qlen >= (1 << 16)) {
             SYLAR_LOG_ERROR(g_logger) << "aresSend qlen too small or too max " << qlen;
             return;
         }
@@ -379,19 +349,19 @@ namespace sylar {
         ares_send(query);
     }
 
-    uint16_t AresChannel::aresQuery(const std::string& name, int dnsclass, int type) {
+    uint16_t AresChannel::aresQuery(const std::string &name, int dnsclass, int type) {
         std::vector<uint8_t> qbuf; //in-out
         int rd = !(m_flags & ARES_FLAG_NORECURSE);
         uint16_t messageId = m_nextId++;
         int status = ares_mkquery(name.c_str(), dnsclass, type, messageId, rd, qbuf);
-        if(status != ARES_SUCCESS) {
+        if (status != ARES_SUCCESS) {
             return -1;
         }
         aresSend(qbuf);
         return messageId;
     }
 
-    void AresChannel::aresGethostbyname(const std::string& name) {
+    void AresChannel::aresGethostbyname(const std::string &name) {
         uint16_t messageId = aresQuery(name);
         if (messageId < 0) {
             SYLAR_LOG_ERROR(g_logger) << "aresGethostbyname failed: messageId < 0";
@@ -404,36 +374,72 @@ namespace sylar {
         }
         query->fiber = sylar::Fiber::GetThis();
         sylar::Fiber::YeildToHold();
-        SYLAR_LOG_DEBUG(g_logger) << "get there";
+        if (query->result.size() > 0) {
+            std::cout<< "result.size: " << query->result.size() << std::endl;
+            for (auto& i : query->result) {
+                IPv4Address ip(ntohl(static_cast<uint32_t>(i.s_addr)));
+                std::cout<< ip.toString() << std::endl;
+            }
+        }
+        return;
     }
 
-    int AresChannel::aresParseReply(uint8_t* abuf, int alen, struct hostent* host) {
+    int AresChannel::getIdxServerFd(int idx) {
+        if (idx >= getServerSize()) {
+            return -1;
+        }
+        return m_servers[idx].begin()->second->getSocket();
+    }
+
+    void AresChannel::startReceiver(Socket::ptr sock) {
+        while (!isStop()) {
+            std::vector<uint8_t> buf;
+            buf.resize(PACKETSZ + 1);
+            int count = sock->recv(&buf[0], buf.size());
+            if (count <= 0) {
+                SYLAR_LOG_ERROR(g_logger) << "AresChannel::startReceiver UDP recv faild errno: " << errno
+                                          << " strerrno: " << strerror(errno);
+                return;
+            }
+            SYLAR_LOG_DEBUG(g_logger) << "AresChannel::starReceiver ret: " << count;
+            size_t which_server = 0;
+            for (; which_server < m_servers.size(); which_server++) {
+                if (getIdxServerFd(which_server) == sock->getSocket()) {
+                    break;
+                }
+            }
+            processAnswer(&buf[0], count, which_server, 0);
+        }
+        return;
+    }
+
+    int AresChannel::aresParseReply(uint8_t* abuf, int alen, std::vector<in_addr>& result) {
         int status, i, rr_type, rr_class, rr_len, naddrs;
         int naliases;
         int len;
-        uint8_t* aptr;
+        uint8_t *aptr;
         std::vector<uint8_t> rr_data;
         std::vector<uint8_t> rr_name;
         std::vector<uint8_t> hostname;
         std::vector<in_addr> addrs;
         std::vector<std::string> aliases;
 
-        if(alen < HFIXEDSZ) {
+        if (alen < HFIXEDSZ) {
             SYLAR_LOG_ERROR(g_logger) << "aresParseReply alen too short: " << alen;
             return ARES_EBADRESP;
         }
 
         uint32_t qdcount = DNS_HEADER_QDCOUNT(abuf);
         uint32_t ancount = DNS_HEADER_ANCOUNT(abuf);
-        if(qdcount != 1) {
+        if (qdcount != 1) {
             SYLAR_LOG_ERROR(g_logger) << "aresParseReply qdcount " << qdcount;
             return ARES_EBADRESP;
         }
 
         aptr = abuf + HFIXEDSZ;
         status = aresExpandName(aptr, abuf, alen, hostname, &len);
-        if(status != ARES_SUCCESS) return status;
-        if(aptr + len + QFIXEDSZ > abuf + alen) {
+        if (status != ARES_SUCCESS) return status;
+        if (aptr + len + QFIXEDSZ > abuf + alen) {
             return ARES_EBADRESP;
         }
         aptr += len + QFIXEDSZ; //In ans
@@ -445,12 +451,12 @@ namespace sylar {
         naliases = 0;
 
         /* Examine each answer resource record (RR) in turn. */
-        for(i = 0; i < (int)ancount; i++) {
+        for (i = 0; i < (int) ancount; i++) {
             /* Decode the RR up to the data field. */
             status = aresExpandName(aptr, abuf, alen, rr_name, &len);
-            if(status != ARES_SUCCESS) break;
+            if (status != ARES_SUCCESS) break;
             aptr += len;
-            if(aptr + RRFIXEDSZ > abuf + alen) {
+            if (aptr + RRFIXEDSZ > abuf + alen) {
                 status = ARES_EBADRESP;
                 break;
             }
@@ -459,46 +465,38 @@ namespace sylar {
             rr_len = DNS_RR_LEN(aptr);
             aptr += RRFIXEDSZ;
 
-            if(rr_class == C_IN && rr_type == T_A && rr_len == sizeof(struct in_addr)
-                    && strcasecmp((const char*) &rr_name[0], (const char*)&hostname[0]) == 0) {
+            if (rr_class == C_IN && rr_type == T_A && rr_len == sizeof(struct in_addr)
+                && strcasecmp((const char *) &rr_name[0], (const char *) &hostname[0]) == 0) {
                 memcpy(&addrs[naddrs], aptr, sizeof(struct in_addr));
                 naddrs++;
                 status = ARES_SUCCESS;
             } //正是查询域名的a记录 则拷到a记录数组中
 
-            if(rr_class == C_IN && rr_type == T_CNAME) { //cname 则把具体的域名 放到alias数组中
+            if (rr_class == C_IN && rr_type == T_CNAME) { //cname 则把具体的域名 放到alias数组中
                 /* Record the RR name as an alias. */
-                aliases.push_back(std::string((char*)&rr_name[0], rr_name.size()));
+                aliases.push_back(std::string((char *) &rr_name[0], rr_name.size()));
                 naliases++;
                 /* Decode the RR data and replace the hostname with it. */
                 status = aresExpandName(aptr, abuf, alen, rr_data, &len);
-                if(status != ARES_SUCCESS) break;
+                if (status != ARES_SUCCESS) break;
                 memcpy(&hostname[0], &rr_data[0], rr_data.size());
             } else {
                 rr_name.clear();
             }
 
             aptr += rr_len;
-            if(aptr > abuf + alen) {
+            if (aptr > abuf + alen) {
                 status = ARES_EBADRESP;
                 break;
             }
         }
 
-        if(status == ARES_SUCCESS && naddrs == 0) status = ARES_ENODATA;
-        if(status == ARES_SUCCESS) { //只要有a记录 就当做是成功
+        if (status == ARES_SUCCESS && naddrs == 0) status = ARES_ENODATA;
+        if (status == ARES_SUCCESS) { //只要有a记录 就当做是成功
             /* We got our answer.  Allocate memory to build the host entry. */
-            if(host) {
-                host->h_addr_list = (char**)malloc((naddrs + 1) * sizeof(char *));
-                if(host->h_addr_list) {
-                    /* Fill in the hostent and return successfully. */
-                    host->h_name = (char*)&hostname[0];
-                    //host->h_aliases = &aliases[0];
-                    host->h_addrtype = AF_INET;
-                    host->h_length = sizeof(struct in_addr);
-                    for (i = 0; i < naddrs; i++)
-                        host->h_addr_list[i] = (char *) &addrs[i];
-                    host->h_addr_list[naddrs] = NULL;
+            {
+                {
+                    result = addrs;
                     return ARES_SUCCESS;
                 }
             }
@@ -520,7 +518,7 @@ namespace sylar {
         auto it = m_queries.find(id);
         if (it == m_queries.end()) {
             SYLAR_LOG_ERROR(g_logger) << "m_queries not has this id: "
-            << id;
+                                      << id;
             return;
         }
         Query::ptr query = it->second;
@@ -554,10 +552,9 @@ namespace sylar {
              */
         }
 
-        aresParseReply(abuf, alen, &query->host);
+        aresParseReply(abuf, alen, query->result);
         sylar::Scheduler::GetThis()->schedule(query->fiber);
     }
+}
 
-    //void AresChannel::writeTcpData(fd_set *write_fds, time_t now);
-    //void AresChannel::readTCPData(time_t now);
 

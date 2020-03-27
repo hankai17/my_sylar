@@ -280,7 +280,8 @@ namespace sylar {
 		std::vector<int> skip_server;
 		ares_cb 	callback;
 		Fiber::ptr		fiber;
-		struct hostent  host;
+		//struct hostent  host;
+		std::vector<in_addr> result;
 
 		int 			try_count;
 		int 			server_idx; // which one in resolve.conf
@@ -288,7 +289,7 @@ namespace sylar {
 		int 			error_status;
 	};
 
-	class AresChannel : UdpServer {
+	class AresChannel : public UdpServer {
 	public:
 		typedef std::shared_ptr<AresChannel> ptr;
 		typedef RWMutex RWMutexType;
@@ -298,6 +299,7 @@ namespace sylar {
 		void init();
 		void setServers(std::map<int, std::map<Address::ptr, Socket::ptr> >&& v) { m_servers = v; }
 		int getServerSize() { return m_servers.size(); }
+		int getIdxServerFd(int idx);
 
 		int ares_mkquery(const char* name, int dnsclass, int type, uint16_t id, int rd,
 				std::vector<uint8_t>& buf);
@@ -308,13 +310,13 @@ namespace sylar {
 		void ares_send(Query::ptr query);
 		void nextServer(Query::ptr query);
 
-		int aresRegistFds();
-		void AresUDPCallBack(int fd);
-
 		void processAnswer(uint8_t* abuf, int alen, int whichserver, int tcp);
-		int aresParseReply(uint8_t* abuf, int alen, struct hostent* host);
+		int aresParseReply(uint8_t* abuf, int alen, std::vector<in_addr>& addr);
 		int aresExpandName(uint8_t* encoded, uint8_t* abuf, int alen, std::vector<uint8_t>& s, int* enclen);
 
+	protected:
+		void startReceiver(Socket::ptr sock) override;
+		//void handleClient(Socket::ptr client) override;
 	private:
 		RWMutexType			m_mutex;
 		int 				m_flags = 16;

@@ -143,6 +143,10 @@ namespace sylar {
             return true;
         }
         m_isStop = false;
+        if (!m_socks.size()) {
+            SYLAR_LOG_ERROR(g_logger) << "UdpServer::start not found socks";
+            return false;
+        }
         for (const auto& i : m_socks) {
             m_receiver->schedule(std::bind(&UdpServer::startReceiver,
                                                shared_from_this(), i));
