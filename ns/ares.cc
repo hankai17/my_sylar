@@ -361,27 +361,29 @@ namespace sylar {
         return messageId;
     }
 
-    void AresChannel::aresGethostbyname(const std::string &name) {
+    std::vector<IPv4Address> AresChannel::aresGethostbyname(const std::string &name) {
+        std::vector<IPv4Address> ips;
         uint16_t messageId = aresQuery(name);
         if (messageId < 0) {
             SYLAR_LOG_ERROR(g_logger) << "aresGethostbyname failed: messageId < 0";
-            return;
+            return ips;
         }
         Query::ptr query = m_queries[messageId];
         if (!query) {
             SYLAR_LOG_ERROR(g_logger) << "aresGethostbyname not exist this query";
-            return;
+            return ips;
         }
         query->fiber = sylar::Fiber::GetThis();
         sylar::Fiber::YeildToHold();
         if (query->result.size() > 0) {
-            std::cout<< "result.size: " << query->result.size() << std::endl;
+            //std::cout<< "result.size: " << query->result.size() << std::endl;
             for (auto& i : query->result) {
                 IPv4Address ip(ntohl(static_cast<uint32_t>(i.s_addr)));
-                std::cout<< ip.toString() << std::endl;
+                //std::cout<< ip.toString() << std::endl;
+                ips.push_back(ip);
             }
         }
-        return;
+        return ips;
     }
 
     int AresChannel::getIdxServerFd(int idx) {
@@ -401,7 +403,7 @@ namespace sylar {
                                           << " strerrno: " << strerror(errno);
                 return;
             }
-            SYLAR_LOG_DEBUG(g_logger) << "AresChannel::starReceiver ret: " << count;
+            //SYLAR_LOG_DEBUG(g_logger) << "AresChannel::starReceiver ret: " << count;
             size_t which_server = 0;
             for (; which_server < m_servers.size(); which_server++) {
                 if (getIdxServerFd(which_server) == sock->getSocket()) {
@@ -479,7 +481,7 @@ namespace sylar {
                 /* Decode the RR data and replace the hostname with it. */
                 status = aresExpandName(aptr, abuf, alen, rr_data, &len);
                 if (status != ARES_SUCCESS) break;
-                //memcpy(&hostname[0], &rr_data[0], rr_data.size());
+                hostname = rr_data;
             } else {
                 rr_name.clear();
             }
@@ -496,6 +498,7 @@ namespace sylar {
             /* We got our answer.  Allocate memory to build the host entry. */
             {
                 {
+                    addrs.resize(naddrs);
                     result = addrs;
                     return ARES_SUCCESS;
                 }

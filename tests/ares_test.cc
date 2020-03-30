@@ -12,9 +12,10 @@ void test() {
     channel->start();
 
     std::string domain("www.ifeng.com");
-    channel->aresGethostbyname(domain.c_str());
-
-    SYLAR_LOG_DEBUG(g_logger) << "in ares test end";
+    auto ips = channel->aresGethostbyname(domain.c_str());
+    for (auto& i : ips) {
+        SYLAR_LOG_DEBUG(g_logger) << i.toString();
+    }
 }
 
 void ticker() {

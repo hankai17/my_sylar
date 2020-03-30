@@ -312,7 +312,7 @@ namespace sylar {
                                                       << sylar::BacktraceToString();
         }
         auto raw_ptr = cur.get(); // Why use raw ptr
-        SYLAR_LOG_ERROR(g_logger) << "cur.use_count: " << cur.use_count();
+        //SYLAR_LOG_ERROR(g_logger) << "cur.use_count: " << cur.use_count();
         cur.reset();
         raw_ptr->swapOut();
         //SYLAR_ASSERT("never reach there, Fiber id: " + std::to_string(raw_ptr->getFiberId()));
