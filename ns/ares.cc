@@ -479,7 +479,7 @@ namespace sylar {
                 /* Decode the RR data and replace the hostname with it. */
                 status = aresExpandName(aptr, abuf, alen, rr_data, &len);
                 if (status != ARES_SUCCESS) break;
-                memcpy(&hostname[0], &rr_data[0], rr_data.size());
+                //memcpy(&hostname[0], &rr_data[0], rr_data.size());
             } else {
                 rr_name.clear();
             }
@@ -554,6 +554,8 @@ namespace sylar {
 
         aresParseReply(abuf, alen, query->result);
         sylar::Scheduler::GetThis()->schedule(query->fiber);
+        //sylar::Scheduler::GetThis()->schedule(&query->fiber);
+        m_queries.erase(query->qid);
     }
 }
 

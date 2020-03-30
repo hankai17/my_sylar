@@ -47,6 +47,8 @@
 ## QA
  - 该库性能怎么样？
  参考pingpong_bench.cc libevent_bench.c 在击鼓传花测试中 在花朵少的情况下my_sylar会低于libevent
+ - shared_ptr看起来用起来很方便 但是方便的前提是你必须清楚这个对象的use_count 必须清楚哪里用了这个对象 哪里还没有释放
+   非常之难受  这跟设计有极大的关系
 
 
 ## 联系方式

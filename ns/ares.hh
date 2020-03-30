@@ -332,3 +332,10 @@ namespace sylar {
 }
 
 #endif
+
+
+//Q可以用指针但手动释放台麻烦 所以用智能指针shared_ptr
+//Q->fiber用哪个?
+//	系统的fiber系统很稳 如果用shared_ptr会不会影响系统  ------肯定: 当ares_test结束时 而此时map<int, Q>忘记把Q摘除 Q没调析构 fiber引用会多一个 导致系统崩溃
+// 													当然可以使用schedule fiber*规避 但这不符合代码易读规范 一切应该建立在设计规范的基础之上
+

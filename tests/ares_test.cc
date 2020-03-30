@@ -13,6 +13,8 @@ void test() {
 
     std::string domain("www.ifeng.com");
     channel->aresGethostbyname(domain.c_str());
+
+    SYLAR_LOG_DEBUG(g_logger) << "in ares test end";
 }
 
 void ticker() {
