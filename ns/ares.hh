@@ -316,7 +316,7 @@ namespace sylar {
 		int aresExpandName(uint8_t* encoded, uint8_t* abuf, int alen, std::vector<uint8_t>& s, int* enclen);
 
 	private:
-		static void ReleasePtr(Query* q, AresChannel* channel);
+		static void QueryTimeout(std::weak_ptr<Query> q, AresChannel::ptr channel);
 
 	protected:
 		void startReceiver(Socket::ptr sock) override;

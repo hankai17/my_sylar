@@ -325,8 +325,7 @@ namespace sylar {
             return;
         }
 
-        Query::ptr query(new Query, std::bind(&AresChannel::ReleasePtr,
-                std::placeholders::_1, this));
+        Query::ptr query(new Query);
         query->qid = DNS_HEADER_QID(qbuf);
         query->timeout = 0;
         query->skip_server.resize(getServerSize());
@@ -363,9 +362,15 @@ namespace sylar {
         return messageId;
     }
 
-    void AresChannel::ReleasePtr(Query* q, AresChannel* channel) {
+    void AresChannel::QueryTimeout(std::weak_ptr<Query> q, AresChannel::ptr channel) {
+        auto t = q.lock();
+        if (!t) {
+            return;
+        }
+        SYLAR_LOG_ERROR(g_logger) << "ares: " << " dns timeout";
+        sylar::Scheduler::GetThis()->schedule(t->fiber);
         RWMutexType::WriteLock lock(channel->m_mutex);
-        channel->m_queries.erase(q->qid);
+        channel->m_queries.erase(t->qid);
     }
 
     std::vector<IPv4Address> AresChannel::aresGethostbyname(const std::string &name) {
@@ -384,13 +389,16 @@ namespace sylar {
 
         IOManager* iom = sylar::IOManager::GetThis();
         std::weak_ptr<Query> wquery(query);
-        Timer::ptr timer = iom->addTimer(2000, [wquery]() {
+        AresChannel::ptr curr = std::dynamic_pointer_cast<AresChannel>(shared_from_this());
+        Timer::ptr timer = iom->addTimer(2000, [wquery, curr]() {
             auto t = wquery.lock();
             if (!t) {
                 return;
             }
-            SYLAR_LOG_ERROR(g_logger) << "ares dns timeout";
+            SYLAR_LOG_ERROR(g_logger) << "ares: " << " dns timeout";
             sylar::Scheduler::GetThis()->schedule(t->fiber);
+            RWMutexType::WriteLock lock(curr->m_mutex);
+            curr->m_queries.erase(t->qid);
         });
         sylar::Fiber::YeildToHold();
         if (timer) {
@@ -583,4 +591,6 @@ namespace sylar {
     }
 }
 
-
+//设计悖论:
+//1. channel中用map<shared_ptr> 那么只有当从map把q摘下来时 q才有可能引用为0  如果是这种容器+shared_ptr无论你怎么自定义release 都不会调这个release
+//	所以要想用自定义的删除器 容器里存放的必然是裸指针
