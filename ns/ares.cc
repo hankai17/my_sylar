@@ -12,6 +12,7 @@
 #include "util.hh"
 #include "log.hh"
 #include "iomanager.hh"
+#include "timer.hh"
 
 namespace sylar {
     static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
@@ -324,7 +325,8 @@ namespace sylar {
             return;
         }
 
-        Query::ptr query(new Query);
+        Query::ptr query(new Query, std::bind(&AresChannel::ReleasePtr,
+                std::placeholders::_1, this));
         query->qid = DNS_HEADER_QID(qbuf);
         query->timeout = 0;
         query->skip_server.resize(getServerSize());
@@ -361,6 +363,11 @@ namespace sylar {
         return messageId;
     }
 
+    void AresChannel::ReleasePtr(Query* q, AresChannel* channel) {
+        RWMutexType::WriteLock lock(channel->m_mutex);
+        channel->m_queries.erase(q->qid);
+    }
+
     std::vector<IPv4Address> AresChannel::aresGethostbyname(const std::string &name) {
         std::vector<IPv4Address> ips;
         uint16_t messageId = aresQuery(name);
@@ -374,7 +381,21 @@ namespace sylar {
             return ips;
         }
         query->fiber = sylar::Fiber::GetThis();
+
+        IOManager* iom = sylar::IOManager::GetThis();
+        std::weak_ptr<Query> wquery(query);
+        Timer::ptr timer = iom->addTimer(2000, [wquery]() {
+            auto t = wquery.lock();
+            if (!t) {
+                return;
+            }
+            SYLAR_LOG_ERROR(g_logger) << "ares dns timeout";
+            sylar::Scheduler::GetThis()->schedule(t->fiber);
+        });
         sylar::Fiber::YeildToHold();
+        if (timer) {
+            timer->cancel();
+        }
         if (query->result.size() > 0) {
             //std::cout<< "result.size: " << query->result.size() << std::endl;
             for (auto& i : query->result) {

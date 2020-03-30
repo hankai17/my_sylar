@@ -270,6 +270,7 @@ namespace sylar {
 	class Query {
 	public:
 	    typedef std::shared_ptr<Query> ptr;
+	    friend class AresChannel;
 		uint16_t 		qid;
 		time_t 	 		timeout;
 		int 			qlen;
@@ -313,6 +314,9 @@ namespace sylar {
 		void processAnswer(uint8_t* abuf, int alen, int whichserver, int tcp);
 		int aresParseReply(uint8_t* abuf, int alen, std::vector<in_addr>& addr);
 		int aresExpandName(uint8_t* encoded, uint8_t* abuf, int alen, std::vector<uint8_t>& s, int* enclen);
+
+	private:
+		static void ReleasePtr(Query* q, AresChannel* channel);
 
 	protected:
 		void startReceiver(Socket::ptr sock) override;
