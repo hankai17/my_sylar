@@ -429,3 +429,6 @@ namespace sylar {
 }
 //#include "config.cc"
 #endif
+
+// 模式: fd_manager config都是工厂 fd_manager提供只读功能 这里的工厂比较奇怪 生产的东西归工厂所有 外部只是拿到的副本
+// 模式: config_var 对一个具体的配置类型封装 同时也是一个观察者(observer) 很明显的提供了changeCB

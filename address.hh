@@ -16,7 +16,7 @@
 
 namespace sylar {
     class IPAddress;
-    class Address {
+    class Address { // 模式: ip工厂 其本质是getaddrinfo可以判断出"字符串"是ipv4/6类型
     public:
         typedef std::shared_ptr<Address> ptr;
         static Address::ptr Create(const sockaddr* addr, socklen_t addrlen); // sockaddr more normal. normal menas it contains ipv46
