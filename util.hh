@@ -137,6 +137,15 @@ namespace sylar {
             return __sync_bool_compare_and_swap(&t, (T) old_val, (T) new_val);
         }
     };
+
+    class StringUtil {
+    public:
+        static std::string Format(const char* fmt, ...);
+        static std::string Formatv(const char* fmt, va_list ap);
+    };
+
+    template<typename T>
+    void nop(T*) {}
 }
 
 #endif

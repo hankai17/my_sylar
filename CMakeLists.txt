@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.7)
 PROJECT(my_sylar)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(cmake/utils.cmake)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
@@ -19,12 +20,18 @@ if(OPENSSL_FOUND)
     include_directories(${OPENSSL_INCLUDE_DIR})
 endif()
 
+find_package(MySQL REQUIRED)
+if(MYSQL_FOUNT)
+    include_directories(${MYSQL_INCLUDE_DIR})
+endif()
+
 set(LIBS ${PROJECT_NAME}
         pthread
         yaml-cpp
         dl
         ${OPENSSL_LIBRARIES}
         #jemalloc
+        ${MYSQL_LIBRARIES}
         )
 
 set(LIB_SRC
@@ -67,6 +74,7 @@ set(LIB_SRC
         dns.cc
         rock/rock.cc
         ns/ares.cc
+        db/mysql.cc
         )
 
 add_library(${PROJECT_NAME} SHARED ${LIB_SRC})
