@@ -54,11 +54,11 @@ namespace sylar {
         mysql_options(mysql, MYSQL_OPT_RECONNECT, &close);
         mysql_options(mysql, MYSQL_SET_CHARSET_NAME, "UTF8");
 
-        int port = 5503;
-        std::string host("root");
-        std::string user("root");
-        std::string pwd("123");
-        std::string dbname("db1");
+        int port = sylar::GetParaValue(params, "port", 3306);
+        std::string host = sylar::GetParaValue<std::string>(params, "host");
+        std::string user = sylar::GetParaValue<std::string>(params, "user");
+        std::string pwd = sylar::GetParaValue<std::string>(params, "passwd");
+        std::string dbname = sylar::GetParaValue<std::string>(params, "dbname");
 
         if (mysql_real_connect(mysql, host.c_str(), user.c_str(), pwd.c_str(),
                                dbname.c_str(), port, NULL, 0) == nullptr) {

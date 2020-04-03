@@ -27,7 +27,7 @@ namespace sylar {
                                    int field_count, int row_no)> data_cb;
 
         MySQLRes(MYSQL_RES *res, int eno, const char *estr);
-        MYSQL_RES *get() const { return m_data.get(); }
+        MYSQL_RES* get() const { return m_data.get(); }
         uint64_t getRows();
         uint64_t getFields();
         int getErrno() const { return m_errno; }
@@ -53,12 +53,12 @@ namespace sylar {
         virtual int cmd(const std::string &sql) override;
         virtual std::shared_ptr<MySQL> getMySQL() override;
         uint64_t getAffectedRows();
-        MySQLRes::ptr query(const char *format, ...); // ::mysql_query & mysql_store_result
-        MySQLRes::ptr query(const char *format, va_list ap);
-        MySQLRes::ptr query(const std::string &sql);
-        const char *cmd();
+        MySQLRes::ptr query(const char* format, ...); // ::mysql_query & mysql_store_result
+        MySQLRes::ptr query(const char* format, va_list ap);
+        MySQLRes::ptr query(const std::string& sql);
+        const char* cmd();
         bool use(const std::string &dbname);
-        const char *getError();
+        const char* getError();
         uint64_t getInsertId();
 
     private:

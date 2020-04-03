@@ -39,7 +39,8 @@ namespace sylar {
         static bool IsRunningPidfile(const std::string& pidfile);
     };
 
-    template <typename Map, typename K, typename V>
+    //template <typename Map, typename K, typename V>
+    template <typename V, typename Map, typename K>
     V GetParaValue(const Map& m, const K& k, const V& def = V()) {
         auto it = m.find(k);
         if (it == m.end()) {
