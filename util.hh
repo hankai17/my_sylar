@@ -21,6 +21,7 @@ namespace sylar {
     uint64_t GetCurrentMs();
     uint64_t GetCurrentUs();
     std::string Time2Str(time_t ts = time(0), const std::string& format = "%Y-%m-%d %H:%M:%S");
+    time_t Str2Time(const char* str, const char* format = "%Y-%m-%d %H:%M:%S");
 
     class FSUtil {
     public:
@@ -147,6 +148,16 @@ namespace sylar {
 
     template<typename T>
     void nop(T*) {}
+
+    class TypeUtil {
+    public:
+        static int8_t ToChar(const std::string& str);
+        static int64_t Atoi(const std::string& str);
+        static double Atof(const std::string& str);
+        static int8_t ToChar(const char* str);
+        static int64_t Atoi(const char* str);
+        static double Atof(const char* str);
+    };
 }
 
 #endif

@@ -19,10 +19,10 @@ bool show_sql_result(char** row, int field_count, int row_no) {
 
 void mysql_test() {
     std::map<std::string, std::string> params;
-    params["host"] = "10.0.120.194";
+    params["host"] = "127.0.0.1";
     params["user"] = "root";
-    params["passwd"] = "000";
-    params["dbname"] = "zabbix";
+    params["passwd"] = "123";
+    params["dbname"] = "bjxw_log";
 
     sylar::MySQL::ptr mysql(new sylar::MySQL(params));
     if (!mysql->connect()) {
@@ -43,7 +43,7 @@ void mysql_test() {
     << mysql->getError();
     //ret->foreach(show_sql_result);
 
-    ret = mysql->query("select * from users");
+    ret = mysql->query("select * from query");
     ret->foreach(show_sql_result);
 
 
