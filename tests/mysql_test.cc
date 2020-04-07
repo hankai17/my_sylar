@@ -43,9 +43,8 @@ void mysql_test() {
     << mysql->getError();
     //ret->foreach(show_sql_result);
 
-    ret = mysql->query("select * from query");
-    ret->foreach(show_sql_result);
-
+    sylar::MySQLRes::ptr ret1 = std::dynamic_pointer_cast<sylar::MySQLRes>(mysql->query("select * from query"));
+    ret1->foreach(show_sql_result);
 
 }
 
