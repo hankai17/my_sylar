@@ -78,7 +78,7 @@ namespace sylar {
         virtual int bindTime(int idx, time_t value) = 0;
         virtual int bindNull(int idx) = 0;
 
-        virtual int execut() = 0;
+        virtual int execute() = 0;
         virtual int64_t getLastInsertId() = 0;
         virtual ISQLData::ptr query() = 0;
         virtual int getErrno() = 0;
@@ -175,12 +175,12 @@ namespace sylar {
             Data();
             ~Data();
             void alloc(size_t size);
-            bool            is_null;
-            bool            error;
-            enum_field_types type;
-            unsigned long   length;
-            int32_t         data_length;
-            char*           data;
+            my_bool             is_null;
+            my_bool             error;
+            enum_field_types    type;
+            unsigned long       length;
+            int32_t             data_length;
+            char*               data;
         };
 
     private:
@@ -316,7 +316,7 @@ namespace sylar {
         int bindTime(int idx, time_t value) override;
         int bindNull(int idx) override;
 
-        int execut() override;
+        int execute() override;
         int64_t getLastInsertId() override;
         ISQLData::ptr query() override;
         int getErrno() override;
@@ -369,7 +369,7 @@ namespace sylar {
         if (ret != 0) {
             return ret;
         }
-        return st->execut();
+        return st->execute();
     }
 
     template <typename... T>

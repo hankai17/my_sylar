@@ -830,7 +830,7 @@ namespace sylar {
         return bind(idx);
     }
 
-    int MySQLStmt::execut() {
+    int MySQLStmt::execute() {
         mysql_stmt_bind_param(m_stmt, &m_binds[0]);
         return mysql_stmt_execute(m_stmt);
     }
@@ -972,7 +972,65 @@ namespace sylar {
     MySQLStmtRes::ptr MySQLStmtRes::Create(std::shared_ptr<MySQLStmt> stmt) {
         int eno = mysql_stmt_errno(stmt->getRaw());
         const char* errstr = mysql_stmt_error(stmt->getRaw());
-        MySQLStmtRes::
+        MySQLStmtRes::ptr ret(new MySQLStmtRes(stmt, eno, errstr));
+        if (eno) {
+            return ret;
+        }
+        MYSQL_RES* res = mysql_stmt_result_metadata(stmt->getRaw());
+        if (!res) {
+            return MySQLStmtRes::ptr(new MySQLStmtRes(stmt, stmt->getErrno(),
+                    stmt->getErrStr()));
+        }
+        int num = mysql_num_fields(res);
+        MYSQL_FIELD* fields = mysql_fetch_field(res);
+
+        ret->m_binds.resize(num);
+        memset(&ret->m_binds[0], 0, sizeof(ret->m_binds[0]) * num);
+        ret->m_datas.resize(num);
+
+        for (int i = 0; i < num; i++) {
+            ret->m_datas[i].type = fields[i].type;
+            switch (fields[i].type) {
+#define XX(m, t) \
+                case m: \
+                ret->m_datas[i].alloc(sizeof(t)); \
+                break;
+                XX(MYSQL_TYPE_TINY, int8_t);
+                XX(MYSQL_TYPE_SHORT, int16_t);
+                XX(MYSQL_TYPE_LONG, int32_t);
+                XX(MYSQL_TYPE_LONGLONG, int64_t);
+                XX(MYSQL_TYPE_FLOAT, float);
+                XX(MYSQL_TYPE_DOUBLE, double);
+                XX(MYSQL_TYPE_TIMESTAMP, MYSQL_TIME);
+                XX(MYSQL_TYPE_DATETIME, MYSQL_TIME);
+                XX(MYSQL_TYPE_DATE, MYSQL_TIME);
+                XX(MYSQL_TYPE_TIME, MYSQL_TIME);
+#undef XX
+                default:
+                    ret->m_datas[i].alloc(fields[i].length);
+                    break;
+            }
+            ret->m_binds[i].buffer_type = ret->m_datas[i].type;
+            ret->m_binds[i].buffer = ret->m_datas[i].data;
+            ret->m_binds[i].buffer_length = ret->m_datas[i].data_length;
+            ret->m_binds[i].length = &ret->m_datas[i].length;
+            ret->m_binds[i].is_null = &ret->m_datas[i].is_null;
+            ret->m_binds[i].error = &ret->m_datas[i].error;
+        }
+
+        if (mysql_stmt_bind_result(stmt->getRaw(), &ret->m_binds[0])) {
+            return MySQLStmtRes::ptr(new MySQLStmtRes(stmt, stmt->getErrno(),
+                    stmt->getErrStr()));
+        }
+
+        stmt->execute();
+
+        if (mysql_stmt_store_result(stmt->getRaw())) {
+            return MySQLStmtRes::ptr(new MySQLStmtRes(stmt, stmt->getErrno(),
+                    stmt->getErrStr()));
+        }
+
+        return ret;
     }
 
     MySQLStmtRes::~MySQLStmtRes() {
