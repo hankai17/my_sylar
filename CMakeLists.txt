@@ -120,5 +120,6 @@ my_sylar_add_executable(singleton_test tests/singleton_test.cc ${PROJECT_NAME} "
 my_sylar_add_executable(ares_test tests/ares_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(http_test tests/http_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(mysql_test tests/mysql_test.cc ${PROJECT_NAME} "${LIBS}")
+my_sylar_add_executable(sem_test tests/semaphore_test.cc ${PROJECT_NAME} "${LIBS}")
 
 #valgrind --tool=memcheck --track-origins=yes --leak-check=full --show-leak-kinds=all ./scheduler_test
