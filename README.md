@@ -51,12 +51,21 @@
    非常之难受  这跟设计有极大的关系
 
 ## 一个iom实例多线程 条件竞争分析
-   1. 多线程共享timers 超时条件竞争
-   2. 事件到来条件竞争 eg: 读事件正在epoll_wait返回处  此时另一线程又捕获到读事件再次到来
-   3. 存在读乱序吗
-   4. 存在些乱序吗
-
-   多个iom(accepter io)实例多线程 条件竞争分析
+- 多线程共享timers 超时条件竞争
+  timermanager是线程安全的  假设线程1有很多imm事件 比较忙很久才轮到swapout到io处 线程2比较轻松 而在轮到swapout之前恰好超时
+  winfo提升成功() 此时大部分可能是还没swapout 但也有可能在YeildToHold~goto retry之间的任一行
+  如果线程1在goto retry的上一行 那么线程1会继续io操作并返回上层 而线程2这里调cancelEvent cancel里 判断已经没有这个事件了 也没有了fiber cancelEvent里会返false
+  感觉核心在iomanager的事件判断 只要发现没有这个事件了 就不会回调  
+  优先以iom为核心考虑条件竞争: 一旦事件到来 (trigger里)就取消这个fd的事件   绝不会发生重复trigger同一个fiber的问题
+  cancelEvent是"事件安全的" 如果有这个事件就cancel 没有就罢了
+- 事件到来条件竞争 eg: 读事件正在epoll_wait返回处 此时另一线程又捕获到读事件再次到来
+  先执行的那个 会先拿到fd的锁 然后取消该事件 然后triggerEvent里 取消该event 扔到队列中
+  后来那个 同样拿到fd锁 然后发现这个事件已经取消了 就会continue
+- 存在读乱序吗
+- 存在写乱序吗
+- 多个iom(accepter io)实例多线程 条件竞争分析
+  tcp_server(accepter, worker) accepter独占一个iom  worker负责做上层业务
+ 
 
 
 
