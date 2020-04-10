@@ -65,10 +65,11 @@
 - 存在写乱序吗
 - 多个iom(accepter io)实例多线程 条件竞争分析
   tcp_server(accepter, worker) accepter独占一个iom  worker负责做上层业务
+- 事件安全
+  上层的事件只会被通知一次(其根本是epoll_ctl del/mod事件) 在此基础上又多了两层保护机制
+  - rigger中重置ctx中的event
+  - ctx中的fiber虽然是个ptr 这个ptr一旦被trigger就被swap成空
  
-
-
-
 ## 联系方式
 - 邮箱：<hankai17@126.com>
 - https://gitee.com/zjlian/server-framework/blob/master/src/scheduler.h
