@@ -14,6 +14,9 @@
 #include <unordered_map>
 
 namespace sylar {
+    class Stream;
+    uint64_t transferStream(Stream& src, Stream& dst, uint64_t toTransfer = ~0ull);
+
     class Stream { // 模式: 依赖反转 很明显的有 纯虚函数跟普通函数"混杂"在一起  buffer由上层管理并传入 rwFix是个高级功能依赖于各版本buffer实现的read write函数
     public:
         typedef std::shared_ptr<Stream> ptr;

@@ -4,6 +4,68 @@
 #include <iostream>
 
 namespace sylar {
+    static void ReadOne(Stream& src, Buffer*& buffer, size_t len, size_t& result) {
+        result = src.read(buffer, len);
+    }
+
+    static void WriteOne(Stream& dst, Buffer*& buffer) {
+        if (buffer->readableBytes() > 0) {
+            dst.writeFixSize(buffer, buffer->readableBytes());
+        }
+    }
+
+    uint64_t transferStream(Stream& src, Stream& dst, uint64_t toTransfer) {
+        Buffer::ptr buf1(new Buffer);
+        Buffer::ptr buf2(new Buffer);
+        Buffer* readBuffer, *writeBuffer;
+        size_t chunkSize = 65536; // 64KB
+        size_t todo, readResult;
+        uint64_t totalRead = 0;
+        if (toTransfer == 0) {
+            return 0;
+        }
+        readBuffer = buf1.get();
+        todo = chunkSize;
+        if (toTransfer - totalRead < todo) {
+            todo = toTransfer - totalRead;
+        }
+        // Pre read
+        ReadOne(src, readBuffer, todo, readResult);
+        totalRead += readResult;
+        if (readResult == 0) {
+            return totalRead;
+        }
+
+        std::vector<std::function<void()> > deferGroups;
+        std::vector<Fiber::ptr> fibers;
+        deferGroups.resize(2);
+        fibers.resize(2);
+        fibers[0].reset(new Fiber(nullptr));
+        fibers[1].reset(new Fiber(nullptr));
+        deferGroups[0] = std::bind(&ReadOne, src, readBuffer, todo, readResult);
+        deferGroups[1] = std::bind(&WriteOne, dst, writeBuffer);
+
+        while (totalRead < toTransfer) {
+            writeBuffer = readBuffer;
+            if (readBuffer == buf1.get()) {
+                readBuffer = buf2.get();
+            } else {
+                readBuffer = buf1.get();
+            }
+            todo = chunkSize;
+            if (toTransfer - totalRead < todo) {
+                todo = toTransfer - totalRead;
+            }
+            ParallelDo(deferGroups, fibers);
+            totalRead += readResult;
+            if (readResult == 0) {
+                return totalRead;
+            }
+        }
+        writeBuffer = readBuffer;
+        WriteOne(dst, writeBuffer);
+        return totalRead;
+    }
 
     int Stream::readFixSize(void* buffer, size_t length) {
         size_t offset = 0;

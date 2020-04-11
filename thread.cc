@@ -3,6 +3,7 @@
 #include "util.hh"
 #include "macro.hh"
 #include "scheduler.hh"
+#include "fiber.hh"
 
 namespace sylar {
 
@@ -142,6 +143,46 @@ namespace sylar {
         } else {
             ++m_concurrency;
         }
+    }
+
+    static void parallelDoImpl(std::function<void()> defer, int& completed, size_t totalDefers,
+            Scheduler* scheduler, Fiber::ptr fiber) {
+        try {
+            defer();
+        } catch (...) {
+            SYLAR_LOG_ERROR(SYLAR_LOG_ROOT()) << "parallelDoImpl falied";
+        }
+        //auto idx = sylar::Atomic::addFetch(m_idx, 1);
+        if (Atomic::fetchAdd(completed, 1) == (int)totalDefers) {
+            scheduler->schedule(fiber);
+        }
+    }
+
+    void ParallelDo(const std::vector<std::function<void()>>& deferGroups,
+                    std::vector<Fiber::ptr>& fibers) {
+        SYLAR_ASSERT(fibers.size() >= deferGroups.size());
+        int completed = 0;
+        Scheduler* scheduler = Scheduler::GetThis();
+        Fiber::ptr caller = Fiber::GetThis();
+        if (scheduler == nullptr || deferGroups.size() <= 1) {
+            for (const auto& i : deferGroups) {
+                i();
+            }
+            return;
+        }
+
+        for (size_t i = 0; i < deferGroups.size(); i++) {
+#if FIBER_MEM_TYPE == FIBER_MEM_NORMAL
+            fibers[i].reset(new Fiber());
+#elif FIBER_MEM_TYPE == FIBER_MEM_POOL
+            fibers[i].reset( NewFiber(
+                            std::bind(&parallelDoImpl, deferGroups[i], std::ref(completed),  // https://blog.csdn.net/zgaoq/article/details/82152713
+                                    deferGroups.size(), scheduler, caller)
+                    ), FreeFiber);
+#endif
+            scheduler->schedule(fibers[i]);
+        }
+        Fiber::YeildToHold();
     }
 
 }

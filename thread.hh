@@ -10,6 +10,7 @@
 #include <bits/pthreadtypes.h>
 #include <atomic>
 #include <list>
+#include <vector>
 #include "nocopy.hh"
 #include "fiber.hh"
 
@@ -286,6 +287,9 @@ namespace sylar {
         size_t          m_concurrency;
         std::list<std::pair<Scheduler*, Fiber::ptr> >  m_waiters;
     };
+
+    void ParallelDo(const std::vector<std::function<void()>>& deferGroups,
+            std::vector<Fiber::ptr>& fibers);
 }
 
 #endif
