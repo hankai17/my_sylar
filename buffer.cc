@@ -4,6 +4,7 @@
 #include "hook.hh"
 
 #include <string.h>
+#include <iostream>
 #include <sys/uio.h>
 
 /// +-------------------+------------------+------------------+
@@ -259,6 +260,7 @@ namespace sylar {
         }
 
         int64_t n = write(fd, peek(), length);
+        //std::cout << "------------------------>writeFd length: " << length << std::endl;
         if (n < 0) {
             *savedErrno = errno;
         } else if (static_cast<size_t>(n) <= length) {

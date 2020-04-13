@@ -35,10 +35,11 @@ namespace sylar {
 
         virtual int read(Buffer::ptr buf, size_t length) = 0;
         virtual int write(Buffer::ptr buf, size_t length) = 0;
-        virtual int read(Buffer* buf, size_t length);
-        virtual int write(Buffer* buf, size_t length);
         virtual int readFixSize(Buffer::ptr buf, size_t length);
         virtual int writeFixSize(Buffer::ptr buf, size_t length);
+        virtual int read(Buffer* buf, size_t length);
+        virtual int write(Buffer* buf, size_t length);
+        virtual int writeFixSize(Buffer* buf, size_t length);
 
         virtual void close() = 0;
     };

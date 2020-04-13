@@ -236,7 +236,9 @@ void TcpTransfer::handleClient(sylar::Socket::ptr client) {
         SYLAR_LOG_DEBUG(g_logger) << "ss is nullptr";
         return;
     }
+    SYLAR_LOG_DEBUG(g_logger) << "begin transfer";
     sylar::TransferStream(*ss.get(), *cs.get());
+    SYLAR_LOG_DEBUG(g_logger) << "transfer end";
     return;
 }
 
@@ -252,5 +254,6 @@ int main() {
     sylar::IOManager iom(1, false, "io");
     iom.schedule(test);
     iom.stop();
+    SYLAR_LOG_DEBUG(g_logger) << "after iom.stop";
     return 0;
 }

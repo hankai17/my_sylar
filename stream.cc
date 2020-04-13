@@ -1,12 +1,17 @@
 #include "stream.hh"
 #include "util.hh"
 #include "hook.hh"
+#include "log.hh"
 #include <vector>
 #include <iostream>
 
 namespace sylar {
+
+    static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
+
     static void ReadOne(Stream& src, Buffer*& buffer, size_t len, size_t& result) {
         result = src.read(buffer, len);
+        SYLAR_LOG_ERROR(g_logger) << "ReadOne result: " << result;
     }
 
     static void WriteOne(Stream& dst, Buffer*& buffer) {
@@ -19,7 +24,7 @@ namespace sylar {
         Buffer::ptr buf1(new Buffer);
         Buffer::ptr buf2(new Buffer);
         Buffer* readBuffer, *writeBuffer;
-        size_t chunkSize = 65536; // 64KB
+        size_t chunkSize = 65535; // Buffer support max 65535
         size_t todo, readResult;
         uint64_t totalRead = 0;
         if (toTransfer == 0) {
@@ -41,8 +46,8 @@ namespace sylar {
         std::vector<Fiber::ptr> fibers;
         deferGroups.resize(2);
         fibers.resize(2);
-        fibers[0].reset(new Fiber(nullptr));
-        fibers[1].reset(new Fiber(nullptr));
+        //fibers[0].reset(new Fiber(nullptr));
+        //fibers[1].reset(new Fiber(nullptr));
         deferGroups[0] = std::bind(&ReadOne, std::ref(src), std::ref(readBuffer), todo, std::ref(readResult));
         deferGroups[1] = std::bind(&WriteOne, std::ref(dst), std::ref(writeBuffer));
 
@@ -60,11 +65,13 @@ namespace sylar {
             ParallelDo(deferGroups, fibers);
             totalRead += readResult;
             if (readResult == 0) {
+                SYLAR_LOG_ERROR(g_logger) << "totalRead: " << totalRead;
                 return totalRead;
             }
         }
         writeBuffer = readBuffer;
         WriteOne(dst, writeBuffer);
+        SYLAR_LOG_ERROR(g_logger) << "totalRead: " << totalRead;
         return totalRead;
     }
 
@@ -156,6 +163,11 @@ namespace sylar {
     int Stream::write(Buffer* buf, size_t length) {
         std::shared_ptr<Buffer> buffer(buf, [](Buffer* ptr){});
         return write(buffer, length);
+    }
+
+    int Stream::writeFixSize(Buffer* buf, size_t length) {
+        std::shared_ptr<Buffer> buffer(buf, [](Buffer* ptr){});
+        return writeFixSize(buffer, length);
     }
 
     SocketStream::SocketStream(Socket::ptr sock, bool owner)

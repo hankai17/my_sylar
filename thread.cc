@@ -152,8 +152,9 @@ namespace sylar {
         } catch (...) {
             SYLAR_LOG_ERROR(SYLAR_LOG_ROOT()) << "parallelDoImpl falied";
         }
-        //auto idx = sylar::Atomic::addFetch(m_idx, 1);
-        if (Atomic::fetchAdd(completed, 1) == (int)totalDefers) {
+
+        //if (Atomic::fetchAdd(completed, 1) == (int)totalDefers) {
+        if (Atomic::addFetch(completed, 1) == (int)totalDefers) {
             scheduler->schedule(fiber);
         }
     }
@@ -175,6 +176,12 @@ namespace sylar {
 #if FIBER_MEM_TYPE == FIBER_MEM_NORMAL
             fibers[i].reset(new Fiber());
 #elif FIBER_MEM_TYPE == FIBER_MEM_POOL
+            /*
+            fibers[i] = std::shared_ptr<Fiber>(new Fiber(
+                    std::bind(&parallelDoImpl, deferGroups[i], std::ref(completed),
+                              deferGroups.size(), scheduler, caller)
+                    ));
+            */
             fibers[i].reset( NewFiber(
                             std::bind(&parallelDoImpl, deferGroups[i], std::ref(completed),  // https://blog.csdn.net/zgaoq/article/details/82152713
                                     deferGroups.size(), scheduler, caller)
