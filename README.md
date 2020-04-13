@@ -65,6 +65,7 @@
 - 存在写乱序吗
 - 多个iom(accepter io)实例多线程 条件竞争分析
   tcp_server(accepter, worker) accepter独占一个iom  worker负责做上层业务
+  这种复用一个树根的ET模式下 用两个iom即可 一个iom做accepter 另一个iom里多起几个线程 既可以做io又可以做其它东西
 - 事件安全
   上层的事件只会被通知一次(其根本是epoll_ctl del/mod事件) 在此基础上又多了两层保护机制
   - rigger中重置ctx中的event

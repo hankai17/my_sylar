@@ -15,7 +15,7 @@
 
 namespace sylar {
     class Stream;
-    uint64_t transferStream(Stream& src, Stream& dst, uint64_t toTransfer = ~0ull);
+    uint64_t TransferStream(Stream& src, Stream& dst, uint64_t toTransfer = ~0ull);
 
     class Stream { // 模式: 依赖反转 很明显的有 纯虚函数跟普通函数"混杂"在一起  buffer由上层管理并传入 rwFix是个高级功能依赖于各版本buffer实现的read write函数
     public:
@@ -35,6 +35,8 @@ namespace sylar {
 
         virtual int read(Buffer::ptr buf, size_t length) = 0;
         virtual int write(Buffer::ptr buf, size_t length) = 0;
+        virtual int read(Buffer* buf, size_t length);
+        virtual int write(Buffer* buf, size_t length);
         virtual int readFixSize(Buffer::ptr buf, size_t length);
         virtual int writeFixSize(Buffer::ptr buf, size_t length);
 
@@ -62,6 +64,27 @@ namespace sylar {
     protected:
         Socket::ptr         m_socket;
         bool                m_owner;
+    };
+
+    class FileStream : public Stream {
+    public:
+        typedef std::shared_ptr<FileStream> ptr;
+        FileStream(int fd);
+        ~FileStream();
+
+        virtual int read(void* buffer, size_t length) override { return 0; }
+        virtual int read(ByteArray::ptr ba, size_t length) override { return 0; }
+        virtual int write(const char* buffer, size_t length) override { return 0; };
+        virtual int write(ByteArray::ptr ba, size_t length) override { return 0; };
+        virtual int read(Buffer::ptr buf, size_t length) override;
+        virtual int write(Buffer::ptr buf, size_t length) override;
+        virtual void close() override;
+
+        int getFd() const { return m_fd; }
+        //bool isOpened() const;
+
+    protected:
+        int                 m_fd;
     };
 
     class AsyncSocketStream : public SocketStream,

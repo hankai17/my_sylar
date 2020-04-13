@@ -9,6 +9,9 @@
 #include "buffer.hh"
 
 #include <vector>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
 
@@ -203,11 +206,46 @@ void TcpProxy::handleClient(sylar::Socket::ptr cli_sock) {
     }
 }
 
+class TcpTransfer : public sylar::TcpServer {
+public:
+    typedef std::shared_ptr<TcpProxy> ptr;
+    TcpTransfer(sylar::IOManager* worker = sylar::IOManager::GetThis(),
+             sylar::IOManager* accept_worker = sylar::IOManager::GetThis());
+protected:
+    virtual void handleClient(sylar::Socket::ptr client);
+private:
+
+};
+
+TcpTransfer::TcpTransfer(sylar::IOManager *worker, sylar::IOManager *accept_worker)
+        : TcpServer(worker, accept_worker) {
+}
+
+void TcpTransfer::handleClient(sylar::Socket::ptr client) {
+    SYLAR_LOG_DEBUG(g_logger) << "connect ok";
+    sylar::Stream::ptr cs(new sylar::SocketStream(client));
+
+    int fd = open("Makefile", O_RDWR);
+    if (fd == -1) {
+        SYLAR_LOG_DEBUG(g_logger) << "open file failed";
+        return;
+    }
+
+    sylar::Stream::ptr ss(new sylar::FileStream(fd));
+    if (ss == nullptr) {
+        SYLAR_LOG_DEBUG(g_logger) << "ss is nullptr";
+        return;
+    }
+    sylar::TransferStream(*ss.get(), *cs.get());
+    return;
+}
+
 void test() {
-    TcpProxy::ptr tcpproxy(new TcpProxy);
+    //sylar::TcpServer::ptr proxy(new TcpProxy);
+    sylar::TcpServer::ptr proxy(new TcpTransfer);
     sylar::IPAddress::ptr addr = sylar::IPv4Address::Create("127.0.0.1", 9527);
-    tcpproxy->bind(addr);
-    tcpproxy->start();
+    proxy->bind(addr);
+    proxy->start();
 }
 
 int main() {

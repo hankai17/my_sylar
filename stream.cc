@@ -1,5 +1,6 @@
 #include "stream.hh"
 #include "util.hh"
+#include "hook.hh"
 #include <vector>
 #include <iostream>
 
@@ -14,7 +15,7 @@ namespace sylar {
         }
     }
 
-    uint64_t transferStream(Stream& src, Stream& dst, uint64_t toTransfer) {
+    uint64_t TransferStream(Stream& src, Stream& dst, uint64_t toTransfer) {
         Buffer::ptr buf1(new Buffer);
         Buffer::ptr buf2(new Buffer);
         Buffer* readBuffer, *writeBuffer;
@@ -42,8 +43,8 @@ namespace sylar {
         fibers.resize(2);
         fibers[0].reset(new Fiber(nullptr));
         fibers[1].reset(new Fiber(nullptr));
-        deferGroups[0] = std::bind(&ReadOne, src, readBuffer, todo, readResult);
-        deferGroups[1] = std::bind(&WriteOne, dst, writeBuffer);
+        deferGroups[0] = std::bind(&ReadOne, std::ref(src), std::ref(readBuffer), todo, std::ref(readResult));
+        deferGroups[1] = std::bind(&WriteOne, std::ref(dst), std::ref(writeBuffer));
 
         while (totalRead < toTransfer) {
             writeBuffer = readBuffer;
@@ -147,6 +148,16 @@ namespace sylar {
         return length;
     }
 
+    int Stream::read(Buffer* buf, size_t length) {
+        std::shared_ptr<Buffer> buffer(buf, [](Buffer* ptr){});
+        return read(buffer, length);
+    }
+
+    int Stream::write(Buffer* buf, size_t length) {
+        std::shared_ptr<Buffer> buffer(buf, [](Buffer* ptr){});
+        return write(buffer, length);
+    }
+
     SocketStream::SocketStream(Socket::ptr sock, bool owner)
     : m_socket(sock),
     m_owner(owner) {
@@ -228,6 +239,32 @@ namespace sylar {
         if (m_socket) {
             m_socket->close();
         }
+    }
+
+    FileStream::FileStream(int fd)
+      : m_fd(fd) {
+    }
+
+    int FileStream::read(Buffer::ptr buf, size_t length) {
+        int err;
+        int ret = buf->orireadFd(m_fd, length, &err);
+        return ret;
+    }
+
+    int FileStream::write(Buffer::ptr buf, size_t length) {
+        int err;
+        int ret = buf->writeFd(m_fd, length, &err);
+        return ret;
+    }
+
+    void FileStream::close() {
+        if (m_fd > 0) {
+            close_f(m_fd);
+        }
+    }
+
+    FileStream::~FileStream() {
+        close();
     }
 
     AsyncSocketStream::AsyncSocketStream(Socket::ptr sock, bool owenr)
