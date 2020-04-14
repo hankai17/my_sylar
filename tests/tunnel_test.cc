@@ -40,31 +40,48 @@ static void connectThem(sylar::Stream::ptr oneEnd, sylar::Stream::ptr otherEnd) 
     scheduler->schedule(std::bind(&shuttleData, otherEnd, oneEnd));
 }
 
+std::string to_hex(const std::string& str) {
+    std::stringstream ss;
+    for(size_t i = 0; i < str.size(); ++i) {
+        ss << std::setw(2) << std::setfill('0') << std::hex
+           << (int)(uint8_t)str[i];
+    }
+    return ss.str();
+}
+
 void TcpProxy::handleClient(sylar::Socket::ptr client) {
     SYLAR_LOG_DEBUG(g_logger) << "start";
-    sylar::Uri::ptr proxy = sylar::Uri::Create("http://10.0.140.173:1984");
-    if (proxy == nullptr) {
-        SYLAR_LOG_DEBUG(g_logger) << "proxy is null";
+
+    sylar::Stream::ptr cs(new sylar::SocketStream(client));
+    std::string buffer;
+    buffer.resize(20);
+    if (cs->readFixSize(&buffer[0], 2) <= 0) {
+        SYLAR_LOG_DEBUG(g_logger) << "read client failed";
         return;
     }
-    //sylar::IPAddress::ptr addr = sylar::IPAddress::Create("10.0.")
-    std::string cli_buf;
-    sylar::Stream* stream_p = tunnel(proxy, nullptr, "soft.duote.org", 80, 5, cli_buf);
-    if (stream_p == nullptr) {
-        SYLAR_LOG_DEBUG(g_logger) << "stream is null";
+    SYLAR_LOG_DEBUG(g_logger) << "read client: " << to_hex(buffer);
+    buffer[0] = 5;
+    buffer[1] = 0;
+    if (cs->writeFixSize(&buffer[0], 2) <= 0) {
+        SYLAR_LOG_DEBUG(g_logger) << "write client failed";
         return;
     }
 
-    sylar::Stream::ptr ss(stream_p, [](sylar::Stream*){});
-    sylar::Stream::ptr cs(new sylar::SocketStream(client));
-    cs->writeFixSize(cli_buf.c_str(), cli_buf.size());
+    sylar::IPAddress::ptr addr = sylar::IPv4Address::Create("127.0.0.1", 1984);
+    sylar::Socket::ptr os_sock = sylar::Socket::CreateTCP(addr);
+    if(!os_sock->connect(addr)) {
+        SYLAR_LOG_DEBUG(g_logger) << "connect os failed: " << addr->toString();
+        return;
+    }
+    sylar::Stream::ptr ss(new sylar::SocketStream(os_sock));
+
     connectThem(cs, ss);
     return;
 }
 
 void test() {
     sylar::TcpServer::ptr proxy(new TcpProxy);
-    sylar::IPAddress::ptr addr = sylar::IPv4Address::Create("172.16.3.144", 2048);
+    sylar::IPAddress::ptr addr = sylar::IPv4Address::Create("0.0.0.0", 2048);
     proxy->bind(addr);
     proxy->start();
 }

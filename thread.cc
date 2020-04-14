@@ -174,14 +174,11 @@ namespace sylar {
 
         for (size_t i = 0; i < deferGroups.size(); i++) {
 #if FIBER_MEM_TYPE == FIBER_MEM_NORMAL
-            fibers[i].reset(new Fiber());
-#elif FIBER_MEM_TYPE == FIBER_MEM_POOL
-            /*
-            fibers[i] = std::shared_ptr<Fiber>(new Fiber(
-                    std::bind(&parallelDoImpl, deferGroups[i], std::ref(completed),
-                              deferGroups.size(), scheduler, caller)
+            fibers[i].reset(new Fiber(
+                            std::bind(&parallelDoImpl, deferGroups[i], std::ref(completed),
+                                    deferGroups.size(), scheduler, caller)
                     ));
-            */
+#elif FIBER_MEM_TYPE == FIBER_MEM_POOL
             fibers[i].reset( NewFiber(
                             std::bind(&parallelDoImpl, deferGroups[i], std::ref(completed),  // https://blog.csdn.net/zgaoq/article/details/82152713
                                     deferGroups.size(), scheduler, caller)

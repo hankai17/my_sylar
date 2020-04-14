@@ -221,24 +221,59 @@ TcpTransfer::TcpTransfer(sylar::IOManager *worker, sylar::IOManager *accept_work
         : TcpServer(worker, accept_worker) {
 }
 
+static void shuttleData(sylar::Stream::ptr oneEnd, sylar::Stream::ptr otherEnd) {
+    try {
+        sylar::TransferStream(*oneEnd.get(), *otherEnd.get());
+        /*
+        if (otherEnd->supportsHalfClose())
+            otherEnd->close(Stream::WRITE);
+            */
+    } catch (std::exception &) {
+        SYLAR_LOG_DEBUG(g_logger) << "shuttleData failed";
+    }
+}
+
+static void connectThem(sylar::Stream::ptr oneEnd, sylar::Stream::ptr otherEnd) {
+    sylar::Scheduler* scheduler = sylar::Scheduler::GetThis();
+    scheduler->schedule(std::bind(&shuttleData, oneEnd, otherEnd));
+    scheduler->schedule(std::bind(&shuttleData, otherEnd, oneEnd));
+}
+
 void TcpTransfer::handleClient(sylar::Socket::ptr client) {
     SYLAR_LOG_DEBUG(g_logger) << "connect ok";
-    sylar::Stream::ptr cs(new sylar::SocketStream(client));
+    if (false) {
+        sylar::Stream::ptr cs(new sylar::SocketStream(client));
 
-    int fd = open("Makefile", O_RDWR);
-    if (fd == -1) {
-        SYLAR_LOG_DEBUG(g_logger) << "open file failed";
-        return;
-    }
+        int fd = open("Makefile", O_RDWR);
+        if (fd == -1) {
+            SYLAR_LOG_DEBUG(g_logger) << "open file failed";
+            return;
+        }
 
-    sylar::Stream::ptr ss(new sylar::FileStream(fd));
-    if (ss == nullptr) {
-        SYLAR_LOG_DEBUG(g_logger) << "ss is nullptr";
+        sylar::Stream::ptr ss(new sylar::FileStream(fd));
+        if (ss == nullptr) {
+            SYLAR_LOG_DEBUG(g_logger) << "ss is nullptr";
+            return;
+        }
+        SYLAR_LOG_DEBUG(g_logger) << "begin transfer";
+        sylar::TransferStream(*ss.get(), *cs.get());
+        SYLAR_LOG_DEBUG(g_logger) << "transfer end";
         return;
+    } else {
+        sylar::Stream::ptr cs(new sylar::SocketStream(client));
+
+        sylar::IPAddress::ptr addr = sylar::IPv4Address::Create("127.0.0.1", 90);
+        sylar::Socket::ptr os_sock = sylar::Socket::CreateTCP(addr);
+        if(!os_sock->connect(addr)) {
+            SYLAR_LOG_DEBUG(g_logger) << "connect os failed: " << addr->toString();
+            return;
+        }
+        sylar::Stream::ptr ss(new sylar::SocketStream(os_sock));
+        SYLAR_LOG_DEBUG(g_logger) << "begin transfer";
+        connectThem(cs, ss);
+        SYLAR_LOG_DEBUG(g_logger) << "transfer end";
     }
-    SYLAR_LOG_DEBUG(g_logger) << "begin transfer";
-    sylar::TransferStream(*ss.get(), *cs.get());
-    SYLAR_LOG_DEBUG(g_logger) << "transfer end";
+    //  curl -v -o /dev/null "http://0.0.0.0:9527/file.dat.200M" -H "Host: 0.0.0.0"
     return;
 }
 
