@@ -121,5 +121,6 @@ my_sylar_add_executable(ares_test tests/ares_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(http_test tests/http_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(mysql_test tests/mysql_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(tcp_proxy_test tests/tcp_proxy_test.cc ${PROJECT_NAME} "${LIBS}")
+my_sylar_add_executable(tunnel_test tests/tunnel_test.cc ${PROJECT_NAME} "${LIBS}")
 
 #valgrind --tool=memcheck --track-origins=yes --leak-check=full --show-leak-kinds=all ./scheduler_test

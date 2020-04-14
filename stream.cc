@@ -1,9 +1,13 @@
 #include "stream.hh"
 #include "util.hh"
+#include "macro.hh"
 #include "hook.hh"
 #include "log.hh"
+#include "endian.hh"
 #include <vector>
 #include <iostream>
+#include <sys/socket.h>
+#include <netinet/in.h>
 
 namespace sylar {
 
@@ -15,22 +19,33 @@ namespace sylar {
     }
 
     static void WriteOne(Stream& dst, Buffer*& buffer) {
+        SYLAR_LOG_ERROR(g_logger) << "WriteOne " << buffer->readableBytes();
         if (buffer->readableBytes() > 0) {
             dst.writeFixSize(buffer, buffer->readableBytes());
         }
     }
 
     // 与ss服务器建联 传参是组ss包中的ip或域名及端口
-    Stream::ptr tunnel(const std::string& proxy, IPAddress::ptr targetIP, 
-          const std::string& targetDomain, uint16 targetPort, uint8_t version) {
+    Stream* tunnel(Uri::ptr proxy, IPAddress::ptr targetIP, 
+          const std::string& targetDomain, uint16_t targetPort, uint8_t version, std::string& cli) {
         SYLAR_ASSERT(version == 4 || version == 5);
         SYLAR_ASSERT(version == 5 || !targetIP 
               || targetIP->getFamily() == AF_INET); // 版本4的targetIP必须非空且是ipv4
         SYLAR_ASSERT(targetIP || !targetDomain.empty());
         std::string buffer;
+        int size = 0;
         buffer.resize(std::max<size_t>(targetDomain.size() + 1u, 16u) + 9); // 7?
-        Stream::ptr stream;
-        if (version == 5) { // 发510 收50
+
+            Address::ptr addr = proxy->createAddress(); 
+            Socket::ptr sock = 0 ? SSLSocket::CreateTCP(addr) : Socket::CreateTCP(addr);
+            if (!sock->connect(addr)) {
+                SYLAR_LOG_ERROR(g_logger) << "connect to proxy failed"; 
+                return nullptr; 
+            }
+            sock->setRecvTimeout(1000);
+        Stream::ptr stream(new SocketStream(sock), [](Stream*){});
+
+        if (false && version == 5) { // 发510 收50
             buffer[0] = version;
             buffer[1] = 1;
             buffer[2] = 0;
@@ -47,6 +62,7 @@ namespace sylar {
         }
         buffer[0] = version;
         buffer[1] = 1;
+        int addrType = 0;
 
         if (version == 4) {
             // TODO
@@ -55,7 +71,8 @@ namespace sylar {
             if (targetIP) {
                 if (targetIP->getFamily() == AF_INET) { // IPv4
                     buffer[3] = 1;
-                    *(unsigned int*)&buffer[4] = sylar::byteswapOnLittleEndian( (unsigned int)(((socketaddr_in*)targetIP->getAddr())->sin_addr.s_addr) );
+                    addrType = 1;
+                    *(unsigned int*)&buffer[4] = sylar::byteswapOnLittleEndian( (unsigned int)(((sockaddr_in*)targetIP->getAddr())->sin_addr.s_addr) );
                     size = 7;
                 } else { 
                     // IPv6
@@ -63,24 +80,27 @@ namespace sylar {
                     //memcpy(&buffer[4], ) ? // ipv6用主机序?
                 }
             } else {
-                buffer[3] = 4;
+                buffer[3] = 3;
+                addrType = 3;
                 buffer[4] = (uint8_t)targetDomain.size();
                 memcpy(&buffer[5], targetDomain.c_str(), targetDomain.size());
                 size = 5 + targetDomain.size();
             }
             if (targetIP) {
-                *(uint16_t*)&buffer[size] = sylar::byteswapOnLittleEndian(targetIP->getPort())
+                *(uint16_t*)&buffer[size] = sylar::byteswapOnLittleEndian(targetIP->getPort());
             } else {
-                *(uint16_t*)&buffer[size] = sylar::byteswapOnLittleEndian(targetPort)
+                *(uint16_t*)&buffer[size] = sylar::byteswapOnLittleEndian(targetPort);
             }
             size += 2;
         }
 
+        // 发510[1|3|4]ip port
         if (stream->writeFixSize(buffer.data(), size) <= 0) {
             SYLAR_LOG_ERROR(g_logger) << "stream send1 failed"; 
             return nullptr;
         }
 
+        // 收50
         if (stream->readFixSize(&buffer[0], 2) <= 0) {
             SYLAR_LOG_ERROR(g_logger) << "stream read1 failed"; 
             return nullptr;
@@ -92,15 +112,32 @@ namespace sylar {
         if (version == 4) {
             // TODO
         } else {
+            cli.resize(40);
+            cli[0] = 5;
+            cli[1] = 0;
             if (stream->readFixSize(&buffer[0], 2) <= 0) {
                 SYLAR_LOG_ERROR(g_logger) << "stream read2 failed"; 
                 return nullptr;
             }
+            cli[2] = buffer[0];
+            cli[3] = buffer[1];
             SYLAR_ASSERT(buffer[0] == 0);
-
+            if (addrType == 3) {
+                size = 3 + 2;
+            } else if (addrType == 1) {
+                size = 6;
+            } else if (addrType == 4) {
+                size = 18;
+            } else {
+                SYLAR_ASSERT(false);
+            }
+            if (stream->readFixSize(&buffer[0], size) <= 0) {
+                SYLAR_LOG_ERROR(g_logger) << "stream read3 failed"; 
+                return nullptr; 
+            }
+            strncpy(&cli[4], &buffer[0], size);
         }
-
-
+        return stream.get();
     }
 
     uint64_t TransferStream(Stream& src, Stream& dst, uint64_t toTransfer) {
