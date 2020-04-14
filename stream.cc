@@ -46,8 +46,14 @@ namespace sylar {
         std::vector<Fiber::ptr> fibers;
         deferGroups.resize(2);
         fibers.resize(2);
-        //fibers[0].reset(new Fiber(nullptr));
-        //fibers[1].reset(new Fiber(nullptr));
+
+#if FIBER_MEM_TYPE == FIBER_MEM_NORMAL
+        fibers[0].reset(new Fiber(nullptr));
+        fibers[1].reset(new Fiber(nullptr));
+#elif FIBER_MEM_TYPE == FIBER_MEM_POOL
+        fibers[0].reset(NewFiber(nullptr), FreeFiber);
+        fibers[1].reset(NewFiber(nullptr), FreeFiber);
+#endif
         deferGroups[0] = std::bind(&ReadOne, std::ref(src), std::ref(readBuffer), todo, std::ref(readResult));
         deferGroups[1] = std::bind(&WriteOne, std::ref(dst), std::ref(writeBuffer));
 
