@@ -9,6 +9,7 @@
 #include "timer.hh"
 #include "iomanager.hh"
 #include "scheduler.hh"
+#include "address.hh"
 #include <boost/any.hpp>
 #include <list>
 #include <unordered_map>
@@ -16,6 +17,8 @@
 namespace sylar {
     class Stream;
     uint64_t TransferStream(Stream& src, Stream& dst, uint64_t toTransfer = ~0ull);
+    Stream::ptr tunnel(const std::string& proxy, IPAddress::ptr targetIP, 
+          const std::string& targetDomain, uint16 targetPort, uint8_t version);
 
     class Stream { // 模式: 依赖反转 很明显的有 纯虚函数跟普通函数"混杂"在一起  buffer由上层管理并传入 rwFix是个高级功能依赖于各版本buffer实现的read write函数
     public:
