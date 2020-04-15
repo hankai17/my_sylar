@@ -363,8 +363,10 @@ int close(int fd) {
         }
         sylar::FdManager::getFdMgr()->del(fd);
     }
-    return close_f(fd);
+    return close_f(fd); // 引用计数仍大于0时，这个close调用就不会引发TCP的四路握手断连过程
 }
+
+// int shutdown // so hard TODO
 
 int fcntl(int fd, int cmd, ... /* arg */ ) {
     va_list va;

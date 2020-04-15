@@ -25,6 +25,7 @@ TcpProxy::TcpProxy(sylar::IOManager *worker, sylar::IOManager *accept_worker)
 static void shuttleData(sylar::Stream::ptr oneEnd, sylar::Stream::ptr otherEnd) {
     try {
         sylar::TransferStream(*oneEnd.get(), *otherEnd.get());
+        otherEnd->close();
         /*
         if (otherEnd->supportsHalfClose())
             otherEnd->close(Stream::WRITE);
@@ -36,8 +37,10 @@ static void shuttleData(sylar::Stream::ptr oneEnd, sylar::Stream::ptr otherEnd) 
 
 static void connectThem(sylar::Stream::ptr oneEnd, sylar::Stream::ptr otherEnd) {
     sylar::Scheduler* scheduler = sylar::Scheduler::GetThis();
-    scheduler->schedule(std::bind(&shuttleData, oneEnd, otherEnd));
+    scheduler->schedule(std::bind(&shuttleData, oneEnd, otherEnd)); // 这里引用计数剧增! 从而导致即使shuttleData结束 也不会释放stream // 是好事儿 还是坏事儿
     scheduler->schedule(std::bind(&shuttleData, otherEnd, oneEnd));
+    //SYLAR_LOG_DEBUG(g_logger) << "+++++++++oneEnd.use_count: " << oneEnd.use_count()
+    //<< "  otherEnd.use_count: " << otherEnd.use_count();
 }
 
 std::string to_hex(const std::string& str) {
@@ -54,7 +57,7 @@ void TcpProxy::handleClient(sylar::Socket::ptr client) {
 
     sylar::Stream::ptr cs(new sylar::SocketStream(client));
 
-    sylar::Stream::ptr ss = tunnel(cs, "10.0.140.173", 1984);
+    sylar::Stream::ptr ss = tunnel(cs, "0.0.0.0", 1967);
     if (ss == nullptr) {
         SYLAR_LOG_DEBUG(g_logger) << "tunnel return ss nullptr";
         return;

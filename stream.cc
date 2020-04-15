@@ -14,7 +14,12 @@ namespace sylar {
     static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
 
     static void ReadOne(Stream& src, Buffer*& buffer, size_t len, size_t& result) {
-        result = src.read(buffer, len);
+        int ret = 0;
+        if ( (ret = src.read(buffer, len)) <= 0) {
+            result = 0;
+            return;
+        }
+        result = ret;
         SYLAR_LOG_ERROR(g_logger) << "ReadOne result: " << result;
     }
 
@@ -258,7 +263,7 @@ namespace sylar {
             ParallelDo(deferGroups, fibers);
             totalRead += readResult;
             if (readResult == 0) {
-                SYLAR_LOG_ERROR(g_logger) << "totalRead: " << totalRead;
+                SYLAR_LOG_ERROR(g_logger) << "read src fin, totalRead: " << totalRead;
                 return totalRead;
             }
         }
