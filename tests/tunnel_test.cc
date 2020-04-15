@@ -53,9 +53,16 @@ void TcpProxy::handleClient(sylar::Socket::ptr client) {
     SYLAR_LOG_DEBUG(g_logger) << "start";
 
     sylar::Stream::ptr cs(new sylar::SocketStream(client));
+
+    sylar::Stream::ptr ss = tunnel(cs, "10.0.140.173", 1984);
+    if (ss == nullptr) {
+        SYLAR_LOG_DEBUG(g_logger) << "tunnel return ss nullptr";
+        return;
+    } 
+    /*
     std::string buffer;
     buffer.resize(20);
-    if (cs->readFixSize(&buffer[0], 2) <= 0) {
+    if (cs->readFixSize(&buffer[0], 4) <= 0) {
         SYLAR_LOG_DEBUG(g_logger) << "read client failed";
         return;
     }
@@ -67,13 +74,15 @@ void TcpProxy::handleClient(sylar::Socket::ptr client) {
         return;
     }
 
-    sylar::IPAddress::ptr addr = sylar::IPv4Address::Create("127.0.0.1", 1984);
+    //sylar::IPAddress::ptr addr = sylar::IPv4Address::Create("127.0.0.1", 1984);
+    sylar::IPAddress::ptr addr = sylar::IPv4Address::Create("10.0.140.173", 1984);
     sylar::Socket::ptr os_sock = sylar::Socket::CreateTCP(addr);
     if(!os_sock->connect(addr)) {
         SYLAR_LOG_DEBUG(g_logger) << "connect os failed: " << addr->toString();
         return;
     }
     sylar::Stream::ptr ss(new sylar::SocketStream(os_sock));
+    */
 
     connectThem(cs, ss);
     return;
