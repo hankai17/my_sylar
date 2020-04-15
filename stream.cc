@@ -25,6 +25,73 @@ namespace sylar {
         }
     }
 
+    sylar::Stream::ptr tunnel(sylar::Stream::ptr cstream, const std::string& targetIP, 
+          uint16_t targetPort) {
+        std::string buffer;
+        buffer.resize(257);
+        // read client req
+        if (cstream->read(&buffer[0], buffer.size()) <= 0) {
+            SYLAR_LOG_ERROR(g_logger) << "read client failed";
+            return nullptr;
+        }
+        SYLAR_ASSERT(buffer[0] == 5 && buffer[1] != 0);
+        // resp no auth
+        buffer[1] = 0;
+        if (cstream->writeFixSize(&buffer[0], 2) <= 0) {
+            SYLAR_LOG_ERROR(g_logger) << "write client failed";
+            return nullptr;
+        }
+    
+        /*
+        // read req of client's ss5
+        if (cstream->readFixSize(&buffer[0], 5) <= 0) {
+            SYLAR_LOG_ERROR(g_logger) << "write client failed";
+            return nullptr;
+        }
+        SYLAR_ASSERT(buffer[0] == 5 && buffer[1] == 1
+              && buffer[2] == 0);
+
+        int addr_len = buffer[4];
+        if (buffer[3] == 1) { // IPv4
+            if (cstream->readFixSize(&buffer[0], addr_len) <= 0) {
+                SYLAR_LOG_ERROR(g_logger) << "read client addr failed";
+                return nullptr;
+            }
+            SYLAR_LOG_ERROR(g_logger) << "read client addr: " << buffer;
+            IPAddress::ptr target_ip = IPAddress::Create(std::string(buffer, addr_len));
+        } else if (buffer[3] == 3) { // Domain
+            if (cstream->readFixSize(&buffer[0], addr_len) <= 0) {
+                SYLAR_LOG_ERROR(g_logger) << "read client addr failed";
+                return nullptr;
+            }
+            SYLAR_LOG_ERROR(g_logger) << "read client addr: " << buffer;
+            std::vector<Address::ptr> result;
+            Address::Lookup(result, std::string(buffer, addr_len));
+            if (result.size() == 0) {
+                SYLAR_LOG_ERROR(g_logger) << "not ip";
+                return nullptr;
+            }
+        } else if (buffer[4] == 4) { // IPv6
+            // TODO
+        } else {
+            SYLAR_LOG_ERROR(g_logger) << "unknow type: " << buffer[4];
+            return nullptr;
+        }
+        */
+        // new ss (return it)
+        Address::ptr addr = IPAddress::Create(targetIP.c_str(), targetPort);
+        Socket::ptr sock = 0 ? SSLSocket::CreateTCP(addr) : Socket::CreateTCP(addr);
+        if (!sock->connect(addr)) {
+            SYLAR_LOG_ERROR(g_logger) << "connect to proxy failed"; 
+            return nullptr; 
+        }
+        sock->setRecvTimeout(1000);
+        Stream::ptr stream(new SocketStream(sock));
+         
+        // sec & send it to p2
+        return stream;
+    }
+
     // 与ss服务器建联 传参是组ss包中的ip或域名及端口
     Stream* tunnel(Uri::ptr proxy, IPAddress::ptr targetIP, 
           const std::string& targetDomain, uint16_t targetPort, uint8_t version, std::string& cli) {

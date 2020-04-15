@@ -49,6 +49,9 @@ namespace sylar {
         virtual void close() = 0;
     };
 
+    Stream::ptr tunnel(sylar::Stream::ptr cstream, const std::string& targetIP, 
+          uint16_t targetPort);
+
     class SocketStream : public Stream {
     public:
         typedef std::shared_ptr<SocketStream> ptr;
