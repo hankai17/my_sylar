@@ -4,6 +4,7 @@
 #include "uri.hh"
 #include "tcp_server.hh"
 #include "http/http_connection.hh"
+#include <signal.h>
 
 sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
 
@@ -25,7 +26,7 @@ TcpProxy::TcpProxy(sylar::IOManager *worker, sylar::IOManager *accept_worker)
 static void shuttleData(sylar::Stream::ptr oneEnd, sylar::Stream::ptr otherEnd) {
     try {
         sylar::TransferStream(*oneEnd.get(), *otherEnd.get());
-        otherEnd->close();
+        //otherEnd->close();
         /*
         if (otherEnd->supportsHalfClose())
             otherEnd->close(Stream::WRITE);
@@ -57,7 +58,8 @@ void TcpProxy::handleClient(sylar::Socket::ptr client) {
 
     sylar::Stream::ptr cs(new sylar::SocketStream(client));
 
-    sylar::Stream::ptr ss = tunnel(cs, "0.0.0.0", 1967);
+    //sylar::Stream::ptr ss = tunnel(cs, "0.0.0.0", 1967);
+    sylar::Stream::ptr ss = tunnel(cs, "0.0.0.0", 1966);
     if (ss == nullptr) {
         SYLAR_LOG_DEBUG(g_logger) << "tunnel return ss nullptr";
         return;
@@ -99,7 +101,8 @@ void test() {
 }
 
 int main() {
-    sylar::IOManager iom(1, false, "io"); 
+    signal(SIGPIPE, SIG_IGN);
+    sylar::IOManager iom(1, false, "io");
     iom.schedule(test);
     iom.stop();
     return 0; 

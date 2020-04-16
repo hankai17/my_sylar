@@ -34,18 +34,47 @@ namespace sylar {
           uint16_t targetPort) {
         std::string buffer;
         buffer.resize(257);
+
         // read client req
         if (cstream->read(&buffer[0], buffer.size()) <= 0) {
             SYLAR_LOG_ERROR(g_logger) << "read client failed";
             return nullptr;
         }
         SYLAR_ASSERT(buffer[0] == 5 && buffer[1] != 0);
+
         // resp no auth
         buffer[1] = 0;
         if (cstream->writeFixSize(&buffer[0], 2) <= 0) {
             SYLAR_LOG_ERROR(g_logger) << "write client failed";
             return nullptr;
         }
+
+        // new ss (return it)
+        Address::ptr addr = IPAddress::Create(targetIP.c_str(), targetPort);
+        Socket::ptr sock = 0 ? SSLSocket::CreateTCP(addr) : Socket::CreateTCP(addr);
+        if (!sock->connect(addr)) {
+            SYLAR_LOG_ERROR(g_logger) << "connect to proxy failed"; 
+            return nullptr; 
+        }
+        sock->setRecvTimeout(1000);
+        Stream::ptr stream(new SocketStream(sock));
+
+        // Whether has this logic?
+
+        // conn to p2 only support noauth
+        buffer[0] = 5;
+        buffer[1] = 1;
+        buffer[2] = 0;
+        if (stream->writeFixSize(&buffer[0], 3) <= 0) {
+            SYLAR_LOG_ERROR(g_logger) << "send to proxy failed";
+            return nullptr;
+        }
+        // recv resp
+        if (stream->readFixSize(&buffer[0], 2) <= 0) {
+            SYLAR_LOG_ERROR(g_logger) << "read proxy failed";
+            return nullptr;
+        }
+        SYLAR_ASSERT(buffer[0] == 5 && buffer[1] == 0);
     
         /*
         // read req of client's ss5
@@ -83,15 +112,6 @@ namespace sylar {
             return nullptr;
         }
         */
-        // new ss (return it)
-        Address::ptr addr = IPAddress::Create(targetIP.c_str(), targetPort);
-        Socket::ptr sock = 0 ? SSLSocket::CreateTCP(addr) : Socket::CreateTCP(addr);
-        if (!sock->connect(addr)) {
-            SYLAR_LOG_ERROR(g_logger) << "connect to proxy failed"; 
-            return nullptr; 
-        }
-        sock->setRecvTimeout(1000);
-        Stream::ptr stream(new SocketStream(sock));
          
         // sec & send it to p2
         return stream;
@@ -261,6 +281,8 @@ namespace sylar {
                 todo = toTransfer - totalRead;
             }
             ParallelDo(deferGroups, fibers);
+            SYLAR_LOG_ERROR(g_logger) << "ParallelDo: " << fibers[0]->getFiberId()
+              << " " << fibers[1]->getFiberId();
             totalRead += readResult;
             if (readResult == 0) {
                 SYLAR_LOG_ERROR(g_logger) << "read src fin, totalRead: " << totalRead;
