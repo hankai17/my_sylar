@@ -359,7 +359,8 @@ int close(int fd) {
     if (ctx) {
         auto iom = sylar::IOManager::GetThis();
         if (iom) {
-            iom->cancelAll(fd);
+            bool ret = iom->cancelAll(fd);
+            SYLAR_LOG_DEBUG(g_logger) << "hook close fd: " << fd << " ret: " << ret;
         }
         sylar::FdManager::getFdMgr()->del(fd);
     }

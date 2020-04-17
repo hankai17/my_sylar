@@ -58,6 +58,9 @@ namespace sylar {
         }
         sock->setRecvTimeout(1000);
         Stream::ptr stream(new SocketStream(sock));
+        SYLAR_LOG_ERROR(g_logger) << "new stream, cstream->fd: "
+        << std::dynamic_pointer_cast<SocketStream>(cstream)->getSocket()->getSocket()
+        << " sstream->fd: " << sock->getSocket();
 
         // Whether has this logic?
 
@@ -285,7 +288,9 @@ namespace sylar {
               << " " << fibers[1]->getFiberId();
             totalRead += readResult;
             if (readResult == 0) {
-                SYLAR_LOG_ERROR(g_logger) << "read src fin, totalRead: " << totalRead;
+                SYLAR_LOG_ERROR(g_logger) << "read src fin, fd: "
+                << dynamic_cast<SocketStream*>(&src)->getSocket()->getSocket()
+                << " totalRead: " << totalRead;
                 return totalRead;
             }
         }

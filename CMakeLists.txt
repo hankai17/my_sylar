@@ -103,7 +103,6 @@ my_sylar_add_executable(http_server tests/http_server.cc ${PROJECT_NAME} "${LIBS
 my_sylar_add_executable(race_condition tests/race_condition.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(http_connection_test tests/http_connection_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(http_parser tests/http_parser.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(uri_test tests/uri_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(udp_test tests/udp_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(daemon_test tests/daemon_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(ws_test tests/ws_test.cc ${PROJECT_NAME} "${LIBS}")
@@ -111,6 +110,7 @@ my_sylar_add_executable(application_test tests/application_test.cc ${PROJECT_NAM
 my_sylar_add_executable(crypto_test tests/crypto_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(counter utils/counter.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(sem_test tests/semaphore_test.cc ${PROJECT_NAME} "${LIBS}")
+my_sylar_add_executable(uri_test tests/uri_test.cc ${PROJECT_NAME} "${LIBS}")
 ###############################
 endif()
 my_sylar_add_executable(pingpong_test tests/pingpong_bench.cc ${PROJECT_NAME} "${LIBS}")

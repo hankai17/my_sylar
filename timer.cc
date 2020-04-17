@@ -121,7 +121,7 @@ namespace sylar {
 
     void TimerManager::addTimer(Timer::ptr timer, RWMutexType::WriteLock& lock) { //base
         auto it = m_timers.insert(timer).first; //迭代器
-        //std::cout << "after addTimer, m_tiemrs.size(): " << m_timers.size();
+        //std::cout << "after addTimer, m_tiemrs.size(): " << m_timers.size() << std::endl;
         bool at_front = (it == m_timers.begin()); //堆顶最小值
         if (at_front) {
             m_tickle = true;
