@@ -56,7 +56,7 @@ namespace sylar {
             SYLAR_LOG_ERROR(g_logger) << "connect to proxy failed"; 
             return nullptr; 
         }
-        sock->setRecvTimeout(1000);
+        sock->setRecvTimeout(1000 * 5);
         Stream::ptr stream(new SocketStream(sock));
         SYLAR_LOG_ERROR(g_logger) << "new stream, cstream->fd: "
         << std::dynamic_pointer_cast<SocketStream>(cstream)->getSocket()->getSocket()
@@ -475,6 +475,12 @@ namespace sylar {
     void SocketStream::close() {
         if (m_socket) {
             m_socket->close();
+        }
+    }
+
+    void SocketStream::shutdown(int how) {
+        if (m_socket) {
+            m_socket->shutdown(how);
         }
     }
 

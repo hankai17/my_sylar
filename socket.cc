@@ -38,6 +38,16 @@ static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
         return false; // ???
     }
 
+    bool Socket::shutdown(int how) {
+        if (!m_isConnected && m_sock == -1) {
+            return true;
+        }
+        if (m_sock != -1) {
+            ::shutdown(m_sock, how);
+        }
+        return false;
+    }
+
     Socket::ptr Socket::CreateTCP(sylar::Address::ptr address) {
         Socket::ptr sock(new Socket(address->getFamily(), TCP, 0));
         return sock;

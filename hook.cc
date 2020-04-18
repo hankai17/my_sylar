@@ -48,6 +48,7 @@ XX(send);
 XX(sendto);
 XX(sendmsg);
 XX(close);
+XX(shutdown);
 XX(fcntl);
 XX(ioctl);
 XX(getsockopt);
@@ -163,6 +164,7 @@ XX(send) \
 XX(sendto) \
 XX(sendmsg) \
 XX(close) \
+XX(shutdown) \
 XX(fcntl) \
 XX(ioctl) \
 XX(getsockopt) \
@@ -367,7 +369,40 @@ int close(int fd) {
     return close_f(fd); // 引用计数仍大于0时，这个close调用就不会引发TCP的四路握手断连过程
 }
 
-// int shutdown // so hard TODO
+int shutdown(int fd, int how) {
+    if (!sylar::t_hook_enable) {
+        return shutdown_f(fd, how);
+    }
+    sylar::FdCtx::ptr ctx = sylar::FdManager::getFdMgr()->get(fd);
+    if (ctx) {
+        auto iom = sylar::IOManager::GetThis();
+        if (iom) {
+            sylar::IOManager::Event event = sylar::IOManager::Event::NONE;
+            switch (how) {
+                case 0: {
+                    event = sylar::IOManager::Event::READ;
+                    break;
+                }
+                case 1: {
+                    event = sylar::IOManager::Event::WRITE;
+                    break;
+                }
+                default : {
+                    break;
+                }
+            }
+            if (event == sylar::IOManager::Event::NONE) {
+                bool ret = iom->cancelAll(fd);
+                SYLAR_LOG_DEBUG(g_logger) << "hook shutdown fd: " << fd << " ret: " << ret;
+            } else {
+                bool ret = iom->cancelEvent(fd, event);
+                SYLAR_LOG_DEBUG(g_logger) << "hook shutdown fd: " << fd << " ret: " << ret;
+            }
+        }
+        //sylar::FdManager::getFdMgr()->del(fd);
+    }
+    return shutdown_f(fd, how); // 引用计数仍大于0时，这个close调用就不会引发TCP的四路握手断连过程
+}
 
 int fcntl(int fd, int cmd, ... /* arg */ ) {
     va_list va;

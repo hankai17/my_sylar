@@ -65,7 +65,7 @@ namespace sylar {
         virtual int read(Buffer::ptr buf, size_t length) override;
         virtual int write(Buffer::ptr buf, size_t length) override;
         virtual void close() override;
-
+        void shutdown(int how);
 
         Socket::ptr getSocket() const { return m_socket; }
         bool isConnected() const;

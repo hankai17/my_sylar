@@ -54,6 +54,7 @@ set(LIB_SRC
         http/httpclient_parser.cc
         http/http_parser.cc
         buffer.cc
+        mbuffer.cc
         tcp_server.cc
         stream.cc
         http/http_server.cc

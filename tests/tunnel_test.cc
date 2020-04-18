@@ -27,14 +27,13 @@ static void shuttleData(sylar::Stream::ptr oneEnd, sylar::Stream::ptr otherEnd) 
     try {
         sylar::TransferStream(*oneEnd.get(), *otherEnd.get());
         int tmp_fd = std::dynamic_pointer_cast<sylar::SocketStream>(otherEnd)->getSocket()->getSocket();
+
         //otherEnd->close(); // 这里不close会导致sigpipe
+        std::dynamic_pointer_cast<sylar::SocketStream>(otherEnd)->shutdown(SHUT_WR);
+
         SYLAR_LOG_DEBUG(g_logger) << "oneEnd closed, oneEnd fd: "
         << std::dynamic_pointer_cast<sylar::SocketStream>(oneEnd)->getSocket()->getSocket()
         << " otherEnd close, fd: " << tmp_fd;
-        /*
-        if (otherEnd->supportsHalfClose())
-            otherEnd->close(Stream::WRITE);
-            */
     } catch (std::exception &) {
         SYLAR_LOG_DEBUG(g_logger) << "shuttleData failed";
     }
@@ -117,6 +116,9 @@ void test() {
 
 // 1 不允许主动调close  close必须放在socket/stream析构中调用  也就是说必须一口气初始化stream 
 // 而且不能把socket暴露出来  也就是说close时机只有当stream引用计数完毕自动析构 其它一概不准 
+// 果然 下载大文件时 即使客户端关闭了 另一端stream仍然再下 根本原因是WriteOne设计时 不像readOne那样有个失败判断
+// 这里抓包很有意思 当向src发数据时 程序收到rst 就看不到发向src的包了 netstat也看不到任何状态 没有cw 但是程序依然保留着fd
+// 所以这就是半关闭的应用场景了
 // 2怎么支持半关闭?
 void test1_1(sylar::Socket::ptr sock) {
     std::string buf;

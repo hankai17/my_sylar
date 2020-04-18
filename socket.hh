@@ -64,6 +64,7 @@ namespace sylar {
         virtual bool reconnect(uint64_t timeout_ms = -1);
         virtual bool listen(int backlog = SOMAXCONN);
         virtual bool close();
+        virtual bool shutdown(int how);
 
         virtual int send(const void* buffer, size_t length, int flags = 0);
         virtual int send(iovec* buffers, size_t length, int flags = 0);
