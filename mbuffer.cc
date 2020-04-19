@@ -54,4 +54,60 @@ namespace sylar {
     void MBuffer::SegmentData::extend(size_t length) {
         m_length += length;
     }
+
+    MBuffer::Segment::Segment(size_t length) : // 一个segment里只有一个segment
+    m_writeIndex(0),
+    m_data(length) {
+        SYLAR_ASSERT(m_writeIndex <= m_data.m_length);
+    }
+
+    MBuffer::Segment::Segment(SegmentData seg_data) :
+    m_writeIndex(seg_data.getLength()),
+    m_data(seg_data) {
+        SYLAR_ASSERT(m_writeIndex <= m_data.m_length);
+    }
+
+    MBuffer::Segment::Segment(void* buffer, size_t length) :
+    m_writeIndex(0),
+    m_data(buffer, length) {
+        SYLAR_ASSERT(m_writeIndex <= m_data.m_length);
+    }
+
+    // ------data---------^----------free--------
+    //                    |
+    //                 m_writeIndex
+
+    size_t MBuffer::Segment::readAvailable() const {
+        SYLAR_ASSERT(m_writeIndex <= m_data.m_length);
+        return m_writeIndex;
+    }
+
+    size_t MBuffer::Segment::writeAvailable() const {
+        SYLAR_ASSERT(m_writeIndex <= m_data.m_length);
+        return m_data.getLength() - m_writeIndex;
+    }
+
+    size_t MBuffer::Segment::length() const {
+        SYLAR_ASSERT(m_writeIndex <= m_data.m_length);
+        return m_data.getLength();
+    }
+
+    void MBuffer::Segment::produce(size_t length) {
+        SYLAR_ASSERT(length <= writeAvailable());
+        m_writeIndex += length;
+        SYLAR_ASSERT(m_writeIndex <= m_data.m_length);
+    }
+
+    void MBuffer::Segment::consume(size_t length) {
+        SYLAR_ASSERT(length <= readAvailable());
+        m_writeIndex -= length;
+        m_data = m_data.slice(length);
+        SYLAR_ASSERT(m_writeIndex <= m_data.m_length);
+    }
+
+    void MBuffer::Segment::truncate(size_t length);
+    void MBuffer::Segment::extend(size_t length);
+    const SegmentData readBuffer() const;
+    const SegmentData writeBuffer() const;
+    SegmentData writeBuffer();
 }
