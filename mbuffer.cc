@@ -11,7 +11,7 @@ namespace sylar {
 
     MBuffer::SegmentData::SegmentData(size_t length) :
     m_length(length) {
-        m_array.reset(new uint8_t[length], [](char* ptr) {
+        m_array.reset(new uint8_t[length], [](uint8_t* ptr) {
             delete[] ptr;
         });
         setStart(m_array.get());
@@ -105,9 +105,19 @@ namespace sylar {
         SYLAR_ASSERT(m_writeIndex <= m_data.m_length);
     }
 
+    /*
     void MBuffer::Segment::truncate(size_t length);
     void MBuffer::Segment::extend(size_t length);
-    const SegmentData readBuffer() const;
-    const SegmentData writeBuffer() const;
-    SegmentData writeBuffer();
+    const SegmentData MBuffer::Segment::readBuffer() const {
+
+    }
+
+    const SegmentData MBuffer::Segment::writeBuffer() const {
+
+    }
+
+    SegmentData MBuffer::Segment::writeBuffer() {
+
+    }
+     */
 }

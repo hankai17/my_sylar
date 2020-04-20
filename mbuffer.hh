@@ -91,7 +91,7 @@ namespace sylar {
         void copyOut(void* buffer, size_t length, size_t pos = 0) const;
 
         ptrdiff_t find(char delimiter, size_t length = ~0) const;
-        ptrdiff_t find(const string& buffer, size_t length = ~0) const;
+        ptrdiff_t find(const std::string& buffer, size_t length = ~0) const;
 
         std::string toString() const;
         std::string getDelimited(char delimiter, bool eofIsDelimiter = true,

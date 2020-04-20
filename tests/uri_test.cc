@@ -4,6 +4,7 @@
 #include "address.hh"
 #include "socket.hh"
 #include "util.hh"
+#include "ns/ares.hh"
 
 #include<sys/socket.h>
 #include<string.h>
@@ -15,7 +16,10 @@
 #include<arpa/inet.h>
 #include<netinet/tcp.h>
 
+#define closesocket close
+
 sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
+sylar::AresChannel::ptr channel = nullptr;
 
 void test() {
     //sylar::Uri::ptr uri = sylar::Uri::Create("http://www.ifeng.com/path/to/1.html?k=v&k1=v1#frag=1");
@@ -79,9 +83,69 @@ void test1() {
 
 }
 
+void test1_1(sylar::Socket::ptr sock) {
+    std::string buf;
+    buf.resize(1024);
+
+    sock->recv(&buf[0], buf.size());
+    SYLAR_LOG_DEBUG(g_logger) << "end test1_1";
+}
+
+void test2() {
+    sylar::IPAddress::ptr addr = nullptr;
+    if (0) {
+        addr = sylar::Address::LookupAnyIPAddress("www.baidu.com:80"); // 不知道为什么加上以后就变成阻塞的了
+    } else {
+        std::string domain("www.ifeng.com");
+        if (channel == nullptr) {
+            SYLAR_LOG_DEBUG(g_logger) << "channel is nullptr sleep 5s...";
+            sleep(5);
+        }
+        auto ips = channel->aresGethostbyname(domain.c_str());
+        for (auto& i : ips) {
+            SYLAR_LOG_DEBUG(g_logger) << i.toString();
+        }
+        SYLAR_LOG_DEBUG(g_logger) << "domain: " << domain << ", test done";
+
+        addr = std::dynamic_pointer_cast<sylar::IPAddress>(
+              sylar::Address::Create(ips[0].getAddr(), ips[0].getAddrLen())
+              );
+    }
+
+    if (addr) {
+        SYLAR_LOG_DEBUG(g_logger) << "addr: " << addr->toString();
+    } else {
+        SYLAR_LOG_DEBUG(g_logger) << "get addr fail";
+        return;;
+    }
+    sylar::Socket::ptr sock = sylar::Socket::CreateTCP(addr);
+    if (!sock->connect(addr)) {
+        SYLAR_LOG_DEBUG(g_logger) << "fd: " << sock->getSocket() << " connect faild addr: " << addr->toString();
+        return;
+    } else {
+        SYLAR_LOG_DEBUG(g_logger) << "fd: " << sock->getSocket() << " connect succeed: " << addr->toString();
+    }
+
+    sylar::IOManager::GetThis()->schedule(std::bind(test1_1, sock));
+    SYLAR_LOG_DEBUG(g_logger) << "after schedule...";
+
+    sleep(10);
+    sock->close(); //这里手动close 底层会触发test_1中的读事件 (so dangerous!)
+    SYLAR_LOG_DEBUG(g_logger) << "after sock->close: " << addr->toString();
+}
+
+void ares_test() {
+    SYLAR_LOG_DEBUG(g_logger) << "in ares test";
+    channel.reset(new sylar::AresChannel);
+    channel->init();
+    channel->start();
+}
+
 int main() {
     sylar::IOManager iom(1, false, "io");
-    iom.schedule(test1);
+    //iom.schedule(test1);
+    iom.schedule(test2);
+    iom.schedule(ares_test);
     iom.stop();
     return 0;
 }

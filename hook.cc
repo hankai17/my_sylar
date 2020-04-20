@@ -48,6 +48,7 @@ XX(send);
 XX(sendto);
 XX(sendmsg);
 XX(close);
+XX(closesocket);
 XX(shutdown);
 XX(fcntl);
 XX(ioctl);
@@ -164,6 +165,7 @@ XX(send) \
 XX(sendto) \
 XX(sendmsg) \
 XX(close) \
+XX(closesocket) \
 XX(shutdown) \
 XX(fcntl) \
 XX(ioctl) \
@@ -220,6 +222,7 @@ int socket(int domain, int type, int protocol) {
         return socket_f(domain, type, protocol);
     }
     int fd = socket_f(domain, type, protocol);
+    SYLAR_LOG_ERROR(g_logger) << "hook: socket() return fd: " << fd;
     if (fd == -1) {
         return fd;
     }
@@ -367,6 +370,10 @@ int close(int fd) {
         sylar::FdManager::getFdMgr()->del(fd);
     }
     return close_f(fd); // 引用计数仍大于0时，这个close调用就不会引发TCP的四路握手断连过程
+}
+
+int closesocket(int fd) {
+    return close(fd);
 }
 
 int shutdown(int fd, int how) {

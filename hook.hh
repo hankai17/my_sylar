@@ -73,6 +73,9 @@ extern sendmsg_fun sendmsg_f;
 typedef int (*close_fun)(int fd);
 extern close_fun close_f;
 
+typedef int (*closesocket_fun)(int fd);
+extern closesocket_fun closesocket_f;
+
 typedef int (*shutdown_fun)(int fd, int how);
 extern shutdown_fun shutdown_f;
 

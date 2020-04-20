@@ -12,6 +12,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <signal.h>
 
 sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
 
@@ -286,6 +287,7 @@ void test() {
 }
 
 int main() {
+    signal(SIGPIPE, SIG_IGN); // gdb not consider this
     sylar::IOManager iom(1, false, "io");
     iom.schedule(test);
     iom.stop();

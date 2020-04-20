@@ -5,6 +5,8 @@
 #include <netdb.h>
 #include <ifaddrs.h>
 
+#define closesocket close
+
 namespace sylar {
     static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
 
@@ -78,7 +80,8 @@ namespace sylar {
             node = host.substr(0, endipv4 ? endipv4 - host.c_str() : host.size());
         }
 
-        int error = getaddrinfo(node.c_str(), service_port, &hints, &results);
+                                                                               //https://blog.csdn.net/haima1998/article/details/51745685
+        int error = getaddrinfo(node.c_str(), service_port, &hints, &results); // 应该尽量选择使用getaddrinfo函数代替之前的getxx函数族，就像应该使用inet_ntop(inet_pton)代替inet_aton, inet_addr等函数一样。
         if (error) {
             SYLAR_LOG_ERROR(g_logger) << "Address::Lookup getaddrinfo(" << node.c_str()
                                       << ", " << service_port << "...) err=" << error << " errno=" << errno << " " << gai_strerror(error);
