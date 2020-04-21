@@ -30,72 +30,191 @@ namespace sylar {
         }
     }
 
+    std::string to_hex(const std::string& str) {
+        std::stringstream ss;
+        for(size_t i = 0; i < str.size(); ++i) {
+            ss << std::setw(2) << std::setfill('0') << std::hex
+               << (int)(uint8_t)str[i];
+        }
+        return ss.str();
+    }
+
     sylar::Stream::ptr tunnel(sylar::Stream::ptr cstream, const std::string& targetIP, 
           uint16_t targetPort) {
         std::string buffer;
         buffer.resize(257);
 
         // read client req
-        if (cstream->read(&buffer[0], buffer.size()) <= 0) {
+        if (cstream->readFixSize(&buffer[0], 2) <= 0) {
             SYLAR_LOG_ERROR(g_logger) << "read client failed";
             return nullptr;
         }
-        SYLAR_ASSERT(buffer[0] == 5 && buffer[1] != 0);
+        // we support 0(noauth) 1(userpas) 80(ssl)
+        if (buffer[0] != 5) {
+            SYLAR_LOG_ERROR(g_logger) << "we only support version5";
+            return nullptr;
+        }
+        int client_auth_num = buffer[1];
+        if (client_auth_num <= 0) {
+            SYLAR_LOG_ERROR(g_logger) << "client not support any auth";
+            return nullptr;
+        }
+        if (cstream->readFixSize(&buffer[0], client_auth_num) <= 0) {
+            SYLAR_LOG_ERROR(g_logger) << "read client failed";
+            return nullptr;
+        }
+        //SYLAR_LOG_ERROR(g_logger) << "buf[0]: " << buffer[0] << " buf[1]: " << buffer[1] << " buf[2]: " << buffer[2];
+        //SYLAR_LOG_ERROR(g_logger) << "buf[1]: " << to_hex(std::string(buffer[1], 1));
+        //SYLAR_LOG_ERROR(g_logger) << "buf[2]: " << to_hex(std::string(buffer[2], 1));
+
+        // we use the first auth default
+        if (buffer[0] != 0 && buffer[0] != 2 && buffer[0] != (int8_t)0x80) {
+            SYLAR_LOG_ERROR(g_logger) << "ss5 not support auth: " << buffer[0];
+            buffer[0] = 0xFF;
+            cstream->writeFixSize(&buffer[0], 1);
+            return nullptr;
+        }
+        int default_auth = buffer[0];
 
         // resp no auth
-        buffer[1] = 0;
+        buffer[0] = 5;
+        buffer[1] = default_auth;
         if (cstream->writeFixSize(&buffer[0], 2) <= 0) {
             SYLAR_LOG_ERROR(g_logger) << "write client failed";
             return nullptr;
         }
 
-        // new ss (return it)
-        Address::ptr addr = IPAddress::Create(targetIP.c_str(), targetPort);
-        Socket::ptr sock = 0 ? SSLSocket::CreateTCP(addr) : Socket::CreateTCP(addr);
-        if (!sock->connect(addr)) {
-            SYLAR_LOG_ERROR(g_logger) << "connect to proxy failed"; 
-            return nullptr; 
+        if (default_auth == 0) {
+        } else if (default_auth == 1) {
+            // compare usepass with para
+            if (cstream->readFixSize(&buffer[0], 2) <= 0) {
+                SYLAR_LOG_ERROR(g_logger) << "read client failed";
+                return nullptr;
+            }
+            if (buffer[0] != default_auth) {
+                SYLAR_LOG_ERROR(g_logger) << "read client failed";
+                return nullptr;
+            }
+            // get user
+            int user_len = buffer[1];
+            if (user_len > 255 || cstream->readFixSize(&buffer[0], user_len) <= 0) {
+                SYLAR_LOG_ERROR(g_logger) << "read client failed";
+                return nullptr;
+            }
+            std::string client_user(&buffer[0], user_len);
+
+            // get pas
+            if (cstream->readFixSize(&buffer[0], 1) <= 0) {
+                SYLAR_LOG_ERROR(g_logger) << "read client failed";
+                return nullptr;
+            }
+            int pas_len = buffer[0];
+            if (cstream->readFixSize(&buffer[0], pas_len) <= 0) {
+                SYLAR_LOG_ERROR(g_logger) << "read client failed";
+                return nullptr;
+            }
+            std::string client_pas(&buffer[0], pas_len);
+            // compare with para
+        } else {
+            // use ssl
         }
-        sock->setRecvTimeout(1000 * 5);
-        Stream::ptr stream(new SocketStream(sock));
-        SYLAR_LOG_ERROR(g_logger) << "new stream, cstream->fd: "
-        << std::dynamic_pointer_cast<SocketStream>(cstream)->getSocket()->getSocket()
-        << " sstream->fd: " << sock->getSocket();
 
-        // Whether has this logic?
+        if (targetIP != "") { // p1
+            // new ss (return it)
+            Address::ptr addr = IPAddress::Create(targetIP.c_str(), targetPort);
+            Socket::ptr sock = 0 ? SSLSocket::CreateTCP(addr) : Socket::CreateTCP(addr);
+            if (!sock->connect(addr)) {
+                SYLAR_LOG_ERROR(g_logger) << "connect to proxy failed"; 
+                return nullptr; 
+            }
+            sock->setRecvTimeout(1000 * 5);
+            Stream::ptr stream(new SocketStream(sock));
+            SYLAR_LOG_ERROR(g_logger) << "new stream, cstream->fd: "
+            << std::dynamic_pointer_cast<SocketStream>(cstream)->getSocket()->getSocket()
+            << " sstream->fd: " << sock->getSocket();
 
-        // conn to p2 only support noauth
+            // Whether has this logic?
+
+            // conn to p2 only support noauth
+            buffer[0] = 5;
+            buffer[1] = 1;
+            buffer[2] = 0;
+            if (stream->writeFixSize(&buffer[0], 3) <= 0) {
+                SYLAR_LOG_ERROR(g_logger) << "send to proxy failed";
+                return nullptr;
+            }
+            // recv resp
+            if (stream->readFixSize(&buffer[0], 2) <= 0) {
+                SYLAR_LOG_ERROR(g_logger) << "read proxy failed";
+                return nullptr;
+            }
+            SYLAR_ASSERT(buffer[0] == 5 && buffer[1] == 0);
+            return stream;
+        }
+
+        SYLAR_LOG_ERROR(g_logger) << "read p1's request...";
+        // read p1's request
+        if (cstream->readFixSize(&buffer[0], 2) <= 0) {
+            SYLAR_LOG_ERROR(g_logger) << "read p1's request failed";
+            return nullptr;
+        }
+        if (buffer[0] != 5 || buffer[1] <= 0) {
+            SYLAR_LOG_ERROR(g_logger) << "p2 not support version: " << buffer[0]
+              << " auth num <= 0"; 
+            return nullptr;
+        }
+        int auth_num = buffer[1];
+        if (cstream->readFixSize(&buffer[0], auth_num) <= 0) {
+            SYLAR_LOG_ERROR(g_logger) << "read p1's request failed";
+            return nullptr;
+        }
+        default_auth = buffer[0];
+        if (buffer[0] != 0 && buffer[0] != 2 && buffer[0] != (int8_t)0x80) {
+            SYLAR_LOG_ERROR(g_logger) << "p2 not support auth: " << buffer[0];
+            return nullptr;
+        }
+
         buffer[0] = 5;
-        buffer[1] = 1;
-        buffer[2] = 0;
-        if (stream->writeFixSize(&buffer[0], 3) <= 0) {
-            SYLAR_LOG_ERROR(g_logger) << "send to proxy failed";
+        buffer[1] = default_auth;
+        if (cstream->writeFixSize(&buffer[0], 2) <= 0) {
+            SYLAR_LOG_ERROR(g_logger) << "write p1 failed";
             return nullptr;
         }
-        // recv resp
-        if (stream->readFixSize(&buffer[0], 2) <= 0) {
-            SYLAR_LOG_ERROR(g_logger) << "read proxy failed";
-            return nullptr;
-        }
-        SYLAR_ASSERT(buffer[0] == 5 && buffer[1] == 0);
-    
-        /*
-        // read req of client's ss5
-        if (cstream->readFixSize(&buffer[0], 5) <= 0) {
-            SYLAR_LOG_ERROR(g_logger) << "write client failed";
-            return nullptr;
-        }
-        SYLAR_ASSERT(buffer[0] == 5 && buffer[1] == 1
-              && buffer[2] == 0);
 
+        if (default_auth == 0) {
+        } else if (default_auth == 1) {
+        } else {
+        }
+
+        if (cstream->readFixSize(&buffer[0], 5) <= 0) {
+            SYLAR_LOG_ERROR(g_logger) << "read p1 failed";
+            return nullptr;
+        }
         int addr_len = buffer[4];
+        SYLAR_LOG_ERROR(g_logger) << "-------->buffer[3]: " << int((uint8_t)buffer[3]);
         if (buffer[3] == 1) { // IPv4
             if (cstream->readFixSize(&buffer[0], addr_len) <= 0) {
                 SYLAR_LOG_ERROR(g_logger) << "read client addr failed";
                 return nullptr;
             }
             SYLAR_LOG_ERROR(g_logger) << "read client addr: " << buffer;
-            IPAddress::ptr target_ip = IPAddress::Create(std::string(buffer, addr_len));
+            if (cstream->readFixSize(&buffer[0], 2) <= 0) {
+                SYLAR_LOG_ERROR(g_logger) << "read client port failed";
+                return nullptr;
+            }
+            uint16_t port = sylar::byteswapOnLittleEndian((*(uint16_t*)&buffer[0]));
+            Address::ptr addr = IPAddress::Create(std::string(buffer, addr_len).c_str(), port);
+            Socket::ptr sock = 0 ? SSLSocket::CreateTCP(addr) : Socket::CreateTCP(addr);
+            if (!sock->connect(addr)) {
+                SYLAR_LOG_ERROR(g_logger) << "connect to proxy failed"; 
+                return nullptr; 
+            }
+            sock->setRecvTimeout(1000 * 5);
+            Stream::ptr stream(new SocketStream(sock));
+            SYLAR_LOG_ERROR(g_logger) << "new stream, cstream->fd: "
+            << std::dynamic_pointer_cast<SocketStream>(cstream)->getSocket()->getSocket()
+            << " sstream->fd: " << sock->getSocket();
+            return stream;
         } else if (buffer[3] == 3) { // Domain
             if (cstream->readFixSize(&buffer[0], addr_len) <= 0) {
                 SYLAR_LOG_ERROR(g_logger) << "read client addr failed";
@@ -108,16 +227,34 @@ namespace sylar {
                 SYLAR_LOG_ERROR(g_logger) << "not ip";
                 return nullptr;
             }
+            if (cstream->readFixSize(&buffer[0], 2) <= 0) {
+                SYLAR_LOG_ERROR(g_logger) << "read client port failed";
+                return nullptr;
+            }
+            uint16_t port = sylar::byteswapOnLittleEndian((*(uint16_t*)&buffer[0]));
+
+            Address::ptr addr = sylar::Address::Create(result[0]->getAddr(), result[0]->getAddrLen());
+            std::dynamic_pointer_cast<IPAddress>(addr)->setPort(port);
+            Socket::ptr sock = 0 ? SSLSocket::CreateTCP(addr) : Socket::CreateTCP(addr);
+            if (!sock->connect(addr)) {
+                SYLAR_LOG_ERROR(g_logger) << "connect to proxy failed"; 
+                return nullptr; 
+            }
+            sock->setRecvTimeout(1000 * 5);
+            Stream::ptr stream(new SocketStream(sock));
+            SYLAR_LOG_ERROR(g_logger) << "new stream, cstream->fd: "
+            << std::dynamic_pointer_cast<SocketStream>(cstream)->getSocket()->getSocket()
+            << " sstream->fd: " << sock->getSocket();
+            return stream;
+
         } else if (buffer[4] == 4) { // IPv6
             // TODO
         } else {
             SYLAR_LOG_ERROR(g_logger) << "unknow type: " << buffer[4];
             return nullptr;
         }
-        */
          
-        // sec & send it to p2
-        return stream;
+        return nullptr;
     }
 
     // 与ss服务器建联 传参是组ss包中的ip或域名及端口

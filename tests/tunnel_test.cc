@@ -60,46 +60,33 @@ void TcpProxy::handleClient(sylar::Socket::ptr client) {
     SYLAR_LOG_DEBUG(g_logger) << "start";
 
     sylar::Stream::ptr cs(new sylar::SocketStream(client));
-
-    //sylar::Stream::ptr ss = tunnel(cs, "0.0.0.0", 1967);
-    sylar::Stream::ptr ss = tunnel(cs, "0.0.0.0", 1966);
+    sylar::Stream::ptr ss = nullptr;
+    if (getName() == "p1") {
+        ss = tunnel(cs, "0.0.0.0", 1966);
+    } else if (getName() == "p2") {
+        ss = tunnel(cs);
+    }
     if (ss == nullptr) {
         SYLAR_LOG_DEBUG(g_logger) << "tunnel return ss nullptr";
         return;
     } 
-    /*
-    std::string buffer;
-    buffer.resize(20);
-    if (cs->readFixSize(&buffer[0], 4) <= 0) {
-        SYLAR_LOG_DEBUG(g_logger) << "read client failed";
-        return;
-    }
-    SYLAR_LOG_DEBUG(g_logger) << "read client: " << to_hex(buffer);
-    buffer[0] = 5;
-    buffer[1] = 0;
-    if (cs->writeFixSize(&buffer[0], 2) <= 0) {
-        SYLAR_LOG_DEBUG(g_logger) << "write client failed";
-        return;
-    }
-
-    //sylar::IPAddress::ptr addr = sylar::IPv4Address::Create("127.0.0.1", 1984);
-    sylar::IPAddress::ptr addr = sylar::IPv4Address::Create("10.0.140.173", 1984);
-    sylar::Socket::ptr os_sock = sylar::Socket::CreateTCP(addr);
-    if(!os_sock->connect(addr)) {
-        SYLAR_LOG_DEBUG(g_logger) << "connect os failed: " << addr->toString();
-        return;
-    }
-    sylar::Stream::ptr ss(new sylar::SocketStream(os_sock));
-    */
-
     connectThem(cs, ss);
     return;
 }
 
-void test() {
+void test_p2() {
+    sylar::TcpServer::ptr proxy(new TcpProxy);
+    sylar::IPAddress::ptr addr = sylar::IPv4Address::Create("0.0.0.0", 1967);
+    proxy->bind(addr);
+    proxy->setName("p2");
+    proxy->start();
+}
+
+void test_p1() {
     sylar::TcpServer::ptr proxy(new TcpProxy);
     sylar::IPAddress::ptr addr = sylar::IPv4Address::Create("0.0.0.0", 2048);
     proxy->bind(addr);
+    proxy->setName("p1");
     proxy->start();
 }
 
@@ -156,8 +143,9 @@ void test1() {
 int main() {
     signal(SIGPIPE, SIG_IGN);
     sylar::IOManager iom(1, false, "io");
-    iom.schedule(test);
-    iom.schedule(test1);
+    iom.schedule(test_p1);
+    iom.schedule(test_p2);
+    //iom.schedule(test1);
     iom.stop();
     return 0; 
 }
