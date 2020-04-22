@@ -8,6 +8,9 @@
 #include <iostream>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
 
 namespace sylar {
 
@@ -39,7 +42,7 @@ namespace sylar {
         return ss.str();
     }
 
-    sylar::Stream::ptr tunnel(sylar::Stream::ptr cstream, const std::string& targetIP, 
+    sylar::Stream::ptr tunnel(sylar::Stream::ptr cstream, AresChannel::ptr channel, const std::string& targetIP,
           uint16_t targetPort) {
         std::string buffer;
         buffer.resize(257);
@@ -154,44 +157,12 @@ namespace sylar {
 
         SYLAR_LOG_ERROR(g_logger) << "read p1's request...";
         // read p1's request
-        if (cstream->readFixSize(&buffer[0], 2) <= 0) {
-            SYLAR_LOG_ERROR(g_logger) << "read p1's request failed";
-            return nullptr;
-        }
-        if (buffer[0] != 5 || buffer[1] <= 0) {
-            SYLAR_LOG_ERROR(g_logger) << "p2 not support version: " << buffer[0]
-              << " auth num <= 0"; 
-            return nullptr;
-        }
-        int auth_num = buffer[1];
-        if (cstream->readFixSize(&buffer[0], auth_num) <= 0) {
-            SYLAR_LOG_ERROR(g_logger) << "read p1's request failed";
-            return nullptr;
-        }
-        default_auth = buffer[0];
-        if (buffer[0] != 0 && buffer[0] != 2 && buffer[0] != (int8_t)0x80) {
-            SYLAR_LOG_ERROR(g_logger) << "p2 not support auth: " << buffer[0];
-            return nullptr;
-        }
-
-        buffer[0] = 5;
-        buffer[1] = default_auth;
-        if (cstream->writeFixSize(&buffer[0], 2) <= 0) {
-            SYLAR_LOG_ERROR(g_logger) << "write p1 failed";
-            return nullptr;
-        }
-
-        if (default_auth == 0) {
-        } else if (default_auth == 1) {
-        } else {
-        }
 
         if (cstream->readFixSize(&buffer[0], 5) <= 0) {
             SYLAR_LOG_ERROR(g_logger) << "read p1 failed";
             return nullptr;
         }
         int addr_len = buffer[4];
-        SYLAR_LOG_ERROR(g_logger) << "-------->buffer[3]: " << int((uint8_t)buffer[3]);
         if (buffer[3] == 1) { // IPv4
             if (cstream->readFixSize(&buffer[0], addr_len) <= 0) {
                 SYLAR_LOG_ERROR(g_logger) << "read client addr failed";
@@ -214,27 +185,57 @@ namespace sylar {
             SYLAR_LOG_ERROR(g_logger) << "new stream, cstream->fd: "
             << std::dynamic_pointer_cast<SocketStream>(cstream)->getSocket()->getSocket()
             << " sstream->fd: " << sock->getSocket();
+            buffer[0] = 5;
+            buffer[1] = 0;
+            buffer[2] = 0;
+            buffer[3] = 1;
+            for (int i = 0; i < 6; i++) {
+                buffer[4 + i] = 0;
+            }
+            if (cstream->writeFixSize(&buffer[0], 10) <= 0) {
+                SYLAR_LOG_ERROR(g_logger) << "stream write to client";
+                return nullptr;
+            }
             return stream;
         } else if (buffer[3] == 3) { // Domain
             if (cstream->readFixSize(&buffer[0], addr_len) <= 0) {
                 SYLAR_LOG_ERROR(g_logger) << "read client addr failed";
                 return nullptr;
             }
-            SYLAR_LOG_ERROR(g_logger) << "read client addr: " << buffer;
+            std::string domain(&buffer[0], addr_len);
+            SYLAR_LOG_ERROR(g_logger) << "read client addr: " << domain;
             std::vector<Address::ptr> result;
-            Address::Lookup(result, std::string(buffer, addr_len));
-            if (result.size() == 0) {
-                SYLAR_LOG_ERROR(g_logger) << "not ip";
-                return nullptr;
+            while (channel == nullptr) {
+                sleep(2);
             }
+
             if (cstream->readFixSize(&buffer[0], 2) <= 0) {
                 SYLAR_LOG_ERROR(g_logger) << "read client port failed";
                 return nullptr;
             }
             uint16_t port = sylar::byteswapOnLittleEndian((*(uint16_t*)&buffer[0]));
 
-            Address::ptr addr = sylar::Address::Create(result[0]->getAddr(), result[0]->getAddrLen());
-            std::dynamic_pointer_cast<IPAddress>(addr)->setPort(port);
+            sylar::IPAddress::ptr addr = nullptr;
+            addrinfo hints, *results;
+            memset(&hints, 0, sizeof(addrinfo));
+            hints.ai_flags = AI_NUMERICHOST; // 必须是一个数字地址字符串
+            hints.ai_family = AF_UNSPEC;
+            int err = getaddrinfo(domain.c_str(), NULL, &hints, &results); // 都是阻塞的 默认解析IPV6和IPV4  如果设只解析IPV4速度则很快
+            if (err) {
+                auto ips = channel->aresGethostbyname(domain.c_str());
+                if (ips.size() == 0) {
+                    SYLAR_LOG_ERROR(g_logger) << "dns resolve : " << domain << " failed";
+                    return nullptr;
+                }
+                addr = std::dynamic_pointer_cast<sylar::IPAddress>(
+                        sylar::Address::Create(ips[0].getAddr(), ips[0].getAddrLen())
+                );
+            } else {
+                addr = IPAddress::Create(domain.c_str(), port);
+            }
+
+
+            addr->setPort(port);
             Socket::ptr sock = 0 ? SSLSocket::CreateTCP(addr) : Socket::CreateTCP(addr);
             if (!sock->connect(addr)) {
                 SYLAR_LOG_ERROR(g_logger) << "connect to proxy failed"; 
@@ -245,8 +246,19 @@ namespace sylar {
             SYLAR_LOG_ERROR(g_logger) << "new stream, cstream->fd: "
             << std::dynamic_pointer_cast<SocketStream>(cstream)->getSocket()->getSocket()
             << " sstream->fd: " << sock->getSocket();
-            return stream;
 
+            buffer[0] = 5;
+            buffer[1] = 0;
+            buffer[2] = 0;
+            buffer[3] = 1;
+            for (int i = 0; i < 6; i++) {
+                buffer[4 + i] = 0;
+            }
+            if (cstream->writeFixSize(&buffer[0], 10) <= 0) {
+                SYLAR_LOG_ERROR(g_logger) << "stream write to client";
+                return nullptr;
+            }
+            return stream;
         } else if (buffer[4] == 4) { // IPv6
             // TODO
         } else {

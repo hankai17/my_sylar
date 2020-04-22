@@ -11,6 +11,7 @@
 #include "scheduler.hh"
 #include "address.hh"
 #include "uri.hh"
+#include "ns/ares.hh"
 #include <boost/any.hpp>
 #include <list>
 #include <unordered_map>
@@ -49,7 +50,7 @@ namespace sylar {
         virtual void close() = 0;
     };
 
-    Stream::ptr tunnel(sylar::Stream::ptr cstream, const std::string& targetIP = "", 
+    Stream::ptr tunnel(sylar::Stream::ptr cstream, AresChannel::ptr channel, const std::string& targetIP = "",
           uint16_t targetPort = 0);
 
     class SocketStream : public Stream {

@@ -4,9 +4,11 @@
 #include "uri.hh"
 #include "tcp_server.hh"
 #include "http/http_connection.hh"
+#include "ns/ares.hh"
 #include <signal.h>
 
 sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
+sylar::AresChannel::ptr channel = nullptr;
 
 class TcpProxy : public sylar::TcpServer {
 public:
@@ -62,9 +64,9 @@ void TcpProxy::handleClient(sylar::Socket::ptr client) {
     sylar::Stream::ptr cs(new sylar::SocketStream(client));
     sylar::Stream::ptr ss = nullptr;
     if (getName() == "p1") {
-        ss = tunnel(cs, "0.0.0.0", 1966);
+        ss = tunnel(cs, nullptr, "0.0.0.0", 1966);
     } else if (getName() == "p2") {
-        ss = tunnel(cs);
+        ss = tunnel(cs, channel);
     }
     if (ss == nullptr) {
         SYLAR_LOG_DEBUG(g_logger) << "tunnel return ss nullptr";
@@ -76,7 +78,7 @@ void TcpProxy::handleClient(sylar::Socket::ptr client) {
 
 void test_p2() {
     sylar::TcpServer::ptr proxy(new TcpProxy);
-    sylar::IPAddress::ptr addr = sylar::IPv4Address::Create("0.0.0.0", 1967);
+    sylar::IPAddress::ptr addr = sylar::IPv4Address::Create("0.0.0.0", 1966);
     proxy->bind(addr);
     proxy->setName("p2");
     proxy->start();
@@ -140,9 +142,17 @@ void test1() {
     SYLAR_LOG_DEBUG(g_logger) << "after sock->close: " << addr->toString();
 }
 
+void ares_test() {
+    SYLAR_LOG_DEBUG(g_logger) << "in ares test";
+    channel.reset(new sylar::AresChannel);
+    channel->init();
+    channel->start();
+}
+
 int main() {
     signal(SIGPIPE, SIG_IGN);
     sylar::IOManager iom(1, false, "io");
+    iom.schedule(ares_test);
     iom.schedule(test_p1);
     iom.schedule(test_p2);
     //iom.schedule(test1);

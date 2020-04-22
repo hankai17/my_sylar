@@ -333,6 +333,10 @@ namespace sylar {
 		std::unordered_map<uint16_t, Query::ptr> 	m_queries;
 	};
 
+	class AresChannelMgr {
+	public:
+	};
+
 }
 
 #endif
