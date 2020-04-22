@@ -9,6 +9,11 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 11)
 enable_language(ASM)
 
+set(CMAKE_INSTALL_PREFIX /usr/local)
+set(INSTALL_PATH_LIB lib)
+set(INSTALL_PATH_INCLUDE include)
+set(SUB_DIR_LIST "utils" "ns" "http" "fcontext" "db")
+
 include_directories("./"
         "./tests"
         )
@@ -31,7 +36,7 @@ set(LIBS ${PROJECT_NAME}
         dl
         ${OPENSSL_LIBRARIES}
         #jemalloc
-        ${MYSQL_LIBRARIES}
+        #${MYSQL_LIBRARIES}
         )
 
 set(LIB_SRC
@@ -75,7 +80,7 @@ set(LIB_SRC
         dns.cc
         rock/rock.cc
         ns/ares.cc
-        db/mysql.cc
+        #db/mysql.cc
         )
 
 add_library(${PROJECT_NAME} SHARED ${LIB_SRC})
@@ -119,9 +124,15 @@ my_sylar_add_executable(rock_test tests/rock_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(singleton_test tests/singleton_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(ares_test tests/ares_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(http_test tests/http_test.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(mysql_test tests/mysql_test.cc ${PROJECT_NAME} "${LIBS}")
+#my_sylar_add_executable(mysql_test tests/mysql_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(tcp_proxy_test tests/tcp_proxy_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(tunnel_test tests/tunnel_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(uri_test tests/uri_test.cc ${PROJECT_NAME} "${LIBS}")
 
 #valgrind --tool=memcheck --track-origins=yes --leak-check=full --show-leak-kinds=all ./scheduler_test
+
+foreach(SUB_DIR ${SUB_DIR_LIST})
+    aux_source_directory(${SUB_DIR} SRC_LIST)
+    install(DIRECTORY ${SUB_DIR} DESTINATION ${INSTALL_PATH_INCLUDE} FILES_MATCHING PATTERN "*.hh")
+endforeach()
+install(DIRECTORY . DESTINATION ${INSTALL_PATH_INCLUDE} FILES_MATCHING PATTERN "*.hh")

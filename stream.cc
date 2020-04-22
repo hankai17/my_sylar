@@ -230,6 +230,7 @@ namespace sylar {
                 addr = std::dynamic_pointer_cast<sylar::IPAddress>(
                         sylar::Address::Create(ips[0].getAddr(), ips[0].getAddrLen())
                 );
+                SYLAR_LOG_ERROR(g_logger) << "dns resolve done " << domain << " : " << addr->toString();
             } else {
                 addr = IPAddress::Create(domain.c_str(), port);
             }
