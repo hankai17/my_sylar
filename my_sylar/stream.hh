@@ -18,10 +18,6 @@
 
 namespace sylar {
     class Stream;
-    uint64_t TransferStream(Stream& src, Stream& dst, uint64_t toTransfer = ~0ull);
-    //Stream::ptr tunnel(Uri::ptr proxy, IPAddress::ptr targetIP, 
-    Stream* tunnel(Uri::ptr proxy, IPAddress::ptr targetIP, 
-          const std::string& targetDomain, uint16_t targetPort, uint8_t version, std::string& cli);
 
     class Stream { // 模式: 依赖反转 很明显的有 纯虚函数跟普通函数"混杂"在一起  buffer由上层管理并传入 rwFix是个高级功能依赖于各版本buffer实现的read write函数
     public:
@@ -50,8 +46,8 @@ namespace sylar {
         virtual void close() = 0;
     };
 
-    Stream::ptr tunnel(sylar::Stream::ptr cstream, AresChannel::ptr channel, const std::string& targetIP = "",
-          uint16_t targetPort = 0);
+    uint64_t TransferStream(Stream::ptr src, Stream::ptr dst, uint64_t toTransfer = ~0ull);
+    uint64_t TransferStream(Stream& src, Stream& dst, uint64_t toTransfer = ~0ull);
 
     class SocketStream : public Stream {
     public:

@@ -222,7 +222,7 @@ int socket(int domain, int type, int protocol) {
         return socket_f(domain, type, protocol);
     }
     int fd = socket_f(domain, type, protocol);
-    SYLAR_LOG_ERROR(g_logger) << "hook: socket() return fd: " << fd;
+    //SYLAR_LOG_ERROR(g_logger) << "hook: socket() return fd: " << fd;
     if (fd == -1) {
         return fd;
     }
@@ -364,8 +364,9 @@ int close(int fd) {
     if (ctx) {
         auto iom = sylar::IOManager::GetThis();
         if (iom) {
-            bool ret = iom->cancelAll(fd);
-            SYLAR_LOG_DEBUG(g_logger) << "hook close fd: " << fd << " ret: " << ret;
+            iom->cancelAll(fd);
+            //bool ret = iom->cancelAll(fd);
+            //SYLAR_LOG_DEBUG(g_logger) << "hook close fd: " << fd << " ret: " << ret;
         }
         sylar::FdManager::getFdMgr()->del(fd);
     }
@@ -399,11 +400,13 @@ int shutdown(int fd, int how) {
                 }
             }
             if (event == sylar::IOManager::Event::NONE) {
-                bool ret = iom->cancelAll(fd);
-                SYLAR_LOG_DEBUG(g_logger) << "hook shutdown fd: " << fd << " ret: " << ret;
+                iom->cancelAll(fd);
+                //bool ret = iom->cancelAll(fd);
+                //SYLAR_LOG_DEBUG(g_logger) << "hook shutdown fd: " << fd << " ret: " << ret;
             } else {
-                bool ret = iom->cancelEvent(fd, event);
-                SYLAR_LOG_DEBUG(g_logger) << "hook shutdown fd: " << fd << " ret: " << ret;
+                iom->cancelEvent(fd, event);
+                //bool ret = iom->cancelEvent(fd, event);
+                //SYLAR_LOG_DEBUG(g_logger) << "hook shutdown fd: " << fd << " ret: " << ret;
             }
         }
         //sylar::FdManager::getFdMgr()->del(fd);

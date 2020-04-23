@@ -179,6 +179,15 @@ namespace sylar {
 
     void Fiber::swapIn() {
         SetThis(this);
+        if (m_state != EXEC) {
+            SYLAR_LOG_DEBUG(g_logger) << "m_state: " << m_state
+            << " != EXEC";
+        } else {
+            SYLAR_LOG_DEBUG(g_logger) << "m_state: " << m_state
+                                      << " == EXEC";
+        }
+
+
         SYLAR_ASSERT(m_state != EXEC);
         m_state = EXEC;
 #if FIBER_CONTEXT_TYPE == FIBER_UCONTEXT

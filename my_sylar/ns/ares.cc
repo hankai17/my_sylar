@@ -587,6 +587,7 @@ namespace sylar {
         aresParseReply(abuf, alen, query->result);
         sylar::Scheduler::GetThis()->schedule(query->fiber);
         //sylar::Scheduler::GetThis()->schedule(&query->fiber);
+        SYLAR_LOG_ERROR(g_logger) << "ares erase " << query->qid;
         m_queries.erase(query->qid);
     }
 }

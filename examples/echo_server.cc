@@ -2,6 +2,7 @@
 #include "my_sylar/tcp_server.hh"
 #include "my_sylar/bytearray.hh"
 #include "my_sylar/iomanager.hh"
+#include "my_sylar/buffer.hh"
 
 #include <memory>
 
@@ -12,13 +13,10 @@ public:
     typedef std::shared_ptr<EchoServer> ptr;
     void handleClient(sylar::Socket::ptr client) {
         SYLAR_LOG_DEBUG(g_logger) << client->toString();
-        sylar::ByteArray::ptr ba(new sylar::ByteArray);
+        sylar::Buffer::ptr buf(new sylar::Buffer);
+        int err;
         while (true) {
-            ba->clear();
-            std::vector<iovec> iovs;
-            ba->getWriteBuffers(iovs, 1024);
-
-            int ret = client->recv(&iovs[0], iovs.size());
+            int ret = buf->orireadFd(client->getSocket(), &err);
             if (ret == 0) {
                 SYLAR_LOG_DEBUG(g_logger) << "peer closed";
                 break;
@@ -28,21 +26,16 @@ public:
                 break;
             }
 
-            SYLAR_LOG_DEBUG(g_logger) << "ret: " << ret;
-            SYLAR_LOG_DEBUG(g_logger) << "getPostion: " << ba->getPosition();
-            SYLAR_LOG_DEBUG(g_logger) << "getReadSize: " << ba->getReadSize();
-            SYLAR_LOG_DEBUG(g_logger) << "getSize: " << ba->getSize();
-            ba->setPosition(ba->getPosition() + ret);
-            SYLAR_LOG_DEBUG(g_logger) << "getPostion: " << ba->getPosition();
-            SYLAR_LOG_DEBUG(g_logger) << "getReadSize: " << ba->getReadSize();
-            SYLAR_LOG_DEBUG(g_logger) << "getSize: " << ba->getSize();
-            //SYLAR_LOG_DEBUG(g_logger) << ba->toHexString();
-            ba->setPosition(0);
-
-            //SYLAR_LOG_DEBUG(g_logger) << "recv ret: " << ret << " data: " << std::string((char*)iovs[0].iov_base, ret);
-            SYLAR_LOG_DEBUG(g_logger) << ba->toString();
-            //SYLAR_LOG_DEBUG(g_logger) << ba->toHexString();
-            break;
+            SYLAR_LOG_DEBUG(g_logger) << buf->peek();
+            ret = buf->writeFd(client->getSocket(), ret, &err);
+            if (ret == 0) {
+                SYLAR_LOG_DEBUG(g_logger) << "peer closed";
+                break;
+            } else if (ret < 0) {
+                SYLAR_LOG_DEBUG(g_logger) << "recv errno: " << errno
+                << " strerrno: " << strerror(errno);
+                break;
+            }
         }
     }
 };

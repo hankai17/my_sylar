@@ -69,6 +69,7 @@ set(LIB_SRC
         my_sylar/utils/crypto_utils.cc
         my_sylar/dns.cc
         my_sylar/ns/ares.cc
+        my_sylar/socks.cc
         )
 
 add_library(${PROJECT_NAME} SHARED ${LIB_SRC})
