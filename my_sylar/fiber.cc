@@ -180,11 +180,11 @@ namespace sylar {
     void Fiber::swapIn() {
         SetThis(this);
         if (m_state != EXEC) {
-            SYLAR_LOG_DEBUG(g_logger) << "m_state: " << m_state
-            << " != EXEC";
+            //SYLAR_LOG_DEBUG(g_logger) << "m_state: " << m_state
+            //<< " != EXEC";
         } else {
-            SYLAR_LOG_DEBUG(g_logger) << "m_state: " << m_state
-                                      << " == EXEC";
+            //SYLAR_LOG_DEBUG(g_logger) << "m_state: " << m_state
+                                      //<< " == EXEC";
         }
 
 

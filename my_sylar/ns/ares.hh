@@ -330,7 +330,8 @@ namespace sylar {
 		uint16_t 			m_tcp_port = htons(53);
 		std::atomic<uint16_t> 						m_nextId;
 		std::map<int, std::map<Address::ptr, Socket::ptr> >	m_servers; // resolv.conf's addr
-		std::unordered_map<uint16_t, Query::ptr> 	m_queries;
+		//std::unordered_map<uint16_t, Query::ptr> 	m_queries;
+		std::map<uint16_t, Query::ptr> 	m_queries;
 	};
 
 	class AresChannelMgr {

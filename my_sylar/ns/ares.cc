@@ -346,7 +346,12 @@ namespace sylar {
         query->using_tcp = (m_flags & ARES_FLAG_USEVC) || qlen > PACKETSZ;
         query->error_status = ARES_ECONNREFUSED;
 
-        m_queries.insert(std::make_pair(query->qid, query));
+        auto it = m_queries.insert(std::make_pair(query->qid, query));
+        if (it.second) {
+            SYLAR_LOG_ERROR(g_logger) << "insert success: " << query->qid;
+        } else {
+            SYLAR_LOG_ERROR(g_logger) << "insert failed: " << query->qid;
+        }
         ares_send(query);
     }
 
@@ -356,7 +361,7 @@ namespace sylar {
         uint16_t messageId = m_nextId++;
         int status = ares_mkquery(name.c_str(), dnsclass, type, messageId, rd, qbuf);
         if (status != ARES_SUCCESS) {
-            return -1;
+            return 0;
         }
         aresSend(qbuf);
         return messageId;
@@ -376,15 +381,27 @@ namespace sylar {
     std::vector<IPv4Address> AresChannel::aresGethostbyname(const std::string &name) {
         std::vector<IPv4Address> ips;
         uint16_t messageId = aresQuery(name);
+        SYLAR_LOG_ERROR(g_logger) << "aresGethostbyname name " << name << " messageId: " << messageId;
         if (messageId < 0) {
             SYLAR_LOG_ERROR(g_logger) << "aresGethostbyname failed: messageId < 0";
             return ips;
         }
+
+        /*
         Query::ptr query = m_queries[messageId];
         if (!query) {
-            SYLAR_LOG_ERROR(g_logger) << "aresGethostbyname not exist this query";
+            SYLAR_LOG_ERROR(g_logger) << "aresGethostbyname not exist this query id: " << messageId;
             return ips;
         }
+         */
+
+        auto it = m_queries.find(messageId);
+        if (it == m_queries.end()) {
+            SYLAR_LOG_ERROR(g_logger) << "aresGethostbyname not exist this query id: " << messageId;
+            return ips;
+        }
+        Query::ptr query = it->second;
+        SYLAR_LOG_ERROR(g_logger) << "aresGethostbyname exist this query id: " << query->qid;
         query->fiber = sylar::Fiber::GetThis();
 
         IOManager* iom = sylar::IOManager::GetThis();
@@ -554,6 +571,7 @@ namespace sylar {
             return;
         }
         Query::ptr query = it->second;
+        SYLAR_LOG_ERROR(g_logger) << "process ans: " << query->qid;
 
         if ((tc || alen > PACKETSZ) && !tcp && !(m_flags & ARES_FLAG_IGNTC)) { //如果包里明确有trunc 或 包长大于512字节
             if (!query->using_tcp) {

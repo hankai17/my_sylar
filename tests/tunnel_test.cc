@@ -96,7 +96,7 @@ void ares_test() {
 int main() {
     signal(SIGPIPE, SIG_IGN);
     SYLAR_ASSERT(1);
-    sylar::IOManager iom(3, false, "io");
+    sylar::IOManager iom(1, false, "io");
     iom.schedule(ares_test);
     iom.schedule(test_p1);
     iom.schedule(test_p2);
