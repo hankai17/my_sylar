@@ -12,7 +12,7 @@ enable_language(ASM)
 set(CMAKE_INSTALL_PREFIX /usr/local)
 set(INSTALL_PATH_LIB lib)
 set(INSTALL_PATH_INCLUDE include)
-set(SUB_DIR_LIST "utils" "ns" "http" "fcontext" "db")
+set(SUB_DIR_LIST "my_sylar/utils" "my_sylar/ns" "my_sylar/http" "my_sylar/fcontext")
 
 include_directories("./"
         "./tests"
@@ -25,111 +25,63 @@ if(OPENSSL_FOUND)
     include_directories(${OPENSSL_INCLUDE_DIR})
 endif()
 
-find_package(MySQL REQUIRED)
-if(MYSQL_FOUNT)
-    include_directories(${MYSQL_INCLUDE_DIR})
-endif()
-
 set(LIBS ${PROJECT_NAME}
         pthread
         yaml-cpp
         dl
         ${OPENSSL_LIBRARIES}
-        #jemalloc
-        #${MYSQL_LIBRARIES}
         )
 
 set(LIB_SRC
-        log.cc
-        config.cc
-        thread.cc
-        fiber.cc
-        scheduler.cc
-        iomanager.cc
-        timer.cc
-        address.cc
-        hook.cc
-        fd_manager.cc
-        socket.cc
-        bytearray.cc
-        util.cc
-        http/http.cc
-        http/dbg.c
-        http/http11_parser.cc
-        http/httpclient_parser.cc
-        http/http_parser.cc
-        buffer.cc
-        mbuffer.cc
-        tcp_server.cc
-        stream.cc
-        http/http_server.cc
-        http/http_connection.cc
-        uri.cc
-        daemon.cc
-        hash.cc
-        http/ws_connection.cc
-        http/ws_server.cc
-        worker.cc
-        application.cc
-        module.cc
-        fcontext/fcontext.S
-        protocol.cc
-        utils/crypto_utils.cc
-        ns/ns_protocol.cc
-        #################
-        dns.cc
-        rock/rock.cc
-        ns/ares.cc
-        #db/mysql.cc
+        my_sylar/log.cc
+        my_sylar/config.cc
+        my_sylar/thread.cc
+        my_sylar/fiber.cc
+        my_sylar/scheduler.cc
+        my_sylar/iomanager.cc
+        my_sylar/timer.cc
+        my_sylar/address.cc
+        my_sylar/hook.cc
+        my_sylar/fd_manager.cc
+        my_sylar/socket.cc
+        my_sylar/bytearray.cc
+        my_sylar/buffer.cc
+        my_sylar/mbuffer.cc
+        my_sylar/util.cc
+        my_sylar/http/http.cc
+        my_sylar/http/dbg.c
+        my_sylar/http/http11_parser.cc
+        my_sylar/http/httpclient_parser.cc
+        my_sylar/http/http_parser.cc
+        my_sylar/tcp_server.cc
+        my_sylar/stream.cc
+        my_sylar/http/http_server.cc
+        my_sylar/http/http_connection.cc
+        my_sylar/uri.cc
+        my_sylar/daemon.cc
+        my_sylar/hash.cc
+        my_sylar/http/ws_connection.cc
+        my_sylar/http/ws_server.cc
+        my_sylar/worker.cc
+        my_sylar/application.cc
+        my_sylar/module.cc
+        my_sylar/fcontext/fcontext.S
+        my_sylar/utils/crypto_utils.cc
+        my_sylar/dns.cc
+        my_sylar/ns/ares.cc
         )
 
 add_library(${PROJECT_NAME} SHARED ${LIB_SRC})
-
 force_redefine_file_macro_for_sources(${PROJECT_NAME}) #__FILE__
 
 option(TEST "ON for complile test" OFF)
 if(TEST)
-my_sylar_add_executable(log_test tests/log_test.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(config_test tests/config_test.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(thread_test tests/thread_test.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(fiber_test tests/fiber_test.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(scheduler_test tests/scheduler_test.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(iomanager_test tests/iomanager_test.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(timer_test tests/timer_test.cc ${PROJECT_NAME} "${LIBS}")
-#my_sylar_add_executable(pingpong_test tests/pingpong_bench.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(address_test tests/address_test.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(hook_test tests/hook_test.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(socket_test tests/socket_test.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(bytearray_test tests/bytearray_test.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(http_test tests/http_test.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(server_test tests/server_test.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(server_test1 tests/server_test1.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(echo_server examples/echo_server.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(http_server tests/http_server.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(race_condition tests/race_condition.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(http_connection_test tests/http_connection_test.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(http_parser tests/http_parser.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(udp_test tests/udp_test.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(daemon_test tests/daemon_test.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(ws_test tests/ws_test.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(application_test tests/application_test.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(crypto_test tests/crypto_test.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(counter utils/counter.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(sem_test tests/semaphore_test.cc ${PROJECT_NAME} "${LIBS}")
-###############################
+my_sylar_add_executable(counter my_sylar/utils/counter.cc ${PROJECT_NAME} "${LIBS}")
 endif()
-my_sylar_add_executable(pingpong_test tests/pingpong_bench.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(normal_test tests/normal_test.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(rock_test tests/rock_test.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(singleton_test tests/singleton_test.cc ${PROJECT_NAME} "${LIBS}")
+my_sylar_add_executable(echo_test examples/echo_server.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(ares_test tests/ares_test.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(http_test tests/http_test.cc ${PROJECT_NAME} "${LIBS}")
-#my_sylar_add_executable(mysql_test tests/mysql_test.cc ${PROJECT_NAME} "${LIBS}")
-my_sylar_add_executable(tcp_proxy_test tests/tcp_proxy_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(tunnel_test tests/tunnel_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(uri_test tests/uri_test.cc ${PROJECT_NAME} "${LIBS}")
-
-#valgrind --tool=memcheck --track-origins=yes --leak-check=full --show-leak-kinds=all ./scheduler_test
 
 foreach(SUB_DIR ${SUB_DIR_LIST})
     aux_source_directory(${SUB_DIR} SRC_LIST)
