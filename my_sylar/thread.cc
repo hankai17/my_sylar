@@ -146,6 +146,7 @@ namespace sylar {
     }
 
     static void parallelDoImpl(std::function<void()> defer, int& completed, size_t totalDefers,
+    //static void parallelDoImpl(std::function<void()> defer, std::atomic<int>& completed, size_t totalDefers,
             Scheduler* scheduler, Fiber::ptr fiber) {
         try {
             defer();
@@ -155,6 +156,9 @@ namespace sylar {
 
         //if (Atomic::fetchAdd(completed, 1) == (int)totalDefers) {
         if (Atomic::addFetch(completed, 1) == (int)totalDefers) {
+        //if (++completed == (int)totalDefers) {
+            SYLAR_LOG_ERROR(SYLAR_LOG_ROOT()) << "parallelDoImpl done, schedule fiber mid: " << fiber->getFiberId()
+            << " m_state: " << fiber->getState();
             scheduler->schedule(fiber);
         }
     }
@@ -162,6 +166,7 @@ namespace sylar {
     void ParallelDo(const std::vector<std::function<void()>>& deferGroups,
                     std::vector<Fiber::ptr>& fibers) {
         SYLAR_ASSERT(fibers.size() >= deferGroups.size());
+        //std::atomic<int> completed {0};
         int completed = 0;
         Scheduler* scheduler = Scheduler::GetThis();
         Fiber::ptr caller = Fiber::GetThis();
@@ -184,9 +189,12 @@ namespace sylar {
                                     deferGroups.size(), scheduler, caller)
                     ), FreeFiber);
 #endif
+            SYLAR_LOG_ERROR(SYLAR_LOG_ROOT()) << "parallelDo, schedule fiber mid: " << fibers[i]->getFiberId()
+            << " m_state: " << fibers[i]->getState();
             scheduler->schedule(fibers[i]);
         }
         Fiber::YeildToHold();
+        SYLAR_LOG_ERROR(SYLAR_LOG_ROOT()) << "parallelDo done, after YeildToHold";
     }
 
 }

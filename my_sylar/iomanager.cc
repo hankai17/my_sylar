@@ -50,6 +50,8 @@ namespace sylar {
       if (ctx.cb) {
           ctx.scheduler->schedule(&ctx.cb); // It's addr!
       } else {
+          SYLAR_LOG_DEBUG(g_logger) << "trigger fiber m_id: " <<  ctx.fiber->getFiberId()
+          << " m_state: " << ctx.fiber->getState();
           ctx.scheduler->schedule(&ctx.fiber); // It's ptr's addr!
       }
       ctx.scheduler = nullptr;

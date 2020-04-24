@@ -179,6 +179,7 @@ namespace sylar {
 
     void Fiber::swapIn() {
         SetThis(this);
+        std::cout<< "swapIn id: " << m_id << " state: " << m_state << std::endl;
         if (m_state != EXEC) {
             //SYLAR_LOG_DEBUG(g_logger) << "m_state: " << m_state
             //<< " != EXEC";
@@ -245,8 +246,9 @@ namespace sylar {
         Fiber::ptr cur = GetThis();
         SYLAR_ASSERT(cur->m_state == EXEC);
         cur->m_state = HOLD;
+        std::cout<< "YeildToHold will swapout, id: " << cur->getFiberId()
+        << " cur->use_count(): " << cur.use_count() << std::endl;
         cur->swapOut();
-        //std::cout<< "YeildToHold cur->use_count(): " << cur.use_count() << std::endl;
     }
 
     Fiber::~Fiber() {

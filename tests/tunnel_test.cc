@@ -55,7 +55,7 @@ void TcpProxy::handleClient(sylar::Socket::ptr client) {
     sylar::Stream::ptr cs(new sylar::SocketStream(client));
     sylar::Stream::ptr ss = nullptr;
     if (getName() == "p1") {
-        ss = tunnel(cs, nullptr, "0.0.0.0", 1966);
+        ss = tunnel(cs, nullptr, "0.0.0.0", 1967);
     } else if (getName() == "p2") {
         ss = tunnel(cs, channel);
     }
@@ -95,9 +95,8 @@ void ares_test() {
 
 int main() {
     signal(SIGPIPE, SIG_IGN);
-    SYLAR_ASSERT(1);
-    sylar::IOManager iom(1, false, "io");
-    iom.schedule(ares_test);
+    sylar::IOManager iom(3, false, "io");
+    //iom.schedule(ares_test);
     iom.schedule(test_p1);
     iom.schedule(test_p2);
     iom.stop();
