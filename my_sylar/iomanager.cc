@@ -50,8 +50,10 @@ namespace sylar {
       if (ctx.cb) {
           ctx.scheduler->schedule(&ctx.cb); // It's addr!
       } else {
-          SYLAR_LOG_DEBUG(g_logger) << "trigger fiber m_id: " <<  ctx.fiber->getFiberId()
-          << " m_state: " << ctx.fiber->getState();
+          SYLAR_LOG_DEBUG(g_logger) << "trigger fiber fd: " << fd
+          << " m_id: " <<  ctx.fiber->getFiberId()
+          << " m_state: " << ctx.fiber->getState()
+          << " event: " << event;
           ctx.scheduler->schedule(&ctx.fiber); // It's ptr's addr!
       }
       ctx.scheduler = nullptr;
@@ -330,7 +332,7 @@ namespace sylar {
                 cbs.clear();
             }
 
-            //SYLAR_LOG_DEBUG(g_logger) << "epoll_ctl ret: " << ret;
+            SYLAR_LOG_DEBUG(g_logger) << "epoll_ctl ret: " << ret;
             for (int i = 0; i < ret; i++) {
                 epoll_event& event = events[i];
 

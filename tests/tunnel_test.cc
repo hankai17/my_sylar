@@ -51,7 +51,7 @@ static void connectThem(sylar::Stream::ptr oneEnd, sylar::Stream::ptr otherEnd) 
 }
 
 void TcpProxy::handleClient(sylar::Socket::ptr client) {
-    sleep(2);
+    //sleep(2);
     sylar::Stream::ptr cs(new sylar::SocketStream(client));
     sylar::Stream::ptr ss = nullptr;
     if (getName() == "p1") {
@@ -63,10 +63,10 @@ void TcpProxy::handleClient(sylar::Socket::ptr client) {
         SYLAR_LOG_DEBUG(g_logger) << "tunnel return ss nullptr";
         return;
     } 
-    //int cs_fd = std::dynamic_pointer_cast<sylar::SocketStream>(cs)->getSocket()->getSocket();
-    //int ss_fd = std::dynamic_pointer_cast<sylar::SocketStream>(ss)->getSocket()->getSocket();
-    //SYLAR_LOG_DEBUG(g_logger) << "start a tunnel: cs fd: " << cs_fd
-      //<< ", ss fd: " << ss_fd;
+    int cs_fd = std::dynamic_pointer_cast<sylar::SocketStream>(cs)->getSocket()->getSocket();
+    int ss_fd = std::dynamic_pointer_cast<sylar::SocketStream>(ss)->getSocket()->getSocket();
+    SYLAR_LOG_DEBUG(g_logger) << "start a tunnel: cs fd: " << cs_fd
+      << ", ss fd: " << ss_fd;
     connectThem(cs, ss);
     return;
 }

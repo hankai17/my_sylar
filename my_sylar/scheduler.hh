@@ -126,7 +126,7 @@ namespace sylar {
         bool                        m_stopping = false;
         std::atomic<size_t>         m_activeFiberCount = {0}; // Not contain m_activeIdleFiber
         std::atomic<size_t>         m_activeIdleFiberCount = {0};
-        bool                        m_autostop = true; // For system test
+        bool                        m_autostop = false; // For system test
     };
 
     class SchedulerSwitcher : public Nocopyable {
