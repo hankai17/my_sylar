@@ -129,6 +129,10 @@ namespace sylar {
                         continue;
                     }
                     SYLAR_ASSERT(it->fiber || it->cb);
+                    if (it->fiber && it->fiber->getState() == Fiber::EXEC) {
+                        ++it;
+                        continue;
+                    }
 
                     ft = *it;
                     m_fibers.erase(it++);
@@ -158,6 +162,7 @@ namespace sylar {
 #endif
                 cb_fiber->swapIn(); // If simple noblock cb, next line the fiber will destruction
                 --m_activeFiberCount;
+                cb_fiber->m_state = Fiber::HOLD;
                 cb_fiber.reset();
             } else {
                 if (idle_fiber->getState() == Fiber::TERM) {

@@ -245,7 +245,7 @@ namespace sylar {
     void Fiber::YeildToHold() { // Normal used
         Fiber::ptr cur = GetThis();
         SYLAR_ASSERT(cur->m_state == EXEC);
-        cur->m_state = HOLD;
+        //cur->m_state = HOLD; // multithread race condition
         //std::cout<< "YeildToHold will swapout, id: " << cur->getFiberId() // If use SYLAR_DEBUG if will dead lock
         //<< " cur->use_count(): " << cur.use_count() << std::endl;
         cur->swapOut();
