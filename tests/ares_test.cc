@@ -19,7 +19,7 @@ void ares_test() {
     sylar::AresChannel::ptr channel(new sylar::AresChannel);
     channel->init();
     channel->start();
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 100000; i++) {
         sylar::IOManager::GetThis()->schedule(std::bind(test_domains,
                 channel, i));
     }
@@ -32,7 +32,7 @@ void ticker() {
 }
 
 int main() {
-    sylar::IOManager iom(1, false, "io");
+    sylar::IOManager iom(4, false, "io");
     //iom.schedule(ticker);
     iom.schedule(ares_test);
     iom.stop();
