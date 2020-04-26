@@ -95,9 +95,9 @@ namespace sylar {
             ParallelDo(deferGroups, fibers);
             totalRead += readResult;
             if (readResult == 0) {
-                //SYLAR_LOG_ERROR(g_logger) << "read src fin, fd: "
-                //<< dynamic_cast<SocketStream*>(&src)->getSocket()->getSocket()
-                //<< " totalRead: " << totalRead;
+                SYLAR_LOG_ERROR(g_logger) << "read src fin, fd: "
+                << dynamic_cast<SocketStream*>(&src)->getSocket()->getSocket()
+                << " totalRead: " << totalRead;
                 return totalRead;
             }
         }

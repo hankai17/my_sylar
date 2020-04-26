@@ -143,6 +143,8 @@ namespace sylar {
             << ret << " (" << errno << ") (" << strerror(errno) << ")";
             return -1; // TODO
         }
+        SYLAR_LOG_ERROR(g_logger) << "epoll_ctl(" << m_epfd << ", "
+                                  << op << ", " << fd << ", " << epevent.events << "):";
 
         ++m_pendingEventCount;
         fd_ctx->events = (Event)(fd_ctx->events | event);
@@ -353,7 +355,8 @@ namespace sylar {
 
                 FdContext* fd_ctx = (FdContext*)event.data.ptr;
                 FdContext::MutexType::Lock lock(fd_ctx->mutex);
-                SYLAR_LOG_DEBUG(g_logger) << "ori event.events: " << event.events;
+                SYLAR_LOG_DEBUG(g_logger) << "ori event.events: " << event.events
+                << " fd: " << fd_ctx->fd;
                 if (event.events & (EPOLLERR | EPOLLHUP)) {
                     event.events |= (EPOLLIN | EPOLLOUT) & fd_ctx->events; //702889d05447d889c9f79b3c94c3e61c3d675be5
                 }
