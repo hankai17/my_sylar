@@ -186,6 +186,8 @@ namespace sylar {
         epevent.data.ptr = fd_ctx;
 
         int ret = epoll_ctl(m_epfd, op, fd, &epevent);
+        SYLAR_LOG_ERROR(g_logger) << "epoll_ctl(" << m_epfd << ", "
+                                  << op << ", " << fd << ", " << epevent.events << "):";
         if (ret) {
             SYLAR_LOG_ERROR(g_logger) << "epoll_ctl(" << m_epfd << ", "
             << op << ", " << fd << ", " << epevent.events << "):"
@@ -220,6 +222,8 @@ namespace sylar {
         epevent.data.ptr = fd_ctx;
 
         int ret = epoll_ctl(m_epfd, op, fd, &epevent);
+        SYLAR_LOG_ERROR(g_logger) << "epoll_ctl(" << m_epfd << ", "
+                                  << op << ", " << fd << ", " << epevent.events << "):";
         if (ret) {
             SYLAR_LOG_ERROR(g_logger) << "epoll_ctl(" << m_epfd << ", "
             << op << ", " << fd << ", " << epevent.events << "):"
@@ -250,6 +254,8 @@ namespace sylar {
         epevent.data.ptr = fd_ctx;
 
         int ret = epoll_ctl(m_epfd, op, fd, &epevent);
+        SYLAR_LOG_ERROR(g_logger) << "epoll_ctl(" << m_epfd << ", "
+                                  << op << ", " << fd << ", " << epevent.events << "):";
         if (ret) {
             SYLAR_LOG_ERROR(g_logger) << "epoll_ctl(" << m_epfd << ", "
             << op << ", " << fd << ", " << epevent.events << "):"
@@ -378,10 +384,14 @@ namespace sylar {
 
                 int ret = epoll_ctl(m_epfd, op, fd_ctx->fd, &event);
                 if (ret) {
-                    //SYLAR_LOG_ERROR(g_logger) << "epoll_ctl(" << m_epfd << ", "
-                    //<< op << ", " << fd_ctx->fd << ", " << event.events << "):"
-                    //<< ret << " (" << errno << ") (" << strerror(errno) << ")";
+                    SYLAR_LOG_ERROR(g_logger) << "epoll_ctl(" << m_epfd << ", "
+                    << op << ", " << fd_ctx->fd << ", " << event.events << "):"
+                    << ret << " (" << errno << ") (" << strerror(errno) << ")";
                     continue;
+                } else {
+                    SYLAR_LOG_ERROR(g_logger) << "epoll_ctl(" << m_epfd << ", "
+                    << op << ", " << fd_ctx->fd << ", " << event.events << "):"
+                    << ret;
                 }
 
                 if (real_events & READ) {

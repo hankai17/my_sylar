@@ -125,7 +125,7 @@ namespace sylar {
                 for (auto it = m_fibers.begin(); it != m_fibers.end();) {
                     if (it->thread != -1 && sylar::GetThreadId() != it->thread) {
                         ++it;
-                        tickle_me = true;
+                        tickle_me = true; // 所属线程可能在idle 让所属线程跑(竞争)
                         continue;
                     }
                     SYLAR_ASSERT(it->fiber || it->cb);
@@ -142,7 +142,7 @@ namespace sylar {
             }
 
             if (tickle_me) {
-                //tickle(); // Why tickle?
+                tickle(); // Why tickle?
             }
 
             if (ft.fiber /*&& fiber state*/) {
