@@ -80,7 +80,26 @@ void test1() {
             ts = ts2;
         }
     }
+}
 
+void test3() {
+    //sylar::IPAddress::ptr addr = sylar::Address::LookupAnyIPAddress("www.baidu.com:80");
+    sylar::IPAddress::ptr addr = sylar::IPAddress::Create("61.135.169.121", 80);
+    if (addr) {
+        SYLAR_LOG_DEBUG(g_logger) << "addr: " << addr->toString();
+    } else {
+        SYLAR_LOG_DEBUG(g_logger) << "get addr fail";
+        return;;
+    }
+    sylar::Socket::ptr sock = sylar::Socket::CreateTCP(addr);
+    if (!sock->connect(addr)) {
+        SYLAR_LOG_DEBUG(g_logger) << "connect faild addr: " << addr->toString();
+        return;
+    } else {
+        SYLAR_LOG_DEBUG(g_logger) << "connect succeed: " << addr->toString();
+    }
+
+    //uint64_t ts = sylar::GetCurrentUs();
 }
 
 void test1_1(sylar::Socket::ptr sock) {
@@ -144,8 +163,9 @@ void ares_test() {
 int main() {
     sylar::IOManager iom(1, false, "io");
     //iom.schedule(test1);
-    iom.schedule(test2);
-    iom.schedule(ares_test);
+    //iom.schedule(test2);
+    //iom.schedule(ares_test);
+    iom.schedule(test3);
     iom.stop();
     return 0;
 }
