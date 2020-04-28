@@ -29,7 +29,7 @@ namespace sylar {
 
             EventContext& getContext(Event event);
             void resetContext(EventContext& ctx); // not const
-            void triggerEvent(Event event);
+            bool triggerEvent(Event event);
 
             EventContext read;
             EventContext write;

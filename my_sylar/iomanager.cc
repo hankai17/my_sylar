@@ -43,8 +43,11 @@ namespace sylar {
         ctx.cb = nullptr;
     }
 
-    void IOManager::FdContext::triggerEvent(IOManager::Event event) {
-      SYLAR_ASSERT(events & event); // 只监听了写 但来了读写事件 是不存在这种情况的
+    bool IOManager::FdContext::triggerEvent(IOManager::Event event) {
+      //SYLAR_ASSERT(events & event); // 只监听了写 但来了读写事件 是不存在这种情况的
+      if (!(events & event)) {
+          return false;
+      }
       events = (Event)(events & ~event); // 同时监听读写 但只来了写 那么events要置为读
       EventContext& ctx = getContext(event);
       if (ctx.cb) {
@@ -57,7 +60,7 @@ namespace sylar {
           ctx.scheduler->schedule(&ctx.fiber); // It's ptr's addr!
       }
       ctx.scheduler = nullptr;
-      return;
+      return true;
     }
 
     IOManager::IOManager(size_t threads, bool use_caller, const std::string &name, bool need_start)
@@ -375,6 +378,8 @@ namespace sylar {
                     real_events |= WRITE;
                 }
                 if ((fd_ctx->events & real_events) == NONE) {
+                    SYLAR_LOG_DEBUG(g_logger) << "fd_ctx->events: " << fd_ctx->events
+                      << " real_events: " << real_events << " not insterest, continue";
                     continue;
                 }
 
@@ -393,13 +398,15 @@ namespace sylar {
                     << op << ", " << fd_ctx->fd << ", " << event.events << "):"
                     << ret;
                 }
-
+                
+                bool triggered = false;
                 if (real_events & READ) {
-                    fd_ctx->triggerEvent(READ);
+                    triggered = fd_ctx->triggerEvent(READ);
                 }
                 if (real_events & WRITE) {
-                    fd_ctx->triggerEvent(WRITE);
+                    triggered = fd_ctx->triggerEvent(WRITE) || triggered;
                 }
+                SYLAR_ASSERT(triggered);
                 --m_pendingEventCount;
 
             }
