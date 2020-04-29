@@ -1,0 +1,1000 @@
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018187 m_state: 1 event: 1
+2020-04-28 15:39:21	8033	1018187	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018189 m_state: 0
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018190 m_state: 0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018189	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018189 m_state: 1 event: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018189	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018191 m_state: 0
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018192 m_state: 0
+2020-04-28 15:39:21	8033	1018192	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018193 m_state: 0
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018194 m_state: 0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018193	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018193 m_state: 1 event: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018193	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018195 m_state: 0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018196 m_state: 0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018195	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018195 m_state: 1 event: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018195	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018197 m_state: 0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018198 m_state: 0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018197	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018197 m_state: 1 event: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018197	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018199 m_state: 0
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018200 m_state: 0
+2020-04-28 15:39:21	8032	1018199	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 2
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018199 m_state: 1 event: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018199	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018201 m_state: 0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018202 m_state: 0
+2020-04-28 15:39:21	8033	1018201	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018201 m_state: 1 event: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018201	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018203 m_state: 0
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018204 m_state: 0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018203	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018203 m_state: 1 event: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018203	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018205 m_state: 0
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018206 m_state: 0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018206	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018207 m_state: 0
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018208 m_state: 0
+2020-04-28 15:39:21	8033	1018207	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018207 m_state: 1 event: 1
+2020-04-28 15:39:21	8034	1018207	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018209 m_state: 0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018210 m_state: 0
+2020-04-28 15:39:21	8034	1018209	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018209 m_state: 1 event: 1
+2020-04-28 15:39:21	8033	1018209	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018211 m_state: 0
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018212 m_state: 0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018211	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018211 m_state: 1 event: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018211	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018213 m_state: 0
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018214 m_state: 0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018213	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018213 m_state: 1 event: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018213	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018215 m_state: 0
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018216 m_state: 0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018215	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018215 m_state: 1 event: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018215	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018217 m_state: 0
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018218 m_state: 0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018217	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018217 m_state: 1 event: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018217	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018219 m_state: 0
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018220 m_state: 0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018219	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018219 m_state: 1 event: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018219	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018221 m_state: 0
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018222 m_state: 0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018221	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018221 m_state: 1 event: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018221	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018223 m_state: 0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018224 m_state: 0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018224	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018225 m_state: 0
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018226 m_state: 0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018225	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018225 m_state: 1 event: 1
+2020-04-28 15:39:21	8034	1018225	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018227 m_state: 0
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018228 m_state: 0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018228	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018229 m_state: 0
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018230 m_state: 0
+2020-04-28 15:39:21	8034	1018229	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018229 m_state: 1 event: 1
+2020-04-28 15:39:21	8032	1018229	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018231 m_state: 0
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018232 m_state: 0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018231	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018231 m_state: 1 event: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018231	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018233 m_state: 0
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018234 m_state: 0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018233	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018233 m_state: 1 event: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018233	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018235 m_state: 0
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018236 m_state: 0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018235	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018235 m_state: 1 event: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018235	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018237 m_state: 0
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018238 m_state: 0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018237	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018237 m_state: 1 event: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018237	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018239 m_state: 0
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018240 m_state: 0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018239	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018239 m_state: 1 event: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018239	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018241 m_state: 0
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018242 m_state: 0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018241	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018241 m_state: 1 event: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018241	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018243 m_state: 0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018244 m_state: 0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018244	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018245 m_state: 0
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018246 m_state: 0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018245	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018245 m_state: 1 event: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018245	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018247 m_state: 0
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018248 m_state: 0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018248	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018249 m_state: 0
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018250 m_state: 0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018249	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018249 m_state: 1 event: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018249	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018251 m_state: 0
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018252 m_state: 0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018251	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018251 m_state: 1 event: 1
+2020-04-28 15:39:21	8032	1018251	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018253 m_state: 0
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018254 m_state: 0
+2020-04-28 15:39:21	8032	1018253	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018253 m_state: 1 event: 1
+2020-04-28 15:39:21	8032	1018253	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018255 m_state: 0
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018256 m_state: 0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018255	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018255 m_state: 1 event: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018255	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018257 m_state: 0
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018258 m_state: 0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018257	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018257 m_state: 1 event: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018257	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018259 m_state: 0
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018260 m_state: 0
+2020-04-28 15:39:21	8033	1018259	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018259 m_state: 1 event: 1
+2020-04-28 15:39:21	8032	1018259	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018261 m_state: 0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018261	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018262 m_state: 0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018261 m_state: 1 event: 1
+2020-04-28 15:39:21	8034	1018261	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018263 m_state: 0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018264 m_state: 0
+2020-04-28 15:39:21	8034	1018263	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018263 m_state: 1 event: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018263	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018265 m_state: 0
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018266 m_state: 0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018266	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018267 m_state: 0
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018268 m_state: 0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018267	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018267 m_state: 1 event: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018267	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018269 m_state: 0
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018270 m_state: 0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018269	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018269 m_state: 1 event: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018269	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018271 m_state: 0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018272 m_state: 0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018271	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018271 m_state: 1 event: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018271	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018273 m_state: 0
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018274 m_state: 0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018273	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018273 m_state: 1 event: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018273	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018275 m_state: 0
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018276 m_state: 0
+2020-04-28 15:39:21	8033	1018275	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018275 m_state: 1 event: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018275	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018277 m_state: 0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018278 m_state: 0
+2020-04-28 15:39:21	8033	1018277	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018279 m_state: 0
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018280 m_state: 0
+2020-04-28 15:39:21	8032	1018279	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018279 m_state: 1 event: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018279	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018281 m_state: 0
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018282 m_state: 0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018281	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018281 m_state: 1 event: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018281	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018283 m_state: 0
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018284 m_state: 0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018283	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018283 m_state: 1 event: 1
+2020-04-28 15:39:21	8034	1018283	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018285 m_state: 0
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018286 m_state: 0
+2020-04-28 15:39:21	8032	1018285	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018285 m_state: 1 event: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018285	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018287 m_state: 0
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018288 m_state: 0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018287	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018287 m_state: 1 event: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:378	fd_ctx->events: 0 real_events: 1 not insterest, continue
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018287	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018289 m_state: 0
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018290 m_state: 0
+2020-04-28 15:39:21	8032	1018289	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018289 m_state: 1 event: 1
+2020-04-28 15:39:21	8032	1018289	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018291 m_state: 0
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018292 m_state: 0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018292	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018293 m_state: 0
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018294 m_state: 0
+2020-04-28 15:39:21	8032	1018293	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018293 m_state: 1 event: 1
+2020-04-28 15:39:21	8033	1018293	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018295 m_state: 0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018296 m_state: 0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018295	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018295 m_state: 1 event: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018295	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018297 m_state: 0
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018298 m_state: 0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018297	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018297 m_state: 1 event: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018297	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018299 m_state: 0
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018300 m_state: 0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018299	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018301 m_state: 0
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018302 m_state: 0
+2020-04-28 15:39:21	8034	1018301	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018301 m_state: 1 event: 1
+2020-04-28 15:39:21	8034	1018301	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018303 m_state: 0
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018304 m_state: 0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018303	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018303 m_state: 1 event: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018303	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018305 m_state: 0
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018306 m_state: 0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018305	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018305 m_state: 1 event: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018305	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018307 m_state: 0
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018308 m_state: 0
+2020-04-28 15:39:21	8034	1018307	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018307 m_state: 1 event: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018307	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018309 m_state: 0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018310 m_state: 0
+2020-04-28 15:39:21	8032	1018309	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018309 m_state: 1 event: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018309	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018311 m_state: 0
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018312 m_state: 0
+2020-04-28 15:39:21	8034	1018311	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 2
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018311 m_state: 1 event: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018311	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018313 m_state: 0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018314 m_state: 0
+2020-04-28 15:39:21	8032	1018313	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018313 m_state: 1 event: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018313	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018315 m_state: 0
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018316 m_state: 0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018316	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018317 m_state: 0
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018318 m_state: 0
+2020-04-28 15:39:21	8033	1018317	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018317 m_state: 1 event: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018317	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018319 m_state: 0
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018320 m_state: 0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018319	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018319 m_state: 1 event: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018319	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018321 m_state: 0
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018322 m_state: 0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018321	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018321 m_state: 1 event: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018321	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018323 m_state: 0
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018324 m_state: 0
+2020-04-28 15:39:21	8034	1018323	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018323 m_state: 1 event: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018323	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018325 m_state: 0
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018326 m_state: 0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018325	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018325 m_state: 1 event: 1
+2020-04-28 15:39:21	8034	1018325	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018327 m_state: 0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018328 m_state: 0
+2020-04-28 15:39:21	8034	1018328	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018329 m_state: 0
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018330 m_state: 0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018329	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018329 m_state: 1 event: 1
+2020-04-28 15:39:21	8032	1018329	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018331 m_state: 0
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018332 m_state: 0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018331	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018331 m_state: 1 event: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018331	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018333 m_state: 0
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018334 m_state: 0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018333	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018333 m_state: 1 event: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018333	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018335 m_state: 0
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018336 m_state: 0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018335	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018335 m_state: 1 event: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018335	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018337 m_state: 0
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018338 m_state: 0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018337	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018337 m_state: 1 event: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018337	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018339 m_state: 0
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018340 m_state: 0
+2020-04-28 15:39:21	8034	1018339	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018339 m_state: 1 event: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018339	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018341 m_state: 0
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018342 m_state: 0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018341	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018341 m_state: 1 event: 1
+2020-04-28 15:39:21	8034	1018341	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018343 m_state: 0
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018344 m_state: 0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018344	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018345 m_state: 0
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018346 m_state: 0
+2020-04-28 15:39:21	8032	1018345	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018345 m_state: 1 event: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018345	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018347 m_state: 0
+2020-04-28 15:39:21	8032	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018348 m_state: 0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018347	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018347 m_state: 1 event: 1
+2020-04-28 15:39:21	8034	1018347	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018349 m_state: 0
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018350 m_state: 0
+2020-04-28 15:39:21	8034	1018349	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 2
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018349 m_state: 1 event: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018350	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018351 m_state: 0
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018352 m_state: 0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018351	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018351 m_state: 1 event: 1
+2020-04-28 15:39:21	8033	1018351	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018353 m_state: 0
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018354 m_state: 0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018354	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018355 m_state: 0
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018356 m_state: 0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018355	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 29
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 29, 2147483648):0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 29 m_id: 1018029 m_state: 1 event: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018029	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017979 m_state: 1
+2020-04-28 15:39:21	8032	1017979	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1017979	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018357 m_state: 0
+2020-04-28 15:39:21	8032	1017979	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018358 m_state: 0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018357	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 29, 2147483649):    // add et r
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018355 m_state: 1 event: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018355	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018359 m_state: 0
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018360 m_state: 0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018359	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 2
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018359 m_state: 1 event: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:378	fd_ctx->events: 0 real_events: 1 not insterest, continue
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1018359	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018361 m_state: 0
+2020-04-28 15:39:21	8033	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018362 m_state: 0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018362	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018363 m_state: 0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018364 m_state: 0
+2020-04-28 15:39:21	8032	1018363	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 31, 2147483649):
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 31
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 31, 2147483648):0
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 31 m_id: 1018363 m_state: 1 event: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018363	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018365 m_state: 0
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018366 m_state: 0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	1018366	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017984 m_state: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018367 m_state: 0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1017984	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018368 m_state: 0
+2020-04-28 15:39:21	8033	1018368	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 3, 29, 2147483653):   // mod  et w r
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 28
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 28, 2147483648):0
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 28 m_id: 1017999 m_state: 1 event: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	1017999	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017977 m_state: 1
+2020-04-28 15:39:21	8034	1017977	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8034	1017977	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018369 m_state: 0
+2020-04-28 15:39:21	8034	1017977	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018370 m_state: 0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	1018369	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 28, 2147483649):
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 29
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8033	5	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 3, 29, 2147483652):0 //----------------------------> mod et w
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 29 m_id: 1018357 m_state: 1 event: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 29 fd: 29 //----------------------------------> hup err w r
+2020-04-28 15:39:21	8032	1018357	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017979 m_state: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 29, 2147483648):0 //----------------------------> del et
+2020-04-28 15:39:21	8032	1017979	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	1017979	[DEBUG]	[system]	my_sylar/stream.cc:98	read src fin, fd: 29 totalRead: 2397
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:364	ori event.events: 1 fd: 30
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:394	epoll_ctl(3, 2, 30, 2147483648):0
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:53	trigger fiber fd: 30 m_id: 1018015 m_state: 1 event: 1
+2020-04-28 15:39:21	8032	1018015	[DEBUG]	[root]	my_sylar/thread.cc:160	parallelDoImpl done, schedule fiber mid: 1017978 m_state: 1
+2020-04-28 15:39:21	8032	1017978	[DEBUG]	[root]	my_sylar/thread.cc:197	parallelDo done, after YeildToHold
+2020-04-28 15:39:21	8032	1017978	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018371 m_state: 0
+2020-04-28 15:39:21	8032	1017978	[DEBUG]	[root]	my_sylar/thread.cc:192	parallelDo, schedule fiber mid: 1018372 m_state: 0
+2020-04-28 15:39:21	8032	1018371	[DEBUG]	[system]	my_sylar/iomanager.cc:146	epoll_ctl(3, 1, 30, 2147483649):
+2020-04-28 15:39:21	8032	2	[DEBUG]	[system]	my_sylar/iomanager.cc:343	epoll_ctl ret: 1
+2020-04-28 15:39:21	8034	6	[DEBUG]	[root]	my_sylar/iomanager.cc:47	ASSERTION: events & event
+backtrace:
+    /root/CLionProjects/my_sylar/cmake-build-debug/libmy_sylar.so(_ZN5sylar9IOManager9FdContext12triggerEventENS0_5EventE+0x1a6) [0x7f08f2917788]
+    /root/CLionProjects/my_sylar/cmake-build-debug/libmy_sylar.so(_ZN5sylar9IOManager4idleEv+0xbdd) [0x7f08f291bf27]
+    /root/CLionProjects/my_sylar/cmake-build-debug/libmy_sylar.so(_ZSt13__invoke_implIvRMN5sylar9SchedulerEFvvERPS1_JEET_St21__invoke_memfun_derefOT0_OT1_DpOT2_+0x67) [0x7f08f2916a9a]
+    /root/CLionProjects/my_sylar/cmake-build-debug/libmy_sylar.so(_ZSt8__invokeIRMN5sylar9SchedulerEFvvEJRPS1_EENSt15__invoke_resultIT_JDpT0_EE4typeEOS8_DpOS9_+0x3f) [0x7f08f29167fb]
+    /root/CLionProjects/my_sylar/cmake-build-debug/libmy_sylar.so(_ZNSt5_BindIFMN5sylar9SchedulerEFvvEPS1_EE6__callIvJEJLm0EEEET_OSt5tupleIJDpT0_EESt12_Index_tupleIJXspT1_EEE+0x48) [0x7f08f2916342]
+    /root/CLionProjects/my_sylar/cmake-build-debug/libmy_sylar.so(_ZNSt5_BindIFMN5sylar9SchedulerEFvvEPS1_EEclIJEvEET0_DpOT_+0x2a) [0x7f08f2915adc]
+    /root/CLionProjects/my_sylar/cmake-build-debug/libmy_sylar.so(_ZNSt17_Function_handlerIFvvESt5_BindIFMN5sylar9SchedulerEFvvEPS3_EEE9_M_invokeERKSt9_Any_data+0x20) [0x7f08f2915146]
+    /root/CLionProjects/my_sylar/cmake-build-debug/libmy_sylar.so(_ZNKSt8functionIFvvEEclEv+0x32) [0x7f08f2906c48]
+    /root/CLionProjects/my_sylar/cmake-build-debug/libmy_sylar.so(_ZN5sylar5Fiber8MainFuncEl+0x26c) [0x7f08f290be58]
+    /root/CLionProjects/my_sylar/cmake-build-debug/libmy_sylar.so(make_fcontext+0x21) [0x7f08f29de691]
+
