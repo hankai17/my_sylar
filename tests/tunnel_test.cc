@@ -30,15 +30,7 @@ TcpProxy::TcpProxy(sylar::IOManager *worker, sylar::IOManager *accept_worker)
 static void shuttleData(sylar::Stream::ptr oneEnd, sylar::Stream::ptr otherEnd) {
     try {
         sylar::TransferStream(oneEnd, otherEnd);
-        //uint64_t total_transfer = sylar::TransferStream(oneEnd, otherEnd);
-        //int tmp_fd = std::dynamic_pointer_cast<sylar::SocketStream>(otherEnd)->getSocket()->getSocket();
         std::dynamic_pointer_cast<sylar::SocketStream>(otherEnd)->shutdown(SHUT_WR);
-
-        //SYLAR_LOG_DEBUG(g_logger) << "oneEnd fd: "
-        //<< std::dynamic_pointer_cast<sylar::SocketStream>(oneEnd)->getSocket()->getSocket()
-        //<< " had closed,"
-        //<< " shutdown otherEnd fd: " << tmp_fd
-        //<< ", total transfered: " << total_transfer;
     } catch (std::exception &) {
         SYLAR_LOG_DEBUG(g_logger) << "shuttleData failed";
     }
@@ -98,7 +90,7 @@ int main() {
     sylar::IOManager iom(3, false, "io");
     //iom.schedule(ares_test);
     iom.schedule(test_p1);
-    iom.schedule(test_p2);
+    //iom.schedule(test_p2);
     iom.stop();
     return 0; 
 }

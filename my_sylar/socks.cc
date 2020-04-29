@@ -203,9 +203,10 @@ namespace sylar {
             }
             sock->setRecvTimeout(1000 * 5);
             Stream::ptr stream(new SocketStream(sock));
-            SYLAR_LOG_ERROR(g_logger) << "new stream, cstream->fd: "
-            << std::dynamic_pointer_cast<SocketStream>(cstream)->getSocket()->getSocket()
-            << " sstream->fd: " << sock->getSocket();
+
+            //SYLAR_LOG_ERROR(g_logger) << "new stream, cstream->fd: "
+            //<< std::dynamic_pointer_cast<SocketStream>(cstream)->getSocket()->getSocket()
+            //<< " sstream->fd: " << sock->getSocket();
 
             buffer[0] = 5;
             buffer[1] = 0;

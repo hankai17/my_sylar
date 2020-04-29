@@ -87,7 +87,7 @@ namespace sylar {
         }
     }
 
-    static thread_local FiberPool s_fiber_pool(512); // Because of thread_local so We do not need mutex
+    static thread_local FiberPool s_fiber_pool(128); // Because of thread_local so We do not need mutex
 
     Fiber* NewFiber(std::function<void()> cb, size_t stacksize, bool use_caller) {
         stacksize = stacksize ? stacksize :  g_fiber_stack_size->getValue();
@@ -253,6 +253,7 @@ namespace sylar {
 
     Fiber::~Fiber() {
         --s_fiber_id;
+        SYLAR_LOG_DEBUG(g_logger) << "thread local s_fiber_id: " << s_fiber_id;
 #if FIBER_MEM_TYPE == FIBER_MEM_POOL
         return;
 #endif

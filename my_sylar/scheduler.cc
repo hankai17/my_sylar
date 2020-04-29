@@ -162,8 +162,13 @@ namespace sylar {
 #endif
                 cb_fiber->swapIn(); // If simple noblock cb, next line the fiber will destruction
                 --m_activeFiberCount;
-                cb_fiber->m_state = Fiber::HOLD;
-                cb_fiber.reset();
+                if (cb_fiber->getState() == Fiber::EXCEPT ||
+                    cb_fiber->getState() == Fiber::TERM) {
+                    cb_fiber->reset(nullptr);
+                } else {
+                    cb_fiber->m_state = Fiber::HOLD;
+                    cb_fiber.reset();
+                }
             } else {
                 if (idle_fiber->getState() == Fiber::TERM) {
                     //std::cout<< "idle end, we should break and end the fiber_system. Otherwise it will swapout the mainfun end and core" << std::endl;

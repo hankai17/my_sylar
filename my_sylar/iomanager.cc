@@ -44,19 +44,14 @@ namespace sylar {
     }
 
     bool IOManager::FdContext::triggerEvent(IOManager::Event event) {
-      //SYLAR_ASSERT(events & event); // 只监听了写 但来了读写事件 是不存在这种情况的
       if (!(events & event)) {
           return false;
       }
-      events = (Event)(events & ~event); // 同时监听读写 但只来了写 那么events要置为读
+      events = (Event)(events & ~event);
       EventContext& ctx = getContext(event);
       if (ctx.cb) {
           ctx.scheduler->schedule(&ctx.cb); // It's addr!
       } else {
-          SYLAR_LOG_DEBUG(g_logger) << "trigger fiber fd: " << fd
-          << " m_id: " <<  ctx.fiber->getFiberId()
-          << " m_state: " << ctx.fiber->getState()
-          << " event: " << event;
           ctx.scheduler->schedule(&ctx.fiber); // It's ptr's addr!
       }
       ctx.scheduler = nullptr;
@@ -146,8 +141,6 @@ namespace sylar {
             << ret << " (" << errno << ") (" << strerror(errno) << ")";
             return -1; // TODO
         }
-        SYLAR_LOG_ERROR(g_logger) << "epoll_ctl(" << m_epfd << ", "
-                                  << op << ", " << fd << ", " << epevent.events << "):";
 
         ++m_pendingEventCount;
         fd_ctx->events = (Event)(fd_ctx->events | event);
@@ -189,8 +182,6 @@ namespace sylar {
         epevent.data.ptr = fd_ctx;
 
         int ret = epoll_ctl(m_epfd, op, fd, &epevent);
-        SYLAR_LOG_ERROR(g_logger) << "epoll_ctl(" << m_epfd << ", "
-                                  << op << ", " << fd << ", " << epevent.events << "):";
         if (ret) {
             SYLAR_LOG_ERROR(g_logger) << "epoll_ctl(" << m_epfd << ", "
             << op << ", " << fd << ", " << epevent.events << "):"
@@ -225,8 +216,6 @@ namespace sylar {
         epevent.data.ptr = fd_ctx;
 
         int ret = epoll_ctl(m_epfd, op, fd, &epevent);
-        SYLAR_LOG_ERROR(g_logger) << "epoll_ctl(" << m_epfd << ", "
-                                  << op << ", " << fd << ", " << epevent.events << "):";
         if (ret) {
             SYLAR_LOG_ERROR(g_logger) << "epoll_ctl(" << m_epfd << ", "
             << op << ", " << fd << ", " << epevent.events << "):"
@@ -257,8 +246,6 @@ namespace sylar {
         epevent.data.ptr = fd_ctx;
 
         int ret = epoll_ctl(m_epfd, op, fd, &epevent);
-        SYLAR_LOG_ERROR(g_logger) << "epoll_ctl(" << m_epfd << ", "
-                                  << op << ", " << fd << ", " << epevent.events << "):";
         if (ret) {
             SYLAR_LOG_ERROR(g_logger) << "epoll_ctl(" << m_epfd << ", "
             << op << ", " << fd << ", " << epevent.events << "):"
@@ -343,7 +330,7 @@ namespace sylar {
                 cbs.clear();
             }
 
-            SYLAR_LOG_DEBUG(g_logger) << "epoll_ctl ret: " << ret;
+            //SYLAR_LOG_DEBUG(g_logger) << "epoll_ctl ret: " << ret;
             for (int i = 0; i < ret; i++) {
                 epoll_event& event = events[i];
 
@@ -364,12 +351,10 @@ namespace sylar {
 
                 FdContext* fd_ctx = (FdContext*)event.data.ptr;
                 FdContext::MutexType::Lock lock(fd_ctx->mutex);
-                SYLAR_LOG_DEBUG(g_logger) << "ori event.events: " << event.events
-                << " fd: " << fd_ctx->fd;
+                //SYLAR_LOG_DEBUG(g_logger) << "ori event.events: " << event.events << " fd: " << fd_ctx->fd;
                 if (event.events & (EPOLLERR | EPOLLHUP)) {
-                    event.events |= (EPOLLIN | EPOLLOUT) & fd_ctx->events; //702889d05447d889c9f79b3c94c3e61c3d675be5
+                    event.events |= (EPOLLIN | EPOLLOUT) & fd_ctx->events;
                 }
-                //std::cout << "2events: " << event.events << std::endl;
                 int real_events = NONE; // Only read or write
                 if (event.events & EPOLLIN) {
                     real_events |= READ;
@@ -378,8 +363,6 @@ namespace sylar {
                     real_events |= WRITE;
                 }
                 if ((fd_ctx->events & real_events) == NONE) {
-                    SYLAR_LOG_DEBUG(g_logger) << "fd_ctx->events: " << fd_ctx->events
-                      << " real_events: " << real_events << " not insterest, continue";
                     continue;
                 }
 
@@ -393,11 +376,7 @@ namespace sylar {
                     << op << ", " << fd_ctx->fd << ", " << event.events << "):"
                     << ret << " (" << errno << ") (" << strerror(errno) << ")";
                     continue;
-                } else {
-                    SYLAR_LOG_ERROR(g_logger) << "epoll_ctl(" << m_epfd << ", "
-                    << op << ", " << fd_ctx->fd << ", " << event.events << "):"
-                    << ret;
-                }
+                } 
                 
                 bool triggered = false;
                 if (real_events & READ) {

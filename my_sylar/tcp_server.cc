@@ -68,7 +68,6 @@ namespace sylar {
             Socket::ptr client = sock->accept();
             if (client) {
                 client->setRecvTimeout(m_recvTimeout);
-                SYLAR_LOG_ERROR(g_logger) << "accept schedule cb fd: " << client->getSocket();
                 m_worker->schedule(std::bind(&TcpServer::handleClient,
                         shared_from_this(),
                         client));
