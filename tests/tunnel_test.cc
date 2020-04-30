@@ -66,7 +66,7 @@ void TcpProxy::handleClient(sylar::Socket::ptr client) {
 
 void test_p2() {
     sylar::TcpServer::ptr proxy(new TcpProxy);
-    sylar::IPAddress::ptr addr = sylar::IPv4Address::Create("0.0.0.0", 1966);
+    sylar::IPAddress::ptr addr = sylar::IPv4Address::Create("0.0.0.0", 1967);
     proxy->bind(addr);
     proxy->setName("p2");
     proxy->start();
@@ -90,9 +90,9 @@ int main() {
     signal(SIGPIPE, SIG_IGN);
     sylar::IOManager iom(3, false, "io");
     iom.addTimer(1000 * 10, sylar::MemStatics, true);
-    //iom.schedule(ares_test);
+    iom.schedule(ares_test);
     iom.schedule(test_p1);
-    //iom.schedule(test_p2);
+    iom.schedule(test_p2);
     iom.stop();
     return 0; 
 }
