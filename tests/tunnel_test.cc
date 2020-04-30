@@ -7,6 +7,7 @@
 #include "my_sylar/ns/ares.hh"
 #include "my_sylar/socks.hh"
 #include "my_sylar/macro.hh"
+#include "my_sylar/fiber.hh"
 #include <signal.h>
 
 sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
@@ -88,6 +89,7 @@ void ares_test() {
 int main() {
     signal(SIGPIPE, SIG_IGN);
     sylar::IOManager iom(3, false, "io");
+    iom.addTimer(1000 * 10, sylar::MemStatics, true);
     //iom.schedule(ares_test);
     iom.schedule(test_p1);
     //iom.schedule(test_p2);

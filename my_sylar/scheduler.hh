@@ -10,6 +10,8 @@
 #include "fiber.hh"
 
 namespace sylar {
+    void FiberStatics();
+
     class Scheduler {
     public:
         typedef std::shared_ptr<Scheduler> ptr;
@@ -58,6 +60,7 @@ namespace sylar {
         }
         void switchTo(int thread = -1);
         std::ostream& dump(std::ostream& os);
+        int getFTSize() { return m_fibers.size(); }
 
     protected:
         virtual void tickle();

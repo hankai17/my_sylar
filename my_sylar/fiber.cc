@@ -17,6 +17,7 @@ namespace sylar {
     static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
     sylar::ConfigVar<uint32_t>::ptr g_fiber_stack_size =
             sylar::Config::Lookup<uint32_t>("fiber.stacksize", 1024 * 1024, "fiber stack size"); // If stacksize == 1K it will coredown
+    static int FiberPoolSize = 128; // ConfigVar TODO
 
     class MallocStackAllocator { // 0
     public:
@@ -54,6 +55,7 @@ namespace sylar {
         }
         void* Alloc(size_t size);
         void Dealloc(void* ptr);
+        int getSize() { return m_mems.size(); }
     private:
         struct MemItem {
             size_t  size;
@@ -87,7 +89,7 @@ namespace sylar {
         }
     }
 
-    static thread_local FiberPool s_fiber_pool(128); // Because of thread_local so We do not need mutex
+    static thread_local FiberPool s_fiber_pool(FiberPoolSize);
 
     Fiber* NewFiber(std::function<void()> cb, size_t stacksize, bool use_caller) {
         stacksize = stacksize ? stacksize :  g_fiber_stack_size->getValue();
@@ -102,6 +104,19 @@ namespace sylar {
 
     void FreeFiber(Fiber* ptr) {
         s_fiber_pool.Dealloc(ptr);
+    }
+
+    void MemStatics() { // Must called after schedule'init
+        std::stringstream ss;
+        ss << "Fiber mem statics: ";
+        ss << "Had consumed: " << s_fiber_count  << " fibers, "
+          << "thread local s_fiber_id: " << s_fiber_id;
+        if (FIBER_MEM_TYPE == FIBER_MEM_NORMAL) {
+        } else if (FIBER_MEM_TYPE == FIBER_MEM_POOL) {
+            ss << "MEM_POOL Size: " << FiberPoolSize
+              << " current size: " << s_fiber_pool.getSize();
+        }
+        SYLAR_LOG_DEBUG(g_logger) << ss.str();
     }
 
     void Fiber::SetThis(sylar::Fiber *f) {
@@ -253,7 +268,6 @@ namespace sylar {
 
     Fiber::~Fiber() {
         --s_fiber_id;
-        SYLAR_LOG_DEBUG(g_logger) << "thread local s_fiber_id: " << s_fiber_id;
 #if FIBER_MEM_TYPE == FIBER_MEM_POOL
         return;
 #endif

@@ -318,11 +318,11 @@ namespace sylar {
         return ARES_SUCCESS;
     }
 
-    void AresChannel::aresSend(const std::vector<uint8_t> &qbuf) {
+    Query::ptr AresChannel::aresSend(const std::vector<uint8_t> &qbuf) {
         int qlen = qbuf.size();
         if (qlen < HFIXEDSZ || qlen >= (1 << 16)) {
             SYLAR_LOG_ERROR(g_logger) << "aresSend qlen too small or too max " << qlen;
-            return;
+            return nullptr;
         }
 
         Query::ptr query(new Query);
@@ -345,26 +345,26 @@ namespace sylar {
         }
         query->using_tcp = (m_flags & ARES_FLAG_USEVC) || qlen > PACKETSZ;
         query->error_status = ARES_ECONNREFUSED;
+        
+        RWMutexType::WriteLock lock(m_mutex);
+        m_queries.insert(std::make_pair(query->qid, query));
+        lock.unlock();
 
-        auto it = m_queries.insert(std::make_pair(query->qid, query));
-        if (it.second) {
-            SYLAR_LOG_ERROR(g_logger) << "insert success: " << query->qid;
-        } else {
-            SYLAR_LOG_ERROR(g_logger) << "insert failed: " << query->qid;
-        }
+        query->fiber = sylar::Fiber::GetThis(); //Must set fiber before send.
         ares_send(query);
+        // 此时很有可能m_queries里已经没哟Q了
+        return query;
     }
 
-    uint16_t AresChannel::aresQuery(const std::string &name, int dnsclass, int type) {
+    Query::ptr AresChannel::aresQuery(const std::string &name, int dnsclass, int type) {
         std::vector<uint8_t> qbuf; //in-out
         int rd = !(m_flags & ARES_FLAG_NORECURSE);
         uint16_t messageId = m_nextId++;
         int status = ares_mkquery(name.c_str(), dnsclass, type, messageId, rd, qbuf);
         if (status != ARES_SUCCESS) {
-            return 0;
+            return nullptr;
         }
-        aresSend(qbuf);
-        return messageId;
+        return aresSend(qbuf);
     }
 
     void AresChannel::QueryTimeout(std::weak_ptr<Query> q, AresChannel::ptr channel) {
@@ -380,29 +380,11 @@ namespace sylar {
 
     std::vector<IPv4Address> AresChannel::aresGethostbyname(const std::string &name) {
         std::vector<IPv4Address> ips;
-        uint16_t messageId = aresQuery(name);
-        SYLAR_LOG_ERROR(g_logger) << "aresGethostbyname name " << name << " messageId: " << messageId;
-        if (messageId < 0) {
-            SYLAR_LOG_ERROR(g_logger) << "aresGethostbyname failed: messageId < 0";
-            return ips;
-        }
-
-        /*
-        Query::ptr query = m_queries[messageId];
+        Query::ptr query = aresQuery(name);
         if (!query) {
-            SYLAR_LOG_ERROR(g_logger) << "aresGethostbyname not exist this query id: " << messageId;
+            SYLAR_LOG_ERROR(g_logger) << "aresGethostbyname query is nullptr";
             return ips;
         }
-         */
-
-        auto it = m_queries.find(messageId);
-        if (it == m_queries.end()) {
-            SYLAR_LOG_ERROR(g_logger) << "aresGethostbyname not exist this query id: " << messageId;
-            return ips;
-        }
-        Query::ptr query = it->second;
-        SYLAR_LOG_ERROR(g_logger) << "aresGethostbyname exist this query id: " << query->qid;
-        query->fiber = sylar::Fiber::GetThis();
 
         IOManager* iom = sylar::IOManager::GetThis();
         std::weak_ptr<Query> wquery(query);
@@ -422,10 +404,8 @@ namespace sylar {
             timer->cancel();
         }
         if (query->result.size() > 0) {
-            //std::cout<< "result.size: " << query->result.size() << std::endl;
             for (auto& i : query->result) {
                 IPv4Address ip(ntohl(static_cast<uint32_t>(i.s_addr)));
-                //std::cout<< ip.toString() << std::endl;
                 ips.push_back(ip);
             }
         }
@@ -571,7 +551,6 @@ namespace sylar {
             return;
         }
         Query::ptr query = it->second;
-        SYLAR_LOG_ERROR(g_logger) << "process ans: " << query->qid;
 
         if ((tc || alen > PACKETSZ) && !tcp && !(m_flags & ARES_FLAG_IGNTC)) { //如果包里明确有trunc 或 包长大于512字节
             if (!query->using_tcp) {
@@ -605,7 +584,8 @@ namespace sylar {
         aresParseReply(abuf, alen, query->result);
         sylar::Scheduler::GetThis()->schedule(query->fiber);
         //sylar::Scheduler::GetThis()->schedule(&query->fiber);
-        SYLAR_LOG_ERROR(g_logger) << "ares erase " << query->qid;
+
+        RWMutexType::WriteLock lock(m_mutex);
         m_queries.erase(query->qid);
     }
 }

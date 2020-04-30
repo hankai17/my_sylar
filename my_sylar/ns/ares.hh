@@ -306,8 +306,8 @@ namespace sylar {
 				std::vector<uint8_t>& buf);
 
 		std::vector<IPv4Address> aresGethostbyname(const std::string& name);
-		uint16_t aresQuery(const std::string& name, int dnsclass = C_IN, int type = T_A);
-		void aresSend(const std::vector<uint8_t>& qbuf);
+        Query::ptr aresQuery(const std::string& name, int dnsclass = C_IN, int type = T_A);
+        Query::ptr aresSend(const std::vector<uint8_t>& qbuf);
 		void ares_send(Query::ptr query);
 		void nextServer(Query::ptr query);
 

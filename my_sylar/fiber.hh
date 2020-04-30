@@ -25,6 +25,7 @@ namespace sylar {
     Fiber* NewFiber(std::function<void()> cb, size_t stacksize = 0, bool use_caller = false);
     Fiber* NewFiber();
     void FreeFiber(Fiber* ptr);
+    void MemStatics();
 
     class Fiber : public std::enable_shared_from_this<Fiber> {
     public:

@@ -8,6 +8,9 @@ namespace sylar {
     static thread_local Scheduler* t_scheduler = nullptr;
     static thread_local Fiber* t_kernel_fiber = nullptr;
 
+    void FiberStatics() {
+    }
+
     Scheduler* Scheduler::GetThis() {
         return t_scheduler; // Why not same as fiber.cc
     }
@@ -87,17 +90,19 @@ namespace sylar {
 
     std::ostream& Scheduler::dump(std::ostream& os) {
         os << "[Scheduler name: " << m_name
-        << " size: " << m_threadCounts
-        << " active_count: " << m_activeFiberCount
-        << " idle_count: "
-        << " stopping: " << m_stopping
-        << "]" << std::endl;
+        << ", size: " << m_threadCounts
+        << ", active_count: " << m_activeFiberCount
+        << ", idle_count: " << m_activeIdleFiberCount
+        << ", fibers in list: " << getFTSize()
+        << "]";
+        /*
         for (size_t i = 0; i < m_threadCounts; i++) {
             if (i) {
                 os << ", ";
             }
             os << m_threadIds[i];
         }
+        */
         return os;
     }
 
