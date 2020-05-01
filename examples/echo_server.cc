@@ -60,6 +60,10 @@ int main() {
     return 0;
 }
 
+// g++ echo_test.cc -I/usr/local/include -lmy_sylar -std=c++11 -lssl -lyaml-cpp
+// CentOS Linux release 7.2.1511 (Core)
+// Linux 3.10.0-327.el7.x86_64 #1 SMP Thu Nov 19 22:10:57 UTC 2015 x86_64 x86_64 x86_64 GNU/Linux
+
 /*
 2020-04-28 09:31:33     4600    4       [DEBUG] [system]        my_sylar/iomanager.cc:343       epoll_ctl ret: 1
 2020-04-28 09:31:33     4599    6       [DEBUG] [system]        my_sylar/iomanager.cc:146       epoll_ctl(3, 1, 6, 2147483649):
