@@ -73,6 +73,11 @@ set(LIB_SRC
         )
 
 add_library(${PROJECT_NAME} SHARED ${LIB_SRC})
+install(TARGETS ${PROJECT_NAME} ARCHIVE DESTINATION ${INSTALL_PATH_LIB} LIBRARY DESTINATION ${INSTALL_PATH_LIB})
+
+add_library(${PROJECT_NAME}_static STATIC ${LIB_SRC})
+install(TARGETS ${PROJECT_NAME}_static ARCHIVE DESTINATION ${INSTALL_PATH_LIB})
+
 force_redefine_file_macro_for_sources(${PROJECT_NAME}) #__FILE__
 
 option(TEST "ON for complile test" OFF)
@@ -84,8 +89,20 @@ my_sylar_add_executable(ares_test tests/ares_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(tunnel_test tests/tunnel_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(uri_test tests/uri_test.cc ${PROJECT_NAME} "${LIBS}")
 
-foreach(SUB_DIR ${SUB_DIR_LIST})
-    aux_source_directory(${SUB_DIR} SRC_LIST)
-    install(DIRECTORY ${SUB_DIR} DESTINATION ${INSTALL_PATH_INCLUDE} FILES_MATCHING PATTERN "*.hh")
-endforeach()
-install(DIRECTORY . DESTINATION ${INSTALL_PATH_INCLUDE} FILES_MATCHING PATTERN "*.hh")
+install(DIRECTORY my_sylar DESTINATION ${INSTALL_PATH_INCLUDE} FILES_MATCHING PATTERN "*.hh")
+
+set(CPACK_PACKAGE_NAME "my_sylar")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "my_sylar")
+set(CPACK_PACKAGE_VENDOR "hankai17")
+set(CPACK_PACKAGE_VERSION "1.0.0")
+set(CPACK_PACKAGE_VERSION_MAJOR "1")
+set(CPACK_PACKAGE_VERSION_MINOR "0")
+set(CPACK_PACKAGE_VERSION_PATCH "0")
+set(CPACK_RPM_PACKAGE_GROUP "hankai17")
+set(CPACK_RPM_PACKAGE_URL "http://github.com/hankai17/my_sylar")
+set(CPACK_RPM_PACKAGE_DESCRIPTION "")
+set(CPACK_PACKAGE_RELEASE 1)
+set(CPACK_RPM_PACKAGE_LICENSE "ASL 2.0")
+set(CPACK_GENERATOR "RPM")
+include(CPack)
+
