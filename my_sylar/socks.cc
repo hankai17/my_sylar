@@ -189,7 +189,7 @@ namespace sylar {
                 addr = std::dynamic_pointer_cast<sylar::IPAddress>(
                         sylar::Address::Create(ips[0].getAddr(), ips[0].getAddrLen())
                 );
-                SYLAR_LOG_ERROR(g_logger) << "dns resolve done " << domain << " : " << addr->toString();
+                //SYLAR_LOG_ERROR(g_logger) << "dns resolve done " << domain << " : " << addr->toString();
             } else {
                 addr = IPAddress::Create(domain.c_str(), port);
             }
@@ -198,7 +198,8 @@ namespace sylar {
             addr->setPort(port);
             Socket::ptr sock = 0 ? SSLSocket::CreateTCP(addr) : Socket::CreateTCP(addr);
             if (!sock->connect(addr)) {
-                SYLAR_LOG_ERROR(g_logger) << "connect to proxy failed"; 
+                SYLAR_LOG_ERROR(g_logger) << "connect to os: " << domain << " failed"
+                << " errno: " << errno << " strerrno: " << strerror(errno);
                 return nullptr; 
             }
             sock->setRecvTimeout(1000 * 5);

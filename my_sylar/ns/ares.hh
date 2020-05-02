@@ -10,9 +10,11 @@
 #include <netdb.h>
 #include <unordered_map>
 #include <atomic>
+#include <map>
 #include "my_sylar/thread.hh"
 #include "my_sylar/tcp_server.hh"
 #include "my_sylar/address.hh"
+#include "my_sylar/utils/lru.hh"
 
 #define ARES_SUCCESS		0
 
@@ -290,6 +292,24 @@ namespace sylar {
 		int 			error_status;
 	};
 
+	class HostDB {
+	public:
+		typedef std::shared_ptr<HostDB> ptr;
+		typedef RWMutex RWMutexType;
+
+		HostDB(uint64_t max_size);
+		bool getRR(std::string domain, ns_type type, std::string& result);
+		bool setRR(std::string domain, ns_type type, std::string val, int64_t expires);
+		std::string getHostDBStatics();
+
+	private:
+		RWMutexType										m_mutex;
+		//unordered_map<std::string, std::vector<RR> >	m_datas; // 被动过期
+		TimedCache<std::string,
+				std::map<ns_type, std::vector<std::string>>
+		>			m_datas; // 主动过期 // ONLY SUPPORT A // SHOULD <domain+type, vector<string>>
+	};
+
 	class AresChannel : public UdpServer {
 	public:
 		typedef std::shared_ptr<AresChannel> ptr;
@@ -332,6 +352,7 @@ namespace sylar {
 		std::map<int, std::map<Address::ptr, Socket::ptr> >	m_servers; // resolv.conf's addr
 		//std::unordered_map<uint16_t, Query::ptr> 	m_queries;
 		std::map<uint16_t, Query::ptr> 	m_queries;
+		HostDB				m_db;
 	};
 
 	class AresChannelMgr {

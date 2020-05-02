@@ -7,6 +7,8 @@
 #include <fcntl.h>
 #include <sys/time.h>
 #include <iostream>
+#include <random>
+
 
 #include "ares.hh"
 #include "my_sylar/util.hh"
@@ -105,7 +107,8 @@ namespace sylar {
     }
 
     AresChannel::AresChannel(IOManager *worker, IOManager *receiver)
-            : UdpServer(worker, receiver) {
+            : UdpServer(worker, receiver),
+            m_db(1024) {
     }
 
     void AresChannel::init() {
@@ -380,6 +383,12 @@ namespace sylar {
 
     std::vector<IPv4Address> AresChannel::aresGethostbyname(const std::string &name) {
         std::vector<IPv4Address> ips;
+        std::string db_result;
+        if (false && m_db.getRR(name, ns_t_a, db_result)) {
+            ips.push_back(*IPv4Address::Create(db_result.c_str()).get());
+            return ips;
+        }
+        //SYLAR_LOG_ERROR(g_logger) << m_db.getHostDBStatics();
         Query::ptr query = aresQuery(name);
         if (!query) {
             SYLAR_LOG_ERROR(g_logger) << "aresGethostbyname query is nullptr";
@@ -394,7 +403,7 @@ namespace sylar {
             if (!t) {
                 return;
             }
-            SYLAR_LOG_ERROR(g_logger) << "ares: " << " dns timeout";
+            //SYLAR_LOG_ERROR(g_logger) << "ares: " << " dns timeout";
             sylar::Scheduler::GetThis()->schedule(t->fiber);
             RWMutexType::WriteLock lock(curr->m_mutex);
             curr->m_queries.erase(t->qid);
@@ -490,6 +499,7 @@ namespace sylar {
             }
             rr_type = DNS_RR_TYPE(aptr);
             rr_class = DNS_RR_CLASS(aptr);
+            int rr_ttl = DNS_RR_TTL(aptr);
             rr_len = DNS_RR_LEN(aptr);
             aptr += RRFIXEDSZ;
 
@@ -498,6 +508,9 @@ namespace sylar {
                 memcpy(&addrs[naddrs], aptr, sizeof(struct in_addr));
                 naddrs++;
                 status = ARES_SUCCESS;
+                IPv4Address ip(ntohl(static_cast<uint32_t>((addrs[naddrs]).s_addr)));
+                m_db.setRR(std::string((char*)&hostname[0]), (ns_type)rr_type,
+                        ip.toString(), sylar::GetCurrentMs() + rr_ttl * 1000);
             } //正是查询域名的a记录 则拷到a记录数组中
 
             if (rr_class == C_IN && rr_type == T_CNAME) { //cname 则把具体的域名 放到alias数组中
@@ -588,6 +601,69 @@ namespace sylar {
         RWMutexType::WriteLock lock(m_mutex);
         m_queries.erase(query->qid);
     }
+
+    HostDB::HostDB(uint64_t max_size) :
+    m_datas(max_size) {
+    }
+
+    bool HostDB::getRR(std::string domain, ns_type type, std::string& result) {
+        RWMutexType::ReadLock lock(m_mutex);
+        m_datas.checkTimeout();
+        std::map<ns_type, std::vector<std::string> > res;
+        if (!m_datas.get(domain, res)) {
+            return false;
+        }
+        auto it = res.find(type);
+        if (it == res.end()) {
+            return false;
+        }
+
+        if (it->second.size() == 0) {
+            return false;
+        }
+
+        std::default_random_engine generator;
+        std::uniform_int_distribution<int> distribution(0, it->second.size() - 1);
+        int dice_roll = distribution(generator);
+        result = it->second[dice_roll];
+        return true;
+    }
+
+    bool HostDB::setRR(std::string domain, ns_type type, std::string val, int64_t expires) {
+        RWMutexType::ReadLock lock(m_mutex);
+        m_datas.checkTimeout();
+        std::map<ns_type, std::vector<std::string> > res;
+        if (!m_datas.get(domain, res)) {
+            res.insert(std::make_pair(
+                    type, std::vector<std::string>{val}
+                   ));
+            m_datas.set(domain, res, expires);
+            return true;
+        }
+
+        auto it = res.find(type);
+        if (it == res.end()) {
+            res.insert(std::make_pair(
+                    type, std::vector<std::string>{val}
+                    ));
+            m_datas.set(domain, res, expires);
+            return true;
+        }
+
+        for (const auto& i : it->second) {
+            if (i == val) {
+                return true;
+            }
+        }
+        it->second.push_back(val);
+        m_datas.set(domain, res, expires);
+        return true;
+    }
+
+    std::string HostDB::getHostDBStatics() {
+        return m_datas.toStatusString();
+    }
+
 }
 
 //设计悖论:

@@ -244,7 +244,7 @@ namespace sylar {
            << ((addr >> 16) & 0xFF) << "."
            << ((addr >> 8)  & 0xFF) << "."
            << (addr & 0xFF);
-        os << ":" << byteswapOnLittleEndian(m_addr.sin_port);
+        //os << ":" << byteswapOnLittleEndian(m_addr.sin_port);
         return os;
     }
 

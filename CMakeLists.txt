@@ -88,6 +88,7 @@ my_sylar_add_executable(echo_test examples/echo_server.cc ${PROJECT_NAME} "${LIB
 my_sylar_add_executable(ares_test tests/ares_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(tunnel_test tests/tunnel_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(uri_test tests/uri_test.cc ${PROJECT_NAME} "${LIBS}")
+my_sylar_add_executable(lru_test tests/lru_test.cc ${PROJECT_NAME} "${LIBS}")
 
 install(DIRECTORY my_sylar DESTINATION ${INSTALL_PATH_INCLUDE} FILES_MATCHING PATTERN "*.hh")
 

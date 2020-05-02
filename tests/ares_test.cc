@@ -20,32 +20,47 @@ void test_domains(sylar::AresChannel::ptr channel, int idx, std::string domain) 
     SYLAR_LOG_DEBUG(g_logger) << "idx: " << idx << ", domain: " << domain << ", result: " << result_num;
 }
 
+void test_domain(sylar::AresChannel::ptr channel, int idx) {
+    int result_num = 0;
+    std::string domain("www.ifeng.com");
+    auto ips = channel->aresGethostbyname(domain.c_str());
+    for (auto& i : ips) {
+        result_num++;
+        SYLAR_LOG_DEBUG(g_logger) << idx << " " << i.toString();
+    }
+    //SYLAR_LOG_DEBUG(g_logger) << "idx: " << idx << ", domain: " << domain << ", result: " << result_num;
+}
+
 void ares_test() {
     SYLAR_LOG_DEBUG(g_logger) << "in ares test";
     sylar::AresChannel::ptr channel(new sylar::AresChannel);
     channel->init();
     channel->start();
 
-    std::ifstream in("querytest.txt");
-    std::string domain;
-    std::string::size_type pos;
-    int i = 0;
-    while (getline(in, domain) && i < 100) {
-        pos = domain.find(" ", 0);
-        if (pos == std::string::npos) {
-            continue;
+    if (false) {
+        std::ifstream in("querytest.txt");
+        std::string domain;
+        std::string::size_type pos;
+        int i = 0;
+        while (getline(in, domain) && i < 100) {
+            pos = domain.find(" ", 0);
+            if (pos == std::string::npos) {
+                continue;
+            }
+            std::string real_domain(domain, 0, pos);
+            //SYLAR_LOG_DEBUG(g_logger) << "domain: " << real_domain;
+            i++;
+            sylar::IOManager::GetThis()->schedule(std::bind(test_domains,
+                                                            channel, i, real_domain));
         }
-        std::string real_domain(domain, 0, pos);
-        //SYLAR_LOG_DEBUG(g_logger) << "domain: " << real_domain;
-        i++;
-        sylar::IOManager::GetThis()->schedule(std::bind(test_domains,
-                channel, i, real_domain));
+    } else {
+        sylar::IOManager::GetThis()->schedule(std::bind(test_domain, channel, 0));
+        sleep(5);
+        for (int i = 0; i < 0; i++) {
+            sylar::IOManager::GetThis()->schedule(std::bind(test_domain,
+                    channel, i));
+        }
     }
-
-    //for (int i = 0; i < 1000; i++) {
-    //    sylar::IOManager::GetThis()->schedule(std::bind(test_domains,
-    //            channel, i));
-    //}
 }
 
 int main() {
