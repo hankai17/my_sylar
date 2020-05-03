@@ -309,7 +309,7 @@ namespace sylar {
 
             int ret = 0;
             do {
-                static const int MAX_TIMEOUT = 3000;
+                static const int MAX_TIMEOUT = 1000;
                 if (next_timeout != ~0ull) {
                     next_timeout = next_timeout > MAX_TIMEOUT ? MAX_TIMEOUT : next_timeout;
                 } else {

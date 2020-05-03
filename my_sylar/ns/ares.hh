@@ -346,8 +346,8 @@ namespace sylar {
 		int 				m_flags = 16;
 		int 				m_timeout = -1;
 		int 				m_tries = 2;
-		uint16_t 			m_udp_port = htons(53);
-		uint16_t 			m_tcp_port = htons(53);
+		uint16_t 			m_udp_port; // = htons(53);
+		uint16_t 			m_tcp_port; // = htons(53);
 		std::atomic<uint16_t> 						m_nextId;
 		std::map<int, std::map<Address::ptr, Socket::ptr> >	m_servers; // resolv.conf's addr
 		//std::unordered_map<uint16_t, Query::ptr> 	m_queries;

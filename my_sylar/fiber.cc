@@ -154,7 +154,7 @@ namespace sylar {
         }
 #endif
         ++s_fiber_count;
-        SYLAR_LOG_DEBUG(g_logger) << "Fiber::Fiber";
+        //SYLAR_LOG_DEBUG(g_logger) << "Fiber::Fiber";
     }
 
     Fiber::Fiber(std::function<void()> cb, size_t stacksize, bool use_caller)

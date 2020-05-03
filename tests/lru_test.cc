@@ -1,5 +1,7 @@
 #include "my_sylar/log.hh"
+#include "my_sylar/iomanager.hh"
 #include "my_sylar/utils/lru.hh"
+#include "my_sylar/utils/rate_limiter.hh"
 #include <iostream>
 
 void test_lru() {
@@ -81,8 +83,36 @@ int main(int argc, char** argv) {
         test_lru();
         test_hash_lru();
     } else {
-        test_timed_cache();
-        //test_hash_timed_cache();
+        sylar::IOManager iom(1, false, "rate");
+        sylar::RateLimiter limiter(iom, 3, 100000ull); // 100ms
+        int ret = limiter.allowed(1);
+        std::cout << "ret: " << ret << std::endl;
+
+        ret = limiter.allowed(1);
+        std::cout << "ret: " << ret << std::endl;
+
+        ret = limiter.allowed(1);
+        std::cout << "ret: " << ret << std::endl;
+
+        ret = limiter.allowed(1);
+        std::cout << "ret: " << ret << std::endl;
+
+        ret = limiter.allowed(1);
+        std::cout << "ret: " << ret << std::endl;
+
+        usleep(200000);
+
+        ret = limiter.allowed(1);
+        std::cout << "ret: " << ret << std::endl;
+
+        ret = limiter.allowed(1);
+        std::cout << "ret: " << ret << std::endl;
+
+        ret = limiter.allowed(1);
+        std::cout << "ret: " << ret << std::endl;
+
+        ret = limiter.allowed(1);
+        std::cout << "ret: " << ret << std::endl;
     }
 
     return 0;

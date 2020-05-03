@@ -15,7 +15,6 @@ public:
         SYLAR_LOG_DEBUG(g_logger) << client->toString();
         sylar::Buffer::ptr buf(new sylar::Buffer);
         int err;
-        int only_listen_in = 1;
         while (true) {
             int ret = buf->orireadFd(client->getSocket(), &err);
             if (ret == 0) {
@@ -27,17 +26,15 @@ public:
                 break;
             }
 
-            SYLAR_LOG_DEBUG(g_logger) << buf->peek();
-            if (only_listen_in == 0) {
-                ret = buf->writeFd(client->getSocket(), ret, &err);
-                if (ret == 0) {
-                    SYLAR_LOG_DEBUG(g_logger) << "peer closed";
-                    break;
-                } else if (ret < 0) {
-                    SYLAR_LOG_DEBUG(g_logger) << "recv errno: " << errno
-                    << " strerrno: " << strerror(errno);
-                    break;
-                }
+            //SYLAR_LOG_DEBUG(g_logger) << buf->peek();
+            ret = buf->writeFd(client->getSocket(), ret, &err);
+            if (ret == 0) {
+                SYLAR_LOG_DEBUG(g_logger) << "peer closed";
+                break;
+            } else if (ret < 0) {
+                SYLAR_LOG_DEBUG(g_logger) << "recv errno: " << errno
+                << " strerrno: " << strerror(errno);
+                break;
             }
         }
     }
@@ -54,7 +51,7 @@ void run() {
 }
 
 int main() {
-    sylar::IOManager iom(2, false, "EchoServer");
+    sylar::IOManager iom(1, false, "EchoServer");
     iom.schedule(run);
     iom.stop();
     return 0;
