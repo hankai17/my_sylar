@@ -384,10 +384,6 @@ namespace sylar {
     std::vector<IPv4Address> AresChannel::aresGethostbyname(const std::string &name) {
         std::vector<IPv4Address> ips;
         std::string db_result;
-        if (false && m_db.getRR(name, ns_t_a, db_result)) {
-            ips.push_back(*IPv4Address::Create(db_result.c_str()).get());
-            return ips;
-        }
         //SYLAR_LOG_ERROR(g_logger) << m_db.getHostDBStatics();
         Query::ptr query = aresQuery(name);
         if (!query) {
@@ -499,7 +495,7 @@ namespace sylar {
             }
             rr_type = DNS_RR_TYPE(aptr);
             rr_class = DNS_RR_CLASS(aptr);
-            int rr_ttl = DNS_RR_TTL(aptr);
+            //int rr_ttl = DNS_RR_TTL(aptr);
             rr_len = DNS_RR_LEN(aptr);
             aptr += RRFIXEDSZ;
 
@@ -508,9 +504,6 @@ namespace sylar {
                 memcpy(&addrs[naddrs], aptr, sizeof(struct in_addr));
                 naddrs++;
                 status = ARES_SUCCESS;
-                IPv4Address ip(ntohl(static_cast<uint32_t>((addrs[naddrs]).s_addr)));
-                m_db.setRR(std::string((char*)&hostname[0]), (ns_type)rr_type,
-                        ip.toString(), sylar::GetCurrentMs() + rr_ttl * 1000);
             } //正是查询域名的a记录 则拷到a记录数组中
 
             if (rr_class == C_IN && rr_type == T_CNAME) { //cname 则把具体的域名 放到alias数组中
