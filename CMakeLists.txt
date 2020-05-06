@@ -71,6 +71,7 @@ set(LIB_SRC
         my_sylar/dns.cc
         my_sylar/ns/ares.cc
         my_sylar/socks.cc
+        my_sylar/utils/ikcp.c
         )
 
 add_library(${PROJECT_NAME} SHARED ${LIB_SRC})
@@ -91,6 +92,7 @@ my_sylar_add_executable(tunnel_test tests/tunnel_test.cc ${PROJECT_NAME} "${LIBS
 my_sylar_add_executable(uri_test tests/uri_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(lru_test tests/lru_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(pingpong_qps_test my_sylar/utils/pingpong_qps.cc ${PROJECT_NAME} "${LIBS}")
+my_sylar_add_executable(kcp_test tests/kcp_test.cc ${PROJECT_NAME} "${LIBS}")
 
 install(DIRECTORY my_sylar DESTINATION ${INSTALL_PATH_INCLUDE} FILES_MATCHING PATTERN "*.hh")
 
