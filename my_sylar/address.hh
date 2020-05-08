@@ -23,7 +23,7 @@ namespace sylar {
 
         virtual const sockaddr* getAddr() const = 0; // sockaddr more normal
         virtual socklen_t getAddrLen() const = 0;
-        virtual std::ostream& insert(std::ostream& os) const = 0;
+        virtual std::ostream& insert(std::ostream& os, bool print_port = false) const = 0;
 
         std::string toString();
         int getFamily() const;
@@ -60,7 +60,7 @@ namespace sylar {
 
         const sockaddr* getAddr() const override;
         socklen_t getAddrLen() const override;
-        std::ostream& insert(std::ostream& os) const override;
+        std::ostream& insert(std::ostream& os, bool print_port = false) const override;
 
         IPAddress::ptr broadcastAddress(uint32_t prefix_len) override;
         IPAddress::ptr networkAddress(uint32_t prefix_len) override;
@@ -82,7 +82,7 @@ namespace sylar {
 
         const sockaddr* getAddr() const override;
         socklen_t getAddrLen() const override;
-        std::ostream& insert(std::ostream& os) const override;
+        std::ostream& insert(std::ostream& os, bool print_port = false) const override;
 
         IPAddress::ptr broadcastAddress(uint32_t prefix_len) override;
         IPAddress::ptr networkAddress(uint32_t prefix_len) override;
@@ -101,7 +101,7 @@ namespace sylar {
 
         const sockaddr* getAddr() const override;
         socklen_t getAddrLen() const override;
-        std::ostream& insert(std::ostream& os) const override;
+        std::ostream& insert(std::ostream& os, bool print_port = false) const override;
 
     private:
         sockaddr m_addr;

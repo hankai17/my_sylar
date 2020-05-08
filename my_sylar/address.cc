@@ -238,13 +238,15 @@ namespace sylar {
         return sizeof(m_addr);
     }
 
-    std::ostream& IPv4Address::insert(std::ostream& os) const  {
+    std::ostream& IPv4Address::insert(std::ostream& os, bool print_port) const  {
         uint32_t addr = byteswapOnLittleEndian(m_addr.sin_addr.s_addr); // resume host order
         os << ((addr >> 24) & 0xFF) << "."
            << ((addr >> 16) & 0xFF) << "."
            << ((addr >> 8)  & 0xFF) << "."
            << (addr & 0xFF);
-        //os << ":" << byteswapOnLittleEndian(m_addr.sin_port);
+        if (print_port) {
+            os << ":" << byteswapOnLittleEndian(m_addr.sin_port);
+        }
         return os;
     }
 
@@ -316,7 +318,7 @@ namespace sylar {
         return sizeof(m_addr);
     }
 
-    std::ostream& IPv6Address::insert(std::ostream& os) const {
+    std::ostream& IPv6Address::insert(std::ostream& os, bool print_port) const {
         os << "[";
         uint16_t* addr = (uint16_t*)m_addr.sin6_addr.s6_addr;
         //bool used_zeros = false; // TODO
@@ -326,7 +328,9 @@ namespace sylar {
             }
             os << std::hex << (int)byteswapOnLittleEndian(addr[i]) << std::dec;
         }
-        os << "]:" << byteswapOnLittleEndian(m_addr.sin6_port);
+        if (print_port) {
+            os << "]:" << byteswapOnLittleEndian(m_addr.sin6_port);
+        }
         return os;
     }
 
@@ -370,7 +374,7 @@ namespace sylar {
         return sizeof(m_addr);
     }
 
-    std::ostream& UnknownAddress::insert(std::ostream& os) const {
+    std::ostream& UnknownAddress::insert(std::ostream& os, bool print_port) const {
         os << "UnknownAddress family: " << m_addr.sa_family;
         return os;
     }

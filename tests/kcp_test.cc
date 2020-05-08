@@ -19,15 +19,26 @@ ikcpcb* kcp2 = nullptr;
 class Session {
 public:
     bool                        is_udp;
+    std::string                 m_serverName;
     sylar::SocketStream::ptr    sockStream;
     sylar::Address::ptr         m_peerAddr;
 };
 
-// KCP的下层协议输出函数，KCP需要发送数据时会调用它
 static int udp_output(const char* buf, int len, ikcpcb* kcp, void* user) {
     Session* session = (Session*)user;
-    int ret = session->sockStream->getSocket()->sendTo(buf, len, session->m_peerAddr);
-    SYLAR_LOG_DEBUG(g_logger) << "udp_output ret: " << ret;
+    if (session->m_serverName == "p1") {
+        int ret = session->sockStream->getSocket()->sendTo(buf, len, session->m_peerAddr);
+        if (false)
+        SYLAR_LOG_DEBUG(g_logger) << "p1 udp_output ret: " << ret << " ";
+        //<< session->m_peerAddr->toString() << "  "
+        //<< std::dynamic_pointer_cast<sylar::IPv4Address>(session->m_peerAddr)->getPort();
+    } else {
+        int ret = session->sockStream->getSocket()->sendTo(buf, len, session->m_peerAddr);
+        if (false)
+        SYLAR_LOG_DEBUG(g_logger) << "p2 udp_output ret: " << ret << " ";
+        //<< session->m_peerAddr->toString() << "  "
+        //<< std::dynamic_pointer_cast<sylar::IPv4Address>(session->m_peerAddr)->getPort();
+    }
     return 0;
 }
 
@@ -49,13 +60,13 @@ KcpServer::KcpServer(sylar::IOManager* worker, sylar::IOManager* receiver):
 UdpServer(worker, receiver) {
 }
 
-static int recv_kcp(char*& buf, uint32_t& size) {
-    int len = ikcp_peeksize(kcp2);
+static int recv_kcp(char*& buf, uint32_t& size, ikcpcb* kcp) {
+    int len = ikcp_peeksize(kcp);
     if (len <= 0) {
         return 0;
     }
     char* data = new char[len];
-    int r = ikcp_recv(kcp2, data, len);
+    int r = ikcp_recv(kcp, data, len);
     if (r <= 0) {
         return -1; // may be eagain
     }
@@ -64,50 +75,52 @@ static int recv_kcp(char*& buf, uint32_t& size) {
     return size;
 }
 
-static void run() {
+static void run(ikcpcb* kcp) {
     while (1) {
         char* buf = nullptr;
         uint32_t len = 0;
-        int ret = recv_kcp(buf, len);
+        int ret = recv_kcp(buf, len, kcp);
         if (ret <= 0) {
             //SYLAR_LOG_DEBUG(g_logger) << "run ret: " << ret;
         } else {
-            SYLAR_LOG_DEBUG(g_logger) << "run ret: " << ret
-            << " buf: " << buf;
+            std::string buff(buf, len);
+            SYLAR_LOG_DEBUG(g_logger) << "p2 recv buf: " << buff;
             free(buf);
             len = 0;
         }
-        usleep(1000 * 10);
+        usleep(1000 * 100);
     }
 }
 
 void KcpServer::startReceiver(sylar::Socket::ptr sock) {
     int once_flag = 0;
     while (!isStop()) {
-        SYLAR_LOG_DEBUG(g_logger) << "while KcpServer::starReceiver ";
         std::vector<uint8_t> buf;
         buf.resize(512 + 1);
-        int count = sock->recv(&buf[0], buf.size());
+
+        sylar::Address::ptr addr(new sylar::IPv4Address);
+        int count = sock->recvFrom(&buf[0], buf.size(), addr);
         if (count <= 0) {
             SYLAR_LOG_ERROR(g_logger) << "KcpServer::startReceiver UDP recv faild errno: " << errno
                                       << " strerrno: " << strerror(errno);
             return;
         }
-        SYLAR_LOG_DEBUG(g_logger) << "KcpServer::starReceiver ret: " << count;
+        SYLAR_LOG_DEBUG(g_logger) << "KcpServer::starReceiver " << addr->toString() << " ret: " << count;
 
         if (!once_flag) {
             once_flag = 1;
             Session* s2 = new Session;
             s2->sockStream.reset(new sylar::SocketStream(sock));
+            s2->m_serverName = "p2";
+            s2->m_peerAddr = addr;
             kcp2 = ikcp_create(0x11223344, s2);
+            ikcp_nodelay(kcp2, 1, 10, 2, 1);
             kcp2->output = udp_output;
-            sylar::IOManager::GetThis()->schedule(run);
+            sylar::IOManager::GetThis()->schedule(std::bind(run, kcp2));
         }
 
-        // recv data from peer/kcp
         ikcp_input(kcp2, (char*)&buf[0], count);
-        // update
-        ikcp_update(kcp1, 10);
+        ikcp_update(kcp2, sylar::GetCurrentMs());
     }
 }
 
@@ -116,21 +129,28 @@ void KcpServer::startReceiver(sylar::Socket::ptr sock) {
 // read/write
 // kernel
 
-void p1_test() {
+void p1_server() {
     sylar::Socket::ptr sock = sylar::Socket::CreateUDPSocket();
     Session* s1 = new Session;
     s1->is_udp = true;
+    s1->m_serverName = "p1";
     s1->m_peerAddr = sylar::IPAddress::Create("127.0.0.1", 9527);
     s1->sockStream.reset(new sylar::SocketStream(sock));
 
     kcp1 = ikcp_create(0x11223344, s1);
+    ikcp_nodelay(kcp1, 1, 10, 2, 1);
     kcp1->output = udp_output;
-    ikcp_send(kcp1, "hello world", 10);
+    sylar::IOManager::GetThis()->schedule(std::bind(run, kcp1));
+    int i = 0;
+    std::string buff("hello world ");
 
     while (1) {
-        //SYLAR_LOG_DEBUG(g_logger) << "update and sleep";
+        std::string buf = buff + std::to_string(i);
+        i++;
+        SYLAR_LOG_DEBUG(g_logger) << "p1 send: " << buf;
+        ikcp_send(kcp1, buf.c_str(), buf.size());
         ikcp_update(kcp1, sylar::GetCurrentMs());
-        usleep(1000 * 10);
+        usleep(1000 * 100);
     }
 }
 
@@ -144,7 +164,7 @@ void kcpServerStart() {
 int main() {
     sylar::IOManager iom(1, false, "io");
     iom.schedule(kcpServerStart);
-    iom.schedule(p1_test);
+    iom.schedule(p1_server);
     iom.stop();
     return 0;
 }
