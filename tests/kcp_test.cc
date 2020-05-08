@@ -129,6 +129,21 @@ void KcpServer::startReceiver(sylar::Socket::ptr sock) {
 // read/write
 // kernel
 
+void p1_recv(ikcpcb* kcp, Session* session) {
+    while (1) {
+        std::vector<uint8_t> buf;
+        buf.resize(512 + 1);
+        sylar::Address::ptr addr(new sylar::IPv4Address);
+        int count = session->sockStream->getSocket()->recvFrom(&buf[0], buf.size(), addr);
+        if (count <= 0) {
+            SYLAR_LOG_DEBUG(g_logger) << "p1 recv ret < 0";
+            return;
+        }
+        ikcp_input(kcp, (char*)&buf[0], count);
+        ikcp_update(kcp, sylar::GetCurrentMs());
+    }
+}
+
 void p1_server() {
     sylar::Socket::ptr sock = sylar::Socket::CreateUDPSocket();
     Session* s1 = new Session;
@@ -140,15 +155,17 @@ void p1_server() {
     kcp1 = ikcp_create(0x11223344, s1);
     ikcp_nodelay(kcp1, 1, 10, 2, 1);
     kcp1->output = udp_output;
-    sylar::IOManager::GetThis()->schedule(std::bind(run, kcp1));
+    //sylar::IOManager::GetThis()->schedule(std::bind(run, kcp1));
+    sylar::IOManager::GetThis()->schedule(std::bind(p1_recv, kcp1, s1));
     int i = 0;
     std::string buff("hello world ");
 
     while (1) {
         std::string buf = buff + std::to_string(i);
         i++;
-        SYLAR_LOG_DEBUG(g_logger) << "p1 send: " << buf;
+        //int ret =
         ikcp_send(kcp1, buf.c_str(), buf.size());
+        //SYLAR_LOG_DEBUG(g_logger) << "p1 send ret: " << ret;
         ikcp_update(kcp1, sylar::GetCurrentMs());
         usleep(1000 * 100);
     }
