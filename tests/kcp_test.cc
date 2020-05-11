@@ -185,3 +185,20 @@ int main() {
     iom.stop();
     return 0;
 }
+
+/*
+kcpuv:
+while(1)
+    epoll_wait(0)                    ikcp_input
+    traversal all conn->run()        ikcp_update + while(1) { recv_kcp }     // 放入msg同步队列
+
+    while(1) { 
+        echo: 读取同步队列至空       ikcp_send echo给对端
+    }
+    sleep_ms(1)
+    
+asio:
+    读回调                           ikcp_input + ikcp_recv 如果收到数据调 ikcp_send
+    timer回调                        ikcp_update
+
+*/
