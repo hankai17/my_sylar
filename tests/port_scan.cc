@@ -1,5 +1,6 @@
 #include "my_sylar/log.hh"
 #include "my_sylar/iomanager.hh"
+#include "my_sylar/address.hh"
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -7,18 +8,26 @@
 #include <netdb.h>
 #include <ifaddrs.h>
 #include <arpa/inet.h>
+#include <map>
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
 
 #define MAX_PCKT_LEN 8192
 #define IP_PCKT_MAX_LEN 65536
 #define PORT_RANGE 65536
-#define COMMS_PORT "9897"
+#define COMMS_PORT "9527"
 
 sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
 int g_sockfd = -1;
 int discovered_ports[PORT_RANGE] = {0};
-char* dest_host_name = (char*)"192.168.0.111";
+char* dest_host_name = (char*)"172.16.3.17";
+//char* dest_host_name = (char*)"www.ifeng.com";
+char* eth_name = (char*)"ens33";
 
 struct my_iph {
+        //45 00 00880e4d40004006cd61ac100311ac100390fb560016ac95892c47b27ffb50183f79e8d80000625707156f00e039198f608ab6fb2bada1d59e461b60312d4ea00c49957785673cc371f1e433c9dd173382bad44922455cd1c0eb9f52b41f7c8c35620c7c26d4d9bb96a3013664c1caba00a53b947791c7cf57b8bd349889bbb0dc89f3d87db9
+        //eg: 收到45 放到buffer里[0001 0101] 之所以是0x45是因为 5是低位4是高位 so结构体里version放单字节中高位
 #if __BYTE_ORDER == __LITTLE_ENDIAN
     uint8_t 	hdr_len:        4;      /* in multiples of 5 */
     uint8_t		version:        4;      /* 4 for IPv4, 6 for IPv6 */
@@ -163,89 +172,41 @@ bool INTERFACE_PRINTED = false;
 bool TARGET_RESOLVED =	false;
 
 void set_interface_ip(const char* interface_name, struct my_iph* snd_iph) {
-    struct ifaddrs *ifaddr, *ifa;
-    char host[NI_MAXHOST];
+    std::multimap<std::string, std::pair<sylar::Address::ptr, uint32_t> > result;
+    if (!sylar::Address::GetInterfaceAddresses(result, AF_INET)) {
+        SYLAR_LOG_DEBUG(g_logger) << "GetInterfaceAddresses failed";
+        //return;
+    } else {
+        for (const auto& i : result) {
+            //SYLAR_LOG_DEBUG(g_logger) << i.first << " " << i.second.first->toString() << " " << i.second.second;
+            if (strcmp(i.first.c_str(), interface_name) == 0) {
+                if (INTERFACE_PRINTED == false) {
+                    SYLAR_LOG_DEBUG(g_logger) << "Interface: " << i.first
+                      << " Address: " << i.second.first->toString();
+                    INTERFACE_PRINTED = true;
 
-    /* Get all interfaces addresses */
-    if (getifaddrs(&ifaddr) == -1) {
-        perror("getifaddrs");
-    }
-
-    /* Walk the linked list of interface addresses to get the specified interface's address */
-    for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
-        if (ifa->ifa_addr == NULL) {
-            continue;
-        }
-
-        /* Address to name translation */
-        int s = -1;
-        s = getnameinfo(ifa->ifa_addr,
-                        sizeof(struct sockaddr_in),
-                        host,
-                        NI_MAXHOST,
-                        NULL,
-                        0,
-                        NI_NUMERICHOST);
-
-        /* Get only the specified interface's name */
-        if((strcmp(ifa->ifa_name, interface_name)==0)&&(ifa->ifa_addr->sa_family==AF_INET)) {
-            if (s != 0) {
-                perror("getnameinfo()");
+                    struct sockaddr_in sa;
+                    inet_pton(AF_INET, i.second.first->toString().c_str(), &(sa.sin_addr));
+                    snd_iph->src_addr = sa.sin_addr.s_addr;
+                }
             }
-
-            if (INTERFACE_PRINTED == false) {
-                printf("\tInterface : <%s>\n",ifa->ifa_name );
-                printf("\t  Address : <%s>\n", host);
-
-                INTERFACE_PRINTED = true;
-            }
-
-            /* Set the source IP address of the given interface */
-            struct sockaddr_in sa;
-            inet_pton(AF_INET, host, &(sa.sin_addr));
-            snd_iph->src_addr = sa.sin_addr.s_addr;
         }
     }
 }
 
 void set_dest_ip(struct my_iph* snd_iph) {
-    struct addrinfo hints;
-    struct addrinfo *dest_info, *p;
-
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_INET;    		/* Get only IPv4 addresses */
-    hints.ai_socktype = SOCK_STREAM;
-
-    /* __Destination_resolution__ */
-    int status = getaddrinfo(dest_host_name, NULL, &hints, &dest_info);
-    if (status != 0) {
-        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status));
-        exit(EXIT_FAILURE);
-    }
-
-    printf("[*] Destination's IP address for %s:\n\t", dest_host_name);
-
-    /* Loop through the results and use the first (dest addr) we can */
-    char ip_str[INET_ADDRSTRLEN];
-    for(p = dest_info; p != NULL; p = p->ai_next) {
-        /* Get the pointer to the address itself */
-        if (p->ai_family == AF_INET) {
-            struct sockaddr_in *ipv4 = (struct sockaddr_in *)p->ai_addr;
-
-            /* Set the destination IP address */
-            snd_iph->dst_addr = ipv4->sin_addr.s_addr;
-
-            /* Convert the IP to a string and print it */
-            if (inet_ntop(AF_INET, &(ipv4->sin_addr), ip_str, INET_ADDRSTRLEN) != NULL) {
-                printf("  IPv4: %s\n", ip_str);
-            } else {
-                perror("[#] Passed address is not in presentation format.");
-            }
-
-            break;
+    std::vector<sylar::Address::ptr> result;
+    if (!sylar::Address::Lookup(result, dest_host_name, 
+            AF_INET, SOCK_STREAM, 0)) {
+        SYLAR_LOG_DEBUG(g_logger) << "Can not get " << dest_host_name << " ip";
+        return;
+    } else {
+        for (const auto& i : result) {
+            SYLAR_LOG_DEBUG(g_logger) << "[*] Destination's IP address: " << i->toString();
+            //snd_iph->dst_addr = ipv4->sin_addr.s_addr;
+            snd_iph->dst_addr = (*((struct sockaddr_in *)(i->getAddr()))).sin_addr.s_addr;
         }
     }
-    free(dest_info);
 }
 
 void set_ip_hdr(struct my_iph* snd_iph) {
@@ -269,7 +230,7 @@ void set_ip_hdr(struct my_iph* snd_iph) {
     snd_iph->protocol = IPPROTO_TCP;
     snd_iph->hdr_chk_sum = 0;			/* calc later */
 
-    set_interface_ip("eth3", snd_iph);
+    set_interface_ip(eth_name, snd_iph);
 
     if (TARGET_RESOLVED == false) {
         set_dest_ip(snd_iph);
@@ -386,28 +347,35 @@ void close_connection(uint16_t port, struct sockaddr_storage from_addr) {
     close_tcph->chksum = 0;
 }
 
+std::string to_hex(const std::string& str) {
+    std::stringstream ss;
+    for(size_t i = 0; i < str.size(); ++i) {
+        ss << std::setw(2) << std::setfill('0') << std::hex
+          << (int)(uint8_t)str[i];
+    }
+    return ss.str();
+}
+
 void do_listen() {
     for (;;) {
-        /* Packet received as reply from target */
         char response_packet[IP_PCKT_MAX_LEN];
         memset(response_packet, 0, IP_PCKT_MAX_LEN);
 
-        /* Holds the destination network information */
         struct sockaddr_storage from_addr;
         socklen_t from_len = 0;
 
-        /* Recieve the response from the target */
         int byte_count = recvfrom(g_sockfd, response_packet, MAX_PCKT_LEN, 0, (struct sockaddr *)&from_addr, &from_len);
         if (byte_count < 0 && errno != EAGAIN) {
-            perror("recvfrom: ");
+            SYLAR_LOG_DEBUG(g_logger) << "recvfrom failed errno: " << errno 
+              << " strerror: " << strerror(errno);
             continue;
         }
 
-        /* Get the pointers to the IP & TCP headers */
         struct my_iph* recv_iph = (struct my_iph*)response_packet;
         struct my_tcph* recv_tcph = (struct my_tcph*)(response_packet + 4 * (recv_iph->hdr_len));
 
-        /* Check if the message is for COMMS_PORT port */
+        //SYLAR_LOG_DEBUG(g_logger) << "recvfrom str: " << to_hex(std::string(response_packet, byte_count));
+        //450000880e4d40004006cd61ac100311ac100390fb560016ac95892c47b27ffb50183f79e8d80000625707156f00e039198f608ab6fb2bada1d59e461b60312d4ea00c49957785673cc371f1e433c9dd173382bad44922455cd1c0eb9f52b41f7c8c35620c7c26d4d9bb96a3013664c1caba00a53b947791c7cf57b8bd349889bbb0dc89f3d87db9
         if (recv_tcph->dst_port != ntohs(atoi(COMMS_PORT))) {
             continue;
         }
@@ -422,18 +390,14 @@ void do_listen() {
             continue;
         }
 
-        /* Check to see if we recived an ACK for a port */
         if (recv_tcph->ack == 0x01) {
-            //printf("\nChecking port %d\n", ntohs(recv_tcph->src_port));
             /* Check if ack is retransmitted due to delayed fin */
             if (discovered_ports[ntohs(recv_tcph->src_port) == 1]) {
                 continue;
             }
-            printf("[*] Port: %d is open.\n", ntohs(recv_tcph->src_port));
-
-            /* Close the connection */
+            SYLAR_LOG_DEBUG(g_logger) << "[*] Port: " << ntohs(recv_tcph->src_port);
             discovered_ports[ntohs(recv_tcph->src_port)] = 1;
-            close_connection(ntohs(recv_tcph->src_port), from_addr);
+            //close_connection(ntohs(recv_tcph->src_port), from_addr);
         }
     }
 }
@@ -455,38 +419,22 @@ void do_scan() {
     p_dest_addr.sin_port = htons(atoi(COMMS_PORT));
     p_dest_addr.sin_addr.s_addr = snd_iph->dst_addr;
 
-    printf("[*] Port Scan Started\n");
-    printf("------------------------\n");
-    printf("------------------------\n");
+    SYLAR_LOG_DEBUG(g_logger) << "[*] Port Scan Started";
 
-    for (int i = 1; i < 65; ++i) {
-        snd_tcph->dst_port = htons(90);
-        if (false) {
-            if (i % 3 == 0) {
-                snd_tcph->dst_port = htons(135);
-            } else if (i % 3 == 1) {
-                snd_tcph->dst_port = htons(139);
-            } else if (i % 3 == 2) {
-                snd_tcph->dst_port = htons(445);
-            } else {
-                snd_tcph->dst_port = htons(49671);
-            }
-        }
+    for (int i = 1; i < 65535; ++i) {
+        snd_tcph->dst_port = htons(i);
         snd_iph->hdr_chk_sum = csum(scanning_packet, snd_iph->tot_len);
         snd_tcph->chksum = tcp_chksum(snd_iph, snd_tcph);
 
         if (sendto(g_sockfd, scanning_packet, snd_iph->tot_len,
                    0, (struct sockaddr *)&p_dest_addr, sizeof(p_dest_addr)) <= 0) {
-            perror("sendto() error:");
-            printf("fail\n");
+            SYLAR_LOG_DEBUG(g_logger) << "sendto failed";
         }
 
         snd_tcph->chksum = 0;
-
-        /* Sleep before sending again */
         usleep(100);
     }
-
+    SYLAR_LOG_DEBUG(g_logger) << "port scan done";
     return;
 }
 
