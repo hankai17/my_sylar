@@ -118,6 +118,8 @@ void KcpServer::startReceiver(sylar::Socket::ptr sock) {
             kcp2->output = udp_output;
             sylar::IOManager::GetThis()->schedule(std::bind(run, kcp2));
         }
+        int kcp_id = ikcp_getconv(&buf[0]);
+        SYLAR_LOG_DEBUG(g_logger) << "KcpServer::starReceiver kcp_id: " << kcp_id;
 
         ikcp_input(kcp2, (char*)&buf[0], count);
         ikcp_update(kcp2, sylar::GetCurrentMs());
@@ -167,7 +169,7 @@ void p1_server() {
         ikcp_send(kcp1, buf.c_str(), buf.size());
         //SYLAR_LOG_DEBUG(g_logger) << "p1 send ret: " << ret;
         ikcp_update(kcp1, sylar::GetCurrentMs());
-        usleep(1000 * 100);
+        usleep(1000 * 500);
     }
 }
 
