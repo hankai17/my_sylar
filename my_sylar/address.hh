@@ -26,6 +26,7 @@ namespace sylar {
         virtual std::ostream& insert(std::ostream& os, bool print_port = false) const = 0;
 
         std::string toString();
+        std::string toStringIP();
         int getFamily() const;
 
         static bool Lookup(std::vector<Address::ptr>& result, const std::string& host,

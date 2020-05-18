@@ -202,6 +202,12 @@ namespace sylar {
         return ss.str();
     }
 
+    std::string Address::toStringIP() {
+        std::stringstream ss;
+        insert(ss, false);
+        return ss.str();
+    }
+
     int Address::getFamily() const {
         return getAddr()->sa_family;
     }
