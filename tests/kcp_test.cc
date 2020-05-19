@@ -14,6 +14,9 @@ extern "C" {
 #include <atomic>
 
 sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
+static std::atomic<uint64_t>    s_count_send_kcp_packet;
+static std::atomic<uint64_t>    s_count_send_kcp_size;
+uint64_t    s_count_send_kcp_size_old;
 
 class KcpClientSession;
 static int client_udp_output(const char* buf, int len, ikcpcb* kcp, void* user);
@@ -76,11 +79,18 @@ public:
                                                                            // 如果这里发生阻塞 把write挂上去 swapout出啦 继续执行周期回调 !!! 造成重复挂write 
                                                                                // 其实周期回调不应该像asio那样 我应该把周期做到这里: 如果能send完所有数据 就继续周期 如果不能一口气发完那就 等到一口气发完
                                                                            // 这是这个kcp模型造成的错误 而非my_sylar问题?
-        if (true) {
+        s_count_send_kcp_size += ret;
+        if (false) {
             SYLAR_LOG_DEBUG(g_logger) << m_serverName << " udp_output ret: " << ret << " ";
             //<< m_peerAddr->toString() << "  "
             //<< std::dynamic_pointer_cast<sylar::IPv4Address>(m_peerAddr)->getPort();
         }
+
+        //g_timer->refresh();
+        //g_timer->reset(2000, true);
+        //sylar::IOManager::GetThis()->addTimer(5,
+        //std::bind(&KcpClientSession::handle_kcp_time, kcs), false);
+
         return 0;
     }
 
@@ -113,7 +123,7 @@ public:
             if (ret <= 0) {
                 //SYLAR_LOG_DEBUG(g_logger) << "upper_recv ret: " << ret;
             } else {
-                SYLAR_LOG_DEBUG(g_logger) << "client upper recv bufsize: " << len;
+                //SYLAR_LOG_DEBUG(g_logger) << "client upper recv bufsize: " << len;
             }
             usleep(1000 * 5);
         }
@@ -131,7 +141,7 @@ public:
             }
             // check peerAddr TODO
             ikcp_input(m_kcp, (char*)&buf[0], count);
-            //ikcp_update(m_kcp, sylar::GetCurrentMs());
+            ikcp_update(m_kcp, sylar::GetCurrentMs());
         }
     }
 
@@ -159,19 +169,29 @@ static int client_udp_output(const char* buf, int len, ikcpcb* kcp, void* user) 
     return kcs->udp_output(buf, len, kcp);
 }
 
+void static_kcp() {
+    float rate = (s_count_send_kcp_size - s_count_send_kcp_size_old) * 1.0 / 10 / 1024;
+    SYLAR_LOG_DEBUG(g_logger) << "sum packets: " << s_count_send_kcp_packet
+      << " rate: " << rate << "KB/s";
+    s_count_send_kcp_size_old = s_count_send_kcp_size;
+}
+
 void p1_test() {
-    KcpClientSession::ptr kcs(new KcpClientSession(sylar::IPAddress::Create("172.16.3.98", 9527)));
+    KcpClientSession::ptr kcs(new KcpClientSession(sylar::IPAddress::Create("0.0.0.0", 9527)));
     sylar::IOManager::GetThis()->schedule(std::bind(&KcpClientSession::client_recv, kcs)); // 怎么处理生命周期
     sylar::IOManager::GetThis()->schedule(std::bind(&KcpClientSession::upper_recv, kcs));
     sylar::IOManager::GetThis()->addTimer(5,
         std::bind(&KcpClientSession::handle_kcp_time, kcs), true); // 怎么处理生命周期  // shared_from_this + stop() TODO
                                                                    // addTimer 发现过期了不会直接调 而是schedule到队列里
+    sylar::IOManager::GetThis()->addTimer(1000 * 10, static_kcp, true);
 
     std::string buff;
-    buff.resize(64 * 1024);
+    buff.resize(4 * 1024);
 
     while (1) {
         kcs->send_msg(buff); //模拟业务发送 64000  
+        s_count_send_kcp_packet++;
+        ikcp_update(kcs->getKcp(), sylar::GetCurrentMs());
         usleep(1000 * 1);
     }
 }
@@ -182,5 +202,3 @@ int main() {
     iom.stop();
     return 0;
 }
-
-// https://www.cnblogs.com/wangshaowei/p/10598608.html  tcp/udp socket多线程读写线程安全问题
