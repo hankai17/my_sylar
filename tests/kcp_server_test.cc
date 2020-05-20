@@ -70,7 +70,7 @@ public:
 
     void handle_kcp_time() {
         ikcp_update(m_kcp, sylar::GetCurrentMs());
-        sylar::IOManager::GetThis()->addTimer(2, // 2ms跟5ms一样都是11MB/s
+        sylar::IOManager::GetThis()->addTimer(1,
                      std::bind(&KcpServerSession::handle_kcp_time, this), false);
     }
 
@@ -89,22 +89,22 @@ public:
                 free(buf);
                 len = 0;
             }
-            usleep(1000 * 2);
+            usleep(1000 * 1);
         }
     }
 
     void init_kcp() {
         m_kcp = ikcp_create(m_kcp_id, this);
         m_kcp->output = m_isUdp ? &server_udp_output : nullptr; // TCP TODO
-        if (false) {
+        if (true) {
             m_kcp->interval = 1;
-            m_kcp->rx_minrto = 5;
-            ikcp_nodelay(m_kcp, 1, 10, 2, 1);
+            m_kcp->rx_minrto = 400;
+            ikcp_wndsize(m_kcp, 2048, 2048);
+            ikcp_nodelay(m_kcp, 1, 5, 2, 1);
         } else {
             ikcp_nodelay(m_kcp, 1, 20, 13, 1);
-            //ikcp_wndsize(m_kcp, 1024, 1024);
-            ikcp_wndsize(m_kcp, 2048, 2048); // 跟1024一样都是11MB/s
-            m_kcp->rx_minrto = 400; // 跟300一样都是11MB/s
+            ikcp_wndsize(m_kcp, 2048, 2048);
+            m_kcp->rx_minrto = 400;
             m_kcp->interval = 1;
         }
     }
@@ -167,7 +167,7 @@ protected:
                 kss->setSock(sock);
                 m_sessions[kcp_id] = kss;
                 sylar::IOManager::GetThis()->schedule(std::bind(&KcpServerSession::upper_recv, kss));
-                sylar::IOManager::GetThis()->addTimer(2,
+                sylar::IOManager::GetThis()->addTimer(1,
                                           std::bind(&KcpServerSession::handle_kcp_time, kss), false);
             } else {
                 kss = it->second;

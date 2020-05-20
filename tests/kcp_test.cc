@@ -89,15 +89,15 @@ public:
         m_kcp_id = SessionManager::GetId();
         m_kcp = ikcp_create(m_kcp_id, this);
         m_kcp->output = m_isUdp ? &client_udp_output : nullptr; // TCP TODO
-        if (false) {
+        if (true) {
             m_kcp->interval = 1;
-            m_kcp->rx_minrto = 5;
-            ikcp_nodelay(m_kcp, 1, 10, 2, 1);
-        } else {
+            m_kcp->rx_minrto = 400;
+            ikcp_wndsize(m_kcp, 2048, 2048); // wndsize is important
+            ikcp_nodelay(m_kcp, 1, 5, 2, 1); // para2 is important  70MB/s & mem increase slow
+        } else { // 40MB/s
             ikcp_nodelay(m_kcp, 1, 20, 13, 1);
-            //ikcp_wndsize(m_kcp, 1024, 1024);
-            ikcp_wndsize(m_kcp, 2048, 2048); // 跟1024一样都是11MB/s
-            m_kcp->rx_minrto = 400; // 跟300一样都是11MB/s
+            ikcp_wndsize(m_kcp, 2048, 2048);
+            m_kcp->rx_minrto = 400;
             m_kcp->interval = 1;
         }
     }
@@ -111,7 +111,7 @@ public:
 
     void handle_kcp_time() {
         ikcp_update(m_kcp, sylar::GetCurrentMs());
-        sylar::IOManager::GetThis()->addTimer(2,
+        sylar::IOManager::GetThis()->addTimer(1,
         std::bind(&KcpClientSession::handle_kcp_time, this), false);
     }
 
@@ -126,7 +126,7 @@ public:
             } else {
                 //SYLAR_LOG_DEBUG(g_logger) << "client upper recv bufsize: " << len;
             }
-            usleep(1000 * 2);
+            usleep(1000 * 1);
         }
     }
 
@@ -172,10 +172,11 @@ void static_kcp() {
 }
 
 void p1_test() {
-    KcpClientSession::ptr kcs(new KcpClientSession(sylar::IPAddress::Create("172.16.3.98", 9527)));
+    //KcpClientSession::ptr kcs(new KcpClientSession(sylar::IPAddress::Create("172.16.3.98", 9527)));
+    KcpClientSession::ptr kcs(new KcpClientSession(sylar::IPAddress::Create("0.0.0.0", 9527)));
     sylar::IOManager::GetThis()->schedule(std::bind(&KcpClientSession::client_recv, kcs)); // 怎么处理生命周期
     sylar::IOManager::GetThis()->schedule(std::bind(&KcpClientSession::upper_recv, kcs));
-    sylar::IOManager::GetThis()->addTimer(2,
+    sylar::IOManager::GetThis()->addTimer(1,
         std::bind(&KcpClientSession::handle_kcp_time, kcs), false); // 怎么处理生命周期  // shared_from_this + stop() TODO
                                                                     // addTimer 发现过期了不会直接调 而是schedule到队列里
     sylar::IOManager::GetThis()->addTimer(1000 * 10, static_kcp, true);
@@ -197,3 +198,6 @@ int main() {
     iom.stop();
     return 0;
 }
+
+//server & client's update & upper_recv set 1ms;  client upper usleep 2ms; ---> get 26MB/s and mem not increase
+//server & client's update & upper_recv set 1ms;  client upper usleep 1ms; ---> get 41MB/s and mem increase slow...
