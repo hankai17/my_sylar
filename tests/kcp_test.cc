@@ -75,32 +75,31 @@ public:
     }
 
     int udp_output(const char*buf, int len, ikcpcb* kcp) {
-        int ret = m_sockStream->getSocket()->sendTo(buf, len, m_peerAddr); // 触发sylar::IOManager::addEvent:129崩溃 崩溃原因是已经有write事件了 重复添加错误
-                                                                           // 如果这里发生阻塞 把write挂上去 swapout出啦 继续执行周期回调 !!! 造成重复挂write 
-                                                                               // 其实周期回调不应该像asio那样 我应该把周期做到这里: 如果能send完所有数据 就继续周期 如果不能一口气发完那就 等到一口气发完
-                                                                           // 这是这个kcp模型造成的错误 而非my_sylar问题?
+        int ret = m_sockStream->getSocket()->sendTo(buf, len, m_peerAddr); // 这是这个kcp模型造成的错误 而非my_sylar问题
         s_count_send_kcp_size += ret;
         if (false) {
             SYLAR_LOG_DEBUG(g_logger) << m_serverName << " udp_output ret: " << ret << " ";
             //<< m_peerAddr->toString() << "  "
             //<< std::dynamic_pointer_cast<sylar::IPv4Address>(m_peerAddr)->getPort();
         }
-
-        //g_timer->refresh();
-        //g_timer->reset(2000, true);
-        //sylar::IOManager::GetThis()->addTimer(5,
-        //std::bind(&KcpClientSession::handle_kcp_time, kcs), false);
-
         return 0;
     }
 
     void init_kcp() {
         m_kcp_id = SessionManager::GetId();
         m_kcp = ikcp_create(m_kcp_id, this);
-        m_kcp->interval = 1;
-        m_kcp->rx_minrto = 5;
         m_kcp->output = m_isUdp ? &client_udp_output : nullptr; // TCP TODO
-        ikcp_nodelay(m_kcp, 1, 10, 2, 1);
+        if (false) {
+            m_kcp->interval = 1;
+            m_kcp->rx_minrto = 5;
+            ikcp_nodelay(m_kcp, 1, 10, 2, 1);
+        } else {
+            ikcp_nodelay(m_kcp, 1, 20, 13, 1);
+            //ikcp_wndsize(m_kcp, 1024, 1024);
+            ikcp_wndsize(m_kcp, 2048, 2048); // 跟1024一样都是11MB/s
+            m_kcp->rx_minrto = 400; // 跟300一样都是11MB/s
+            m_kcp->interval = 1;
+        }
     }
 
     void send_msg(const std::string& msg) {
@@ -112,6 +111,8 @@ public:
 
     void handle_kcp_time() {
         ikcp_update(m_kcp, sylar::GetCurrentMs());
+        sylar::IOManager::GetThis()->addTimer(2,
+        std::bind(&KcpClientSession::handle_kcp_time, this), false);
     }
 
     void upper_recv() {
@@ -125,7 +126,7 @@ public:
             } else {
                 //SYLAR_LOG_DEBUG(g_logger) << "client upper recv bufsize: " << len;
             }
-            usleep(1000 * 5);
+            usleep(1000 * 2);
         }
     }
 
@@ -141,7 +142,6 @@ public:
             }
             // check peerAddr TODO
             ikcp_input(m_kcp, (char*)&buf[0], count);
-            ikcp_update(m_kcp, sylar::GetCurrentMs());
         }
     }
 
@@ -159,11 +159,6 @@ private:
     uint16_t                    m_kcp_id;
 };
 
-// ikcp_send/recv
-// output/input
-// read/write
-// kernel
-
 static int client_udp_output(const char* buf, int len, ikcpcb* kcp, void* user) {
     KcpClientSession* kcs = static_cast<KcpClientSession*>(user);
     return kcs->udp_output(buf, len, kcp);
@@ -177,21 +172,21 @@ void static_kcp() {
 }
 
 void p1_test() {
-    KcpClientSession::ptr kcs(new KcpClientSession(sylar::IPAddress::Create("0.0.0.0", 9527)));
+    KcpClientSession::ptr kcs(new KcpClientSession(sylar::IPAddress::Create("172.16.3.98", 9527)));
     sylar::IOManager::GetThis()->schedule(std::bind(&KcpClientSession::client_recv, kcs)); // 怎么处理生命周期
     sylar::IOManager::GetThis()->schedule(std::bind(&KcpClientSession::upper_recv, kcs));
-    sylar::IOManager::GetThis()->addTimer(5,
-        std::bind(&KcpClientSession::handle_kcp_time, kcs), true); // 怎么处理生命周期  // shared_from_this + stop() TODO
-                                                                   // addTimer 发现过期了不会直接调 而是schedule到队列里
+    sylar::IOManager::GetThis()->addTimer(2,
+        std::bind(&KcpClientSession::handle_kcp_time, kcs), false); // 怎么处理生命周期  // shared_from_this + stop() TODO
+                                                                    // addTimer 发现过期了不会直接调 而是schedule到队列里
     sylar::IOManager::GetThis()->addTimer(1000 * 10, static_kcp, true);
 
     std::string buff;
-    buff.resize(4 * 1024);
+    buff.resize(64 * 1024);
 
     while (1) {
         kcs->send_msg(buff); //模拟业务发送 64000  
         s_count_send_kcp_packet++;
-        ikcp_update(kcs->getKcp(), sylar::GetCurrentMs());
+        //ikcp_update(kcs->getKcp(), sylar::GetCurrentMs());
         usleep(1000 * 1);
     }
 }
