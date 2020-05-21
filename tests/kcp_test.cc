@@ -63,6 +63,12 @@ public:
             m_isUdp(is_udp),
             m_serverName(client_name) {
         m_sock = is_udp ? sylar::Socket::CreateUDPSocket() : nullptr; // TCP TODO
+        //bool Socket::setOption(int level, int option, const void* result, size_t len) {
+        int sndbuf = 65536;
+        if (!m_sock->setOption(SOL_SOCKET, SO_SNDBUF, &sndbuf, sizeof(int)) ) {
+            SYLAR_LOG_DEBUG(g_logger) << "setOption failed errno: " << errno
+              << " strerrno: " << strerror(errno);
+        }
         m_sockStream.reset(new sylar::SocketStream(m_sock));
         //get m_kcp_id from mgr
         init_kcp();
@@ -91,8 +97,9 @@ public:
         m_kcp->output = m_isUdp ? &client_udp_output : nullptr; // TCP TODO
         if (true) {
             m_kcp->interval = 1;
-            m_kcp->rx_minrto = 400;
-            ikcp_wndsize(m_kcp, 2048, 2048); // wndsize is important
+            m_kcp->rx_minrto = 2000;
+            //ikcp_wndsize(m_kcp, 2048, 2048); // wndsize is important
+            ikcp_wndsize(m_kcp, 20480, 20480); // wndsize is important
             ikcp_nodelay(m_kcp, 1, 5, 2, 1); // para2 is important  70MB/s & mem increase slow
         } else { // 40MB/s
             ikcp_nodelay(m_kcp, 1, 20, 13, 1);
@@ -172,8 +179,8 @@ void static_kcp() {
 }
 
 void p1_test() {
-    //KcpClientSession::ptr kcs(new KcpClientSession(sylar::IPAddress::Create("172.16.3.98", 9527)));
-    KcpClientSession::ptr kcs(new KcpClientSession(sylar::IPAddress::Create("0.0.0.0", 9527)));
+    KcpClientSession::ptr kcs(new KcpClientSession(sylar::IPAddress::Create("172.16.3.98", 9527)));
+    //KcpClientSession::ptr kcs(new KcpClientSession(sylar::IPAddress::Create("0.0.0.0", 9527)));
     sylar::IOManager::GetThis()->schedule(std::bind(&KcpClientSession::client_recv, kcs)); // 怎么处理生命周期
     sylar::IOManager::GetThis()->schedule(std::bind(&KcpClientSession::upper_recv, kcs));
     sylar::IOManager::GetThis()->addTimer(1,
@@ -182,14 +189,21 @@ void p1_test() {
     sylar::IOManager::GetThis()->addTimer(1000 * 10, static_kcp, true);
 
     std::string buff;
-    buff.resize(64 * 1024);
+    buff.resize(4 * 1024);
 
     while (1) {
         kcs->send_msg(buff); //模拟业务发送 64000  
         s_count_send_kcp_packet++;
-        //ikcp_update(kcs->getKcp(), sylar::GetCurrentMs());
-        usleep(1000 * 1);
+        //usleep(1000 * 1);
+
+        sylar::Fiber::YeildToReady();
+        //sylar::Fiber::YeildToHold();
+        if (s_count_send_kcp_packet % 10000 == 0) {
+            usleep(1000 * 1);
+        }
     }
+        SYLAR_LOG_DEBUG(g_logger) << "done...";
+        std::cout << "end" << std::endl;
 }
 
 int main() {

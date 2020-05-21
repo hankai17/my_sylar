@@ -153,10 +153,13 @@ namespace sylar {
             if (ft.fiber /*&& fiber state*/) {
                 ft.fiber->swapIn();
                 --m_activeFiberCount;
-                if (ft.fiber->m_state == Fiber::TERM) {
-                    ;
-                } else {
+                if (ft.fiber->m_state == Fiber::READY) {
+                    schedule(ft.fiber);
+                } else if (ft.fiber->m_state != Fiber::TERM && 
+                      ft.fiber->m_state != Fiber::EXCEPT) {
                     ft.fiber->m_state = Fiber::HOLD; // Fiber EXCEPT: std::bad_alloc Fiber id: 3
+                } else {
+                    ;
                 }
                 ft.reset();
             } else if (ft.cb) {
@@ -167,12 +170,17 @@ namespace sylar {
 #endif
                 cb_fiber->swapIn(); // If simple noblock cb, next line the fiber will destruction
                 --m_activeFiberCount;
-                if (cb_fiber->getState() == Fiber::EXCEPT ||
+                if (cb_fiber->getState() == Fiber::READY) {
+                    schedule(cb_fiber);
+                    cb_fiber.reset();
+                } else if (cb_fiber->getState() == Fiber::EXCEPT ||
                     cb_fiber->getState() == Fiber::TERM) {
                     cb_fiber->reset(nullptr);
                 } else {
                     cb_fiber->m_state = Fiber::HOLD;
                     cb_fiber.reset();
+                    //std::cout << "after cb_fiber.reset(), cb_fiber.use_count: " <<
+                     //cb_fiber.use_count() << std::endl;
                 }
             } else {
                 if (idle_fiber->getState() == Fiber::TERM) {

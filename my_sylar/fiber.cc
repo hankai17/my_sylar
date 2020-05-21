@@ -250,14 +250,14 @@ namespace sylar {
 #endif
     }
 
-    void Fiber::YeildToReady() { // Why need this
+    void Fiber::YeildToReady() {
         Fiber::ptr cur = GetThis();
         SYLAR_ASSERT(cur->m_state == EXEC);
         cur->m_state = READY;
         cur->swapOut();
     }
 
-    void Fiber::YeildToHold() { // Normal used
+    void Fiber::YeildToHold() {
         Fiber::ptr cur = GetThis();
         SYLAR_ASSERT(cur->m_state == EXEC);
         //cur->m_state = HOLD; // multithread race condition
