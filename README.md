@@ -45,7 +45,7 @@
 - 击鼓传花测试 参考pingpong_bench.cc libevent_bench.c 在花朵少的情况下my_sylar会低于libevent
 - pingpong测试 参考pingpong_qps.cc echo_server.cc 大概14000次/s
 
-## 一个iom实例多线程 条件竞争分析
+## Race Condition分析
 - 多线程共享timers 超时条件竞争
   timermanager是线程安全的  假设线程1有很多imm事件 比较忙很久才轮到swapout到io处 线程2比较轻松 而在轮到swapout之前恰好超时
   winfo提升成功() 此时大部分可能是还没swapout 但也有可能在YeildToHold~goto retry之间的任一行
