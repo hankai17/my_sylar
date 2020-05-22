@@ -39,12 +39,11 @@
   make
   ```
 
-## QA
- - 该库性能怎么样 
-  - 多线程下使用该库跑ss5代理 消耗1千万协程 无崩溃 没发现明显的内存泄漏
-  - [context切换测试](https://github.com/hankai17/context_benchmark) 大概在50ns左右
-  - 击鼓传花测试 参考pingpong_bench.cc libevent_bench.c 在花朵少的情况下my_sylar会低于libevent
-  - pingpong测试 参考pingpong_qps.cc echo_server.cc 大概14000次/s
+## QA 该库性能怎么样 
+- 多线程下使用该库跑ss5代理 消耗1千万协程 无崩溃 没发现明显的内存泄漏
+- [context切换测试](https://github.com/hankai17/context_benchmark) 大概在50ns左右
+- 击鼓传花测试 参考pingpong_bench.cc libevent_bench.c 在花朵少的情况下my_sylar会低于libevent
+- pingpong测试 参考pingpong_qps.cc echo_server.cc 大概14000次/s
 
 ## 一个iom实例多线程 条件竞争分析
 - 多线程共享timers 超时条件竞争
