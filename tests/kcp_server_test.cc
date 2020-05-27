@@ -97,8 +97,9 @@ public:
                 SYLAR_LOG_DEBUG(g_logger) << "upper recv > 0"
                   << " conn: " << m_kcp_id
                   << " last_time: " << m_lastRecvPtime
-                  << " upper_recv_bytes: " << upper_recved
-                  << " package: " << package;
+                  << " upper_recv_bytes: " << upper_recved;
+                  //<< " package: " << package;
+                send_msg(package);
             }
         }
     }
@@ -121,10 +122,10 @@ public:
 
     int udp_output(const char*buf, int len, ikcpcb* kcp) {
         int ret = m_sock->sendTo(buf, len, m_peerAddr);
-        if (false) {
-            SYLAR_LOG_DEBUG(g_logger) << m_serverName << " udp_output ret: " << ret << " ";
-            //<< m_peerAddr->toString() << "  "
-            //<< std::dynamic_pointer_cast<sylar::IPv4Address>(m_peerAddr)->getPort();
+        if (true) {
+            SYLAR_LOG_DEBUG(g_logger) << m_serverName << " udp_output ret: " << ret << " "
+            << m_peerAddr->toString() << "  "
+            << std::dynamic_pointer_cast<sylar::IPv4Address>(m_peerAddr)->getPort();
         }
         return 0;
     }
@@ -133,25 +134,6 @@ public:
         int send_ret = ikcp_send(m_kcp, msg.c_str(), msg.size());
         if (send_ret < 0) {
             SYLAR_LOG_DEBUG(g_logger) << "send_msg ikcp_send < 0, ret: " << send_ret;
-        }
-    }
-
-    void upper_recv() {
-        ikcpcb *kcp = m_kcp;
-        while (1) {
-            char *buf = nullptr;
-            uint32_t len = 0;
-            int ret = recv_kcp(buf, len, kcp);
-            if (ret <= 0) {
-                //SYLAR_LOG_DEBUG(g_logger) << "upper_recv ret: " << ret;
-            } else {
-                std::string buff(buf, len);
-                SYLAR_LOG_DEBUG(g_logger) << "server upper recv bufsize: " << buff.size();
-                send_msg(buff);
-                free(buf);
-                len = 0;
-            }
-            usleep(1000 * 1);
         }
     }
 
@@ -264,6 +246,7 @@ protected:
                 std::string send_back_msg =  make_response_conv_pack(conv);
                 sock->sendTo(send_back_msg.c_str(), send_back_msg.size(), addr);
                 m_kcp_mgr->add_new_session(conv, addr);
+                SYLAR_LOG_ERROR(g_logger) << "new connect id: " << conv << " " << addr->toString();
                 continue;
             }
 
@@ -299,6 +282,7 @@ void kcpServerStart() {
     KcpServer::ptr ks(new KcpServer);
     ks->bind(addr, true);
     ks->start();
+    ks->handle_kcp_time();
 }
 
 int main() {

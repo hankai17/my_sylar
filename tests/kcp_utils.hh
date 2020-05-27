@@ -27,8 +27,8 @@ std::string make_connect_pack() {
 }
 
 bool is_connect_pack(const char* data, size_t len) {
-    return len == strlen(SYLAR_KCP_CONN_PACK) &&
-        memcmp(data, SYLAR_KCP_CONN_PACK, strlen(SYLAR_KCP_CONN_PACK)) == 0;
+    return len == sizeof(SYLAR_KCP_CONN_PACK) &&
+        memcmp(data, SYLAR_KCP_CONN_PACK, sizeof(SYLAR_KCP_CONN_PACK) - 1) == 0;
 }
 
 std::string make_response_conv_pack(uint32_t conv) {
@@ -38,12 +38,12 @@ std::string make_response_conv_pack(uint32_t conv) {
 }
 
 bool is_response_conv_pack(const char* data, size_t len) {
-    return len > strlen(SYLAR_KCP_RESP_CONV_PACK) &&
-        memcmp(data, SYLAR_KCP_RESP_CONV_PACK, strlen(SYLAR_KCP_RESP_CONV_PACK)) == 0;
+    return len >= sizeof(SYLAR_KCP_RESP_CONV_PACK) &&
+        memcmp(data, SYLAR_KCP_RESP_CONV_PACK, sizeof(SYLAR_KCP_RESP_CONV_PACK) - 1) == 0;
 }
 
 uint32_t parse_conv_from_response_conv_pack(const char* data, size_t len) {
-    uint32_t conv = atol(data + sizeof(SYLAR_KCP_RESP_CONV_PACK));
+    uint32_t conv = atol(data + sizeof(SYLAR_KCP_RESP_CONV_PACK) - 1);
     return conv;
 }
 
@@ -54,8 +54,8 @@ std::string make_disconnect_pack(uint32_t conv) {
 }
 
 bool is_disconnect_pack(const char* data, size_t len) {
-    return len > strlen(SYLAR_KCP_DIS_CONN_PACK) &&
-        memcmp(data, SYLAR_KCP_DIS_CONN_PACK, strlen(SYLAR_KCP_DIS_CONN_PACK)) == 0;
+    return len > sizeof(SYLAR_KCP_DIS_CONN_PACK) &&
+        memcmp(data, SYLAR_KCP_DIS_CONN_PACK, sizeof(SYLAR_KCP_DIS_CONN_PACK) - 1) == 0;
 }
 
 uint32_t parse_conv_from_disconnect_pack(const char* data, size_t len) {

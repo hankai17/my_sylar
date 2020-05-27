@@ -108,6 +108,7 @@ public:
             return;
         }
         uint32_t id = parse_conv_from_response_conv_pack(recv_buf, ret);
+        //SYLAR_LOG_DEBUG(g_logger) << "get id: " << id;
         init_kcp(id);
     }
 
@@ -141,38 +142,44 @@ public:
     }
 
     void do_recv_udp_in_loop() {
-        std::vector<uint8_t> buf;
-        buf.resize(20 * 1024);
+        while (1) {
+            if (!m_isConnected) {
+                break;
+            }
+            std::vector<uint8_t> buf;
+            buf.resize(20 * 1024);
 
-        sylar::Address::ptr addr(new sylar::IPv4Address);
-        set_recv_timeout(1000);
-        int count = m_sockStream->getSocket()->recvFrom(&buf[0], buf.size(), addr); // Why lower recv once However upper recv once more ?
-        if (count <= 0) {
-            if (count == 0) {
-                SYLAR_LOG_DEBUG(g_logger) << "do_recv_udp_in_loop ret == 0";
+            set_recv_timeout(1000 * 10);
+            int count = m_sockStream->getSocket()->recvFrom(&buf[0], buf.size(), m_peerAddr); // Why lower recv once However upper recv once more ?
+            if (count <= 0) {
+                if (count == 0) {
+                    SYLAR_LOG_DEBUG(g_logger) << "do_recv_udp_in_loop ret == 0";
+                    return;
+                }
+                SYLAR_LOG_DEBUG(g_logger) << "do_recv_udp_in_loop ret < 0"
+                                          << " errno: " << errno << " strerrno: " << strerror(errno);
+                m_isConnected = false;
                 return;
             }
-            SYLAR_LOG_DEBUG(g_logger) << "do_recv_udp_in_loop ret < 0";
-            m_isConnected = false;
-            return;
-        }
+            SYLAR_LOG_DEBUG(g_logger) << "do_recv_udp_in_loop ret: " << count;
 
-        // check peerAddr TODO
-        if (is_disconnect_pack((char*)&buf[0], count)) {
-            m_isConnected = false;
-        }
+            // check peerAddr TODO
+            if (is_disconnect_pack((char*)&buf[0], count)) {
+                m_isConnected = false;
+            }
 
-        ikcp_input(m_kcp, (char*)&buf[0], count);
+            ikcp_input(m_kcp, (char*)&buf[0], count);
 
-        while (1) {
-            char* buf = nullptr;
-            uint32_t len = 0;
-            int ret = recv_kcp(buf, len, m_kcp);
-            if (ret <= 0) {
-                //SYLAR_LOG_DEBUG(g_logger) << "upper_recv ret: " << ret;
-                break;
-            } else {
-                SYLAR_LOG_DEBUG(g_logger) << "client upper recv bufsize: " << len;
+            while (1) {
+                char* buf = nullptr;
+                uint32_t len = 0;
+                int ret = recv_kcp(buf, len, m_kcp);
+                if (ret <= 0) {
+                    //SYLAR_LOG_DEBUG(g_logger) << "upper_recv ret: " << ret;
+                    break;
+                } else {
+                    SYLAR_LOG_DEBUG(g_logger) << "client upper recv bufsize: " << len;
+                }
             }
         }
     }
@@ -188,7 +195,7 @@ public:
             return;
         }
         do_send_msg_in_queue();
-        do_recv_udp_in_loop();
+        //do_recv_udp_in_loop();
         ikcp_update(m_kcp, sylar::GetCurrentMs());
 
         sylar::IOManager::GetThis()->addTimer(5,
@@ -220,6 +227,7 @@ public:
 
     ikcpcb* getKcp() { return m_kcp; }
     bool isConnect() { return m_isConnected; }
+    uint32_t getKcpId() { return m_kcp_id; }
 
 private:
     sylar::IPAddress::ptr       m_peerAddr;
@@ -240,8 +248,8 @@ void static_kcp() {
 }
 
 void p1_test() {
-    KcpClientSession::ptr kcs(new KcpClientSession(sylar::IPAddress::Create("172.16.3.98", 9527)));
-    //KcpClientSession::ptr kcs(new KcpClientSession(sylar::IPAddress::Create("0.0.0.0", 9527)));
+    //KcpClientSession::ptr kcs(new KcpClientSession(sylar::IPAddress::Create("172.16.3.98", 9527)));
+    KcpClientSession::ptr kcs(new KcpClientSession(sylar::IPAddress::Create("0.0.0.0", 9527)));
 
     sylar::IOManager::GetThis()->addTimer(1000 * 10, static_kcp, true);
     kcs->do_send_connect_pack();
@@ -251,6 +259,8 @@ void p1_test() {
         return;
     }
 
+    SYLAR_LOG_DEBUG(g_logger) << "Connect success id: " << kcs->getKcpId();
+    sylar::IOManager::GetThis()->schedule(std::bind(&KcpClientSession::do_recv_udp_in_loop, kcs));
     sylar::IOManager::GetThis()->addTimer(5,
         std::bind(&KcpClientSession::update, kcs), false);
 }

@@ -198,7 +198,7 @@ namespace sylar {
 
     std::string Address::toString() {
         std::stringstream ss;
-        insert(ss);
+        insert(ss, true);
         return ss.str();
     }
 
