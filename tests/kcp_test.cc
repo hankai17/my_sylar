@@ -228,7 +228,7 @@ private:
     sylar::Socket::ptr          m_sock;
     sylar::SocketStream::ptr    m_sockStream;
     ikcpcb*                     m_kcp;
-    uint16_t                    m_kcp_id;
+    uint32_t                    m_kcp_id;
     bool                        m_isConnected;
 };
 

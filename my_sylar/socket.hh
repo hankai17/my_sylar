@@ -12,7 +12,7 @@
 #include <openssl/ssl.h>
 
 namespace sylar {
-    class Socket : public std::enable_shared_from_this<Socket>, Nocopyable {
+    class Socket : public std::enable_shared_from_this<Socket>, Nocopyable { // 对象语义禁止拷贝 //可以借助smart point把对象语义转化为值语义 从而轻松解决对象生命期
     public:
         typedef std::shared_ptr<Socket> ptr;
         typedef std::weak_ptr<Socket> weak_ptr;
