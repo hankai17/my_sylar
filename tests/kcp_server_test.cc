@@ -17,6 +17,9 @@ extern "C" {
 #include "kcp_utils.hh"
 
 sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
+static std::atomic<uint64_t>    s_count_send_kcp_packet;
+static std::atomic<uint64_t>    s_count_send_kcp_size;
+uint64_t    s_count_send_kcp_size_old;
 
 class KcpServerSession;
 static int server_udp_output(const char* buf, int len, ikcpcb* kcp, void* user);
@@ -54,6 +57,7 @@ public:
     }
 
     void clean() {
+        SYLAR_LOG_DEBUG(g_logger) << "clean kcp: " << m_kcp_id;
         std::string disconn_msg = make_disconnect_pack(m_kcp_id);
         int ret = m_sock->sendTo(disconn_msg.c_str(), disconn_msg.size(), m_peerAddr);
         if (ret <= 0) {
@@ -72,8 +76,8 @@ public:
         m_kcp->output = m_isUdp ? &server_udp_output : nullptr; // TCP TODO
         if (true) {
             m_kcp->interval = 1;
-            m_kcp->rx_minrto = 400;
-            ikcp_wndsize(m_kcp, 2048, 2048);
+            m_kcp->rx_minrto = 500;
+            ikcp_wndsize(m_kcp, 1024 * 10, 1024 * 10);
             ikcp_nodelay(m_kcp, 1, 5, 2, 1);
         } else {
             ikcp_nodelay(m_kcp, 1, 20, 13, 1);
@@ -91,13 +95,18 @@ public:
             char kcp_buf[1024 * 1000] = "";
             int upper_recved = ikcp_recv(m_kcp, kcp_buf, sizeof(kcp_buf));
             if (upper_recved <= 0) {
-                SYLAR_LOG_DEBUG(g_logger) << "upper recv <= 0";
+                if (upper_recved == 0) {
+                    SYLAR_LOG_DEBUG(g_logger) << "upper recv == 0";
+                }
+                // < 0 EAGAIN
             } else {
+                s_count_send_kcp_packet++;
+                s_count_send_kcp_size += upper_recved;
                 const std::string package(kcp_buf, upper_recved);
-                SYLAR_LOG_DEBUG(g_logger) << "upper recv > 0"
-                  << " conn: " << m_kcp_id
-                  << " last_time: " << m_lastRecvPtime
-                  << " upper_recv_bytes: " << upper_recved;
+                //SYLAR_LOG_DEBUG(g_logger) << "upper recv > 0"
+                 // << " conn: " << m_kcp_id
+                 // << " last_time: " << m_lastRecvPtime
+                 // << " upper_recv_bytes: " << upper_recved;
                   //<< " package: " << package;
                 send_msg(package);
             }
@@ -122,7 +131,7 @@ public:
 
     int udp_output(const char*buf, int len, ikcpcb* kcp) {
         int ret = m_sock->sendTo(buf, len, m_peerAddr);
-        if (true) {
+        if (false) {
             SYLAR_LOG_DEBUG(g_logger) << m_serverName << " udp_output ret: " << ret << " "
             << m_peerAddr->toString() << "  "
             << std::dynamic_pointer_cast<sylar::IPv4Address>(m_peerAddr)->getPort();
@@ -145,6 +154,14 @@ public:
         m_sock = sock;
     }
 
+    std::string toString() {
+        std::stringstream ss;
+        ss << " m_kcp_id: " << m_kcp_id
+        << " peerAddr: " << m_peerAddr->toString()
+        << " lastRecvTime: " << m_lastRecvPtime;
+        return ss.str();
+    }
+
 private:
     //sylar::IPAddress::ptr       m_peerAddr;
     sylar::Address::ptr         m_peerAddr;
@@ -154,7 +171,7 @@ private:
     sylar::Socket::ptr          m_sock;
     sylar::SocketStream::ptr    m_sockStream;
     ikcpcb*                     m_kcp;
-    uint32_t                    m_lastRecvPtime;
+    uint64_t                    m_lastRecvPtime;
 };
 
 // 用来批量update所有kcp
@@ -167,6 +184,7 @@ public:
             KcpServerSession::ptr kss = it->second;
             kss->update_kcp(clock);
             if (kss->is_timeout()) { // 置位kss 超时位
+                SYLAR_LOG_DEBUG(g_logger) << "KcpServerSession is timout: " << kss->toString();
                 m_conns.erase(it++);
                 continue;
             }
@@ -222,7 +240,7 @@ public:
 
     void handle_kcp_time() {
         m_kcp_mgr->update_all_kcp(sylar::GetCurrentMs());
-        sylar::IOManager::GetThis()->addTimer(5,
+        sylar::IOManager::GetThis()->addTimer(1,
                      std::bind(&KcpServer::handle_kcp_time, this), false); // shared_from_this
     }
 
@@ -230,7 +248,7 @@ protected:
     void startReceiver(sylar::Socket::ptr sock) {
         while (!isStop()) {
             std::vector<uint8_t> buf;
-            buf.resize(32 * 1024);
+            buf.resize(1024 * 72);
 
             sylar::Address::ptr addr(new sylar::IPv4Address);
             int count = sock->recvFrom(&buf[0], buf.size(), addr);
@@ -240,12 +258,12 @@ protected:
                 return;
             }
 
-            //bool is_connect_pack(const char* data, size_t len);
             if ( is_connect_pack((char*)&buf[0], count)) {
                 uint32_t conv = m_kcp_mgr->get_new_conv();
                 std::string send_back_msg =  make_response_conv_pack(conv);
                 sock->sendTo(send_back_msg.c_str(), send_back_msg.size(), addr);
-                m_kcp_mgr->add_new_session(conv, addr);
+                auto kss = m_kcp_mgr->add_new_session(conv, addr);
+                kss->setSock(sock);
                 SYLAR_LOG_ERROR(g_logger) << "new connect id: " << conv << " " << addr->toString();
                 continue;
             }
@@ -267,14 +285,16 @@ private:
     KcpServerSessionMgr::ptr                    m_kcp_mgr;
 };
 
-// ikcp_send/recv
-// output/input
-// read/write
-// kernel
-
 static int server_udp_output(const char* buf, int len, ikcpcb* kcp, void* user) {
     KcpServerSession* kss = static_cast<KcpServerSession*>(user);
     return kss->udp_output(buf, len, kcp);
+}
+
+void static_kcp() {
+    float rate = (s_count_send_kcp_size - s_count_send_kcp_size_old) * 1.0 / 10 / 1024;
+    SYLAR_LOG_DEBUG(g_logger) << "sum packets: " << s_count_send_kcp_packet
+      << " rate: " << rate << "KB/s";
+    s_count_send_kcp_size_old = s_count_send_kcp_size;
 }
 
 void kcpServerStart() {
@@ -283,6 +303,7 @@ void kcpServerStart() {
     ks->bind(addr, true);
     ks->start();
     ks->handle_kcp_time();
+    sylar::IOManager::GetThis()->addTimer(1000 * 10, static_kcp, true);
 }
 
 int main() {

@@ -118,8 +118,8 @@ public:
         m_kcp->output = m_isUdp ? &KcpClientSession::upper_udp_output : nullptr; // TCP TODO
         if (true) {
             m_kcp->interval = 1;
-            m_kcp->rx_minrto = 2000;
-            ikcp_wndsize(m_kcp, 2048, 2048); // wndsize is important
+            m_kcp->rx_minrto = 500;
+            ikcp_wndsize(m_kcp, 1024 * 10, 1024 * 10); // wndsize is important
             //ikcp_wndsize(m_kcp, 20480, 20480); // wndsize is important
             ikcp_nodelay(m_kcp, 1, 5, 2, 1); // para2 is important  70MB/s & mem increase slow
         } else { // 40MB/s
@@ -133,7 +133,9 @@ public:
 
     void do_send_msg_in_queue() {
         std::string str = "hello world";
+        str.resize(1024 * 32);
         send_msg(str);
+        s_count_send_kcp_packet++;
     }
 
     void set_recv_timeout(uint64_t recv_timeout) {
@@ -147,7 +149,7 @@ public:
                 break;
             }
             std::vector<uint8_t> buf;
-            buf.resize(20 * 1024);
+            buf.resize(72 * 1024);
 
             set_recv_timeout(1000 * 10);
             int count = m_sockStream->getSocket()->recvFrom(&buf[0], buf.size(), m_peerAddr); // Why lower recv once However upper recv once more ?
@@ -161,7 +163,7 @@ public:
                 m_isConnected = false;
                 return;
             }
-            SYLAR_LOG_DEBUG(g_logger) << "do_recv_udp_in_loop ret: " << count;
+            //SYLAR_LOG_DEBUG(g_logger) << "do_recv_udp_in_loop ret: " << count;
 
             // check peerAddr TODO
             if (is_disconnect_pack((char*)&buf[0], count)) {
@@ -178,7 +180,7 @@ public:
                     //SYLAR_LOG_DEBUG(g_logger) << "upper_recv ret: " << ret;
                     break;
                 } else {
-                    SYLAR_LOG_DEBUG(g_logger) << "client upper recv bufsize: " << len;
+                    //SYLAR_LOG_DEBUG(g_logger) << "client upper recv bufsize: " << len;
                 }
             }
         }
@@ -198,7 +200,7 @@ public:
         //do_recv_udp_in_loop();
         ikcp_update(m_kcp, sylar::GetCurrentMs());
 
-        sylar::IOManager::GetThis()->addTimer(5,
+        sylar::IOManager::GetThis()->addTimer(1,
                 std::bind(&KcpClientSession::update, shared_from_this()), false);
     }
 
@@ -219,6 +221,7 @@ public:
     }
 
     void send_msg(const std::string& msg) {
+        //SYLAR_LOG_DEBUG(g_logger) << "send_msg msg.size(): " << msg.size();
         int send_ret = ikcp_send(m_kcp, msg.c_str(), msg.size());
         if (send_ret < 0) {
             SYLAR_LOG_DEBUG(g_logger) << "send_msg ikcp_send < 0, ret: " << send_ret;
@@ -260,9 +263,31 @@ void p1_test() {
     }
 
     SYLAR_LOG_DEBUG(g_logger) << "Connect success id: " << kcs->getKcpId();
-    sylar::IOManager::GetThis()->schedule(std::bind(&KcpClientSession::do_recv_udp_in_loop, kcs));
-    sylar::IOManager::GetThis()->addTimer(5,
-        std::bind(&KcpClientSession::update, kcs), false);
+    sylar::IOManager::GetThis()->schedule(std::bind(&KcpClientSession::do_recv_udp_in_loop, kcs)); // while(1) recv
+    sylar::IOManager::GetThis()->addTimer(1,
+        std::bind(&KcpClientSession::update, kcs), false); // upper send pack
+}
+
+void post_file() { // check kcp realiable
+    KcpClientSession::ptr kcs(new KcpClientSession(sylar::IPAddress::Create("0.0.0.0", 9527)));
+
+    sylar::IOManager::GetThis()->addTimer(1000 * 10, static_kcp, true);
+    kcs->do_send_connect_pack();
+    kcs->do_recv_connect_back_pack();
+    if (!kcs->isConnect()) {
+        SYLAR_LOG_DEBUG(g_logger) << "Can not connect server";
+        return;
+    }
+
+    SYLAR_LOG_DEBUG(g_logger) << "Connect success id: " << kcs->getKcpId();
+    sylar::IOManager::GetThis()->schedule(std::bind(&KcpClientSession::do_recv_udp_in_loop, kcs)); // while(1) recv
+    sylar::IOManager::GetThis()->addTimer(1,
+        std::bind(&KcpClientSession::update, kcs), false); // upper send pack
+    {
+        // read file
+        // write file content to queue
+    }
+
 }
 
 int main() {
@@ -272,3 +297,4 @@ int main() {
     return 0;
 }
 
+// 这个版本发包比第一个版本猛了近1000个 但是量却提不上来 开始很快 后来急剧下降
