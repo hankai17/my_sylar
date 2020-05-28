@@ -28,7 +28,7 @@
   - [CMake 3.7.2](https://cmake.org/files/v3.7/cmake-3.7.2.tar.gz) (最低cmake2.8)
 - 编译安装
   项目依赖
-  - [yaml解析](https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.3.tar.gz) 编译成动态库并安装
+  - [yaml解析](https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.3.tar.gz) 编译成动态库并安装  我也编译好了做成了rpm包直接安装即可[百度云](https://pan.baidu.com/s/1fNCRIkIFOim7xgU6VXVtJQ) 提取码6kiu
   - Boost: yum install boost-devel.x86_64
 
   ```
