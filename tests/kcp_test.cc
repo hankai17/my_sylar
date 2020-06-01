@@ -118,9 +118,8 @@ public:
         m_kcp->output = m_isUdp ? &KcpClientSession::upper_udp_output : nullptr; // TCP TODO
         if (true) {
             m_kcp->interval = 1;
-            m_kcp->rx_minrto = 500;
+            m_kcp->rx_minrto = 100;
             ikcp_wndsize(m_kcp, 1024 * 10, 1024 * 10); // wndsize is important
-            //ikcp_wndsize(m_kcp, 20480, 20480); // wndsize is important
             ikcp_nodelay(m_kcp, 1, 5, 2, 1); // para2 is important  70MB/s & mem increase slow
         } else { // 40MB/s
             ikcp_nodelay(m_kcp, 1, 20, 13, 1);
@@ -212,8 +211,8 @@ public:
     int udp_output(const char* buf, int len, ikcpcb* kcp) {
         int ret = m_sockStream->getSocket()->sendTo(buf, len, m_peerAddr);
         s_count_send_kcp_size += ret;
-        if (false) {
-            SYLAR_LOG_DEBUG(g_logger) << m_serverName << " udp_output ret: " << ret << " ";
+        if (true) {
+            SYLAR_LOG_DEBUG(g_logger) << m_serverName << " lower udp_output ret: " << ret << " ";
             //<< m_peerAddr->toString() << "  "
             //<< std::dynamic_pointer_cast<sylar::IPv4Address>(m_peerAddr)->getPort();
         }
@@ -226,6 +225,7 @@ public:
         if (send_ret < 0) {
             SYLAR_LOG_DEBUG(g_logger) << "send_msg ikcp_send < 0, ret: " << send_ret;
         }
+        //SYLAR_LOG_DEBUG(g_logger) << "upper send_msg msg.size(): " << msg.size() << " ret: " << send_ret;
     }
 
     ikcpcb* getKcp() { return m_kcp; }

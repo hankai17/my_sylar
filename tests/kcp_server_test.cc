@@ -76,7 +76,7 @@ public:
         m_kcp->output = m_isUdp ? &server_udp_output : nullptr; // TCP TODO
         if (true) {
             m_kcp->interval = 1;
-            m_kcp->rx_minrto = 500;
+            m_kcp->rx_minrto = 100;
             ikcp_wndsize(m_kcp, 1024 * 10, 1024 * 10);
             ikcp_nodelay(m_kcp, 1, 5, 2, 1);
         } else {
@@ -257,6 +257,7 @@ protected:
                                           << " strerrno: " << strerror(errno);
                 return;
             }
+            SYLAR_LOG_DEBUG(g_logger) << " recvFrom ret: " << count;
 
             if ( is_connect_pack((char*)&buf[0], count)) {
                 uint32_t conv = m_kcp_mgr->get_new_conv();
