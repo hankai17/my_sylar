@@ -77,7 +77,7 @@ public:
         if (true) {
             m_kcp->interval = 1;
             m_kcp->rx_minrto = 100;
-            ikcp_wndsize(m_kcp, 1024 * 10, 1024 * 10);
+            ikcp_wndsize(m_kcp, 1024 * 4, 1024 * 4);
             ikcp_nodelay(m_kcp, 1, 5, 2, 1);
         } else {
             ikcp_nodelay(m_kcp, 1, 20, 13, 1);
@@ -113,7 +113,7 @@ public:
         }
     }
 
-    void update_kcp(uint32_t clock) {
+    void update_kcp(uint64_t clock) {
         ikcp_update(m_kcp, clock);
     }
 
@@ -179,7 +179,7 @@ class KcpServerSessionMgr {
 public:
     typedef std::shared_ptr<KcpServerSessionMgr> ptr;
 
-    void update_all_kcp(uint32_t clock) {
+    void update_all_kcp(uint64_t clock) {
         for (auto it = m_conns.begin(); it != m_conns.end();) {
             KcpServerSession::ptr kss = it->second;
             kss->update_kcp(clock);
@@ -240,7 +240,7 @@ public:
 
     void handle_kcp_time() {
         m_kcp_mgr->update_all_kcp(sylar::GetCurrentMs());
-        sylar::IOManager::GetThis()->addTimer(1,
+        sylar::IOManager::GetThis()->addTimer(2,
                      std::bind(&KcpServer::handle_kcp_time, this), false); // shared_from_this
     }
 
@@ -257,7 +257,7 @@ protected:
                                           << " strerrno: " << strerror(errno);
                 return;
             }
-            SYLAR_LOG_DEBUG(g_logger) << " recvFrom ret: " << count;
+            //SYLAR_LOG_DEBUG(g_logger) << " recvFrom ret: " << count;
 
             if ( is_connect_pack((char*)&buf[0], count)) {
                 uint32_t conv = m_kcp_mgr->get_new_conv();

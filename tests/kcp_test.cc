@@ -119,7 +119,7 @@ public:
         if (true) {
             m_kcp->interval = 1;
             m_kcp->rx_minrto = 100;
-            ikcp_wndsize(m_kcp, 1024 * 10, 1024 * 10); // wndsize is important
+            ikcp_wndsize(m_kcp, 1024 * 4, 1024 * 4); // wndsize is important
             ikcp_nodelay(m_kcp, 1, 5, 2, 1); // para2 is important  70MB/s & mem increase slow
         } else { // 40MB/s
             ikcp_nodelay(m_kcp, 1, 20, 13, 1);
@@ -199,7 +199,7 @@ public:
         //do_recv_udp_in_loop();
         ikcp_update(m_kcp, sylar::GetCurrentMs());
 
-        sylar::IOManager::GetThis()->addTimer(1,
+        sylar::IOManager::GetThis()->addTimer(2,
                 std::bind(&KcpClientSession::update, shared_from_this()), false);
     }
 
@@ -211,7 +211,7 @@ public:
     int udp_output(const char* buf, int len, ikcpcb* kcp) {
         int ret = m_sockStream->getSocket()->sendTo(buf, len, m_peerAddr);
         s_count_send_kcp_size += ret;
-        if (true) {
+        if (false) {
             SYLAR_LOG_DEBUG(g_logger) << m_serverName << " lower udp_output ret: " << ret << " ";
             //<< m_peerAddr->toString() << "  "
             //<< std::dynamic_pointer_cast<sylar::IPv4Address>(m_peerAddr)->getPort();
