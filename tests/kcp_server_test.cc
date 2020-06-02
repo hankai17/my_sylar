@@ -15,6 +15,9 @@ extern "C" {
 #include <unordered_map>
 
 #include "kcp_utils.hh"
+#define UPDATE 5
+#define WINS 8
+#define RTO 1
 
 sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
 static std::atomic<uint64_t>    s_count_send_kcp_packet;
@@ -76,14 +79,14 @@ public:
         m_kcp->output = m_isUdp ? &server_udp_output : nullptr; // TCP TODO
         if (true) {
             m_kcp->interval = 1;
-            m_kcp->rx_minrto = 100;
-            ikcp_wndsize(m_kcp, 1024 * 4, 1024 * 4);
-            ikcp_nodelay(m_kcp, 1, 5, 2, 1);
+            m_kcp->rx_minrto = 100 * RTO;
+            ikcp_wndsize(m_kcp, 1024 * WINS, 1024 * WINS);
+            ikcp_nodelay(m_kcp, 1, 10, 2, 1);
         } else {
-            ikcp_nodelay(m_kcp, 1, 20, 13, 1);
-            ikcp_wndsize(m_kcp, 2048, 2048);
-            m_kcp->rx_minrto = 400;
             m_kcp->interval = 1;
+            m_kcp->rx_minrto = 400;
+            ikcp_wndsize(m_kcp, 2048, 2048);
+            ikcp_nodelay(m_kcp, 1, 20, 13, 1);
         }
     }
 
@@ -240,7 +243,7 @@ public:
 
     void handle_kcp_time() {
         m_kcp_mgr->update_all_kcp(sylar::GetCurrentMs());
-        sylar::IOManager::GetThis()->addTimer(2,
+        sylar::IOManager::GetThis()->addTimer(UPDATE,
                      std::bind(&KcpServer::handle_kcp_time, this), false); // shared_from_this
     }
 
