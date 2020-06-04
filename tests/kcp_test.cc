@@ -15,9 +15,9 @@ extern "C" {
 #include <atomic>
 
 #include "kcp_utils.hh"
-#define UPDATE 1
-#define WINS 8 * 4
-#define RTO 5
+#define UPDATE 2
+#define WINS 1 * 1
+#define RTO 3
 
 sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
 static std::atomic<uint64_t>    s_count_send_kcp_packet;
@@ -135,7 +135,7 @@ public:
 
     void do_send_msg_in_queue() {
         std::string str = "hello world";
-        str.resize(1024 * 10);
+        str.resize(1024 * 32);
         send_msg(str);
         s_count_send_kcp_packet++;
     }
@@ -254,8 +254,8 @@ void static_kcp() {
 }
 
 void p1_test() {
-    KcpClientSession::ptr kcs(new KcpClientSession(sylar::IPAddress::Create("172.16.3.98", 9527)));
-    //KcpClientSession::ptr kcs(new KcpClientSession(sylar::IPAddress::Create("0.0.0.0", 9527)));
+    //KcpClientSession::ptr kcs(new KcpClientSession(sylar::IPAddress::Create("172.16.3.98", 9527)));
+    KcpClientSession::ptr kcs(new KcpClientSession(sylar::IPAddress::Create("0.0.0.0", 9527)));
 
     sylar::IOManager::GetThis()->addTimer(1000 * 10, static_kcp, true);
     kcs->do_send_connect_pack();

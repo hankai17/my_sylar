@@ -15,9 +15,9 @@ extern "C" {
 #include <unordered_map>
 
 #include "kcp_utils.hh"
-#define UPDATE 5
-#define WINS 8
-#define RTO 1
+#define UPDATE 2
+#define WINS 1 * 1
+#define RTO 3
 
 sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
 static std::atomic<uint64_t>    s_count_send_kcp_packet;
@@ -81,7 +81,7 @@ public:
             m_kcp->interval = 1;
             m_kcp->rx_minrto = 100 * RTO;
             ikcp_wndsize(m_kcp, 1024 * WINS, 1024 * WINS);
-            ikcp_nodelay(m_kcp, 1, 10, 2, 1);
+            ikcp_nodelay(m_kcp, 1, 20, 13, 1);
         } else {
             m_kcp->interval = 1;
             m_kcp->rx_minrto = 400;
