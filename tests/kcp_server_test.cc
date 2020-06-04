@@ -86,7 +86,7 @@ public:
             m_kcp->interval = 1;
             m_kcp->rx_minrto = 400;
             ikcp_wndsize(m_kcp, 2048, 2048);
-            ikcp_nodelay(m_kcp, 1, 20, 13, 1);
+            ikcp_nodelay(m_kcp, 1, 5, 2, 1);
         }
     }
 
