@@ -67,7 +67,6 @@
 ## TODO
 - hostdb
 - buffer版本3
-- kcp
 
 ## 联系方式
 - 邮箱：<hankai17@126.com>
