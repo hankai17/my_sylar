@@ -425,3 +425,59 @@ struct MySQLBinder<N, type, Tail...> { \
 
 #endif
 
+
+/*
+   namespace {
+
+template<size_t N, typename... Args>
+struct MySQLBinder {          // 递归结束
+    static int Bind(std::shared_ptr<MySQLStmt> stmt) { return 0; }
+};
+
+template<typename... Args>
+int bindX(MySQLStmt::ptr stmt, Args&... args) {
+    return MySQLBinder<1, Args...>::Bind(stmt, args...);
+}
+}
+
+
+template<class... Args>
+ISQLData::ptr MySQL::queryStmt(const char* stmt, Args&&... args) {
+    auto st = MySQLStmt::Create(shared_from_this(), stmt);
+    if(!st) {
+        return nullptr;
+    }
+    int rt = bindX(st, args...);
+    if(rt != 0) {
+        return nullptr;
+    }
+    return st->query();
+}
+
+namespace {
+
+template<size_t N, typename Head, typename... Tail>
+struct MySQLBinder<N, Head, Tail...> { // 递归结束
+    static int Bind(MySQLStmt::ptr stmt, const Head&, Tail&...) {
+        static_assert(sizeof...(Tail) < 0, "invalid type");
+        return 0;
+    }
+};
+
+template<size_t N, typename... Tail>
+struct MySQLBinder<N, char*, Tail...> {
+    static int Bind(MySQLStmt::ptr stmt, char* value , Tail&... tail) {  // 偏特化
+        int rt = stmt->bind(N, value);
+        if(rt != 0) {
+            return rt;
+        }
+        return MySQLBinder<N + 1, Tail...>::Bind(stmt, tail...); \
+    }
+};
+
+
+
+}
+
+
+   */
