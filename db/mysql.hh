@@ -424,3 +424,4 @@ struct MySQLBinder<N, type, Tail...> { \
 };
 
 #endif
+
