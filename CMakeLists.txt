@@ -35,6 +35,7 @@ set(LIBS ${PROJECT_NAME}
         pthread
         yaml-cpp
         dl
+        event
         ${OPENSSL_LIBRARIES}
         ${MYSQL_LIBRARIES}
         )
@@ -77,6 +78,7 @@ set(LIB_SRC
         my_sylar/dns.cc
         my_sylar/ns/ares.cc
         my_sylar/db/mysql.cc
+        my_sylar/db/fox_thread.cc
         my_sylar/socks.cc
         my_sylar/utils/ikcp.c
         )
@@ -102,6 +104,7 @@ my_sylar_add_executable(pingpong_qps_test my_sylar/utils/pingpong_qps.cc ${PROJE
 my_sylar_add_executable(kcp_test tests/kcp_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(kcp_server_test tests/kcp_server_test.cc ${PROJECT_NAME} "${LIBS}")
 my_sylar_add_executable(port_scan tests/port_scan.cc ${PROJECT_NAME} "${LIBS}")
+my_sylar_add_executable(fox_test tests/fox_test.cc ${PROJECT_NAME} "${LIBS}")
 
 install(DIRECTORY my_sylar DESTINATION ${INSTALL_PATH_INCLUDE} FILES_MATCHING PATTERN "*.hh")
 
