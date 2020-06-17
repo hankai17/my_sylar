@@ -13,7 +13,7 @@ enable_language(ASM)
 set(CMAKE_INSTALL_PREFIX /usr/local)
 set(INSTALL_PATH_LIB lib)
 set(INSTALL_PATH_INCLUDE include)
-set(SUB_DIR_LIST "my_sylar/utils" "my_sylar/ns" "my_sylar/http" "my_sylar/fcontext")
+#set(SUB_DIR_LIST "my_sylar/utils" "my_sylar/ns" "my_sylar/http" "my_sylar/fcontext" "my_sylar/db")
 
 include_directories("./"
         "./tests"
@@ -26,11 +26,17 @@ if(OPENSSL_FOUND)
     include_directories(${OPENSSL_INCLUDE_DIR})
 endif()
 
+find_package(MySQL REQUIRED)
+if(MYSQL_FOUNT)
+    include_directories(${MYSQL_INCLUDE_DIR})
+endif()
+
 set(LIBS ${PROJECT_NAME}
         pthread
         yaml-cpp
         dl
         ${OPENSSL_LIBRARIES}
+        ${MYSQL_LIBRARIES}
         )
 
 set(LIB_SRC
@@ -70,6 +76,7 @@ set(LIB_SRC
         my_sylar/utils/crypto_utils.cc
         my_sylar/dns.cc
         my_sylar/ns/ares.cc
+        my_sylar/db/mysql.cc
         my_sylar/socks.cc
         my_sylar/utils/ikcp.c
         )
