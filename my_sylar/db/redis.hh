@@ -5,6 +5,9 @@
 
 #include "my_sylar/db/fox_thread.hh"
 #include "my_sylar/scheduler.hh"
+#include <hiredis-vip/hiredis.h>
+#include <hiredis-vip/hircluster.h>
+#include <hiredis-vip/adapters/libevent.h>
 
 namespace sylar {
     typedef std::shared_ptr<redisReply> ReplyPtr;
@@ -17,8 +20,8 @@ namespace sylar {
             FOX_REDIS = 3,
             FOX_REDIS_CLUSTER = 4
         };
-        IRedis() : m_logEnable(true) {};
-        ~virtual IRedis() {}
+        IRedis() : m_logEnable(true) {}
+        virtual ~IRedis() {}
 
         virtual ReplyPtr cmd(const char* fmt, ...) = 0;
         virtual ReplyPtr cmd(const char* fmt, va_list ap) = 0;
@@ -68,6 +71,10 @@ namespace sylar {
         virtual bool connect();
         virtual bool setTimeout(uint64_t ms);
 
+        virtual ReplyPtr cmd(const char* fmt, ...);
+        virtual ReplyPtr cmd(const char* fmt, va_list ap);
+        virtual ReplyPtr cmd(const std::vector<std::string>& argv);
+
         virtual int appendCmd(const char* fmt, ...);
         virtual int appendCmd(const char* fmt, va_list ap);
         virtual int appendCmd(const std::vector<std::string>& argv);
@@ -106,7 +113,8 @@ namespace sylar {
 
         virtual ReplyPtr cmd(const char* fmt, ...);
         virtual ReplyPtr cmd(const char* fmt, va_list ap);
-        virtual ReplyPtr cmd(const std::vector<std::string>& argv);
+        virtual ReplyPtr cmd(const std::vector<std::string>& argv); // cmd里 分配base任务(cmd查询任务FCtx)仍到base里(里面分配Ctx并开始查询 设回调为CmdCb) yeild并处理结果
+                                                                    // 跟ares很像 CmdCb里schedule到yeild处
 
         bool init();
         int getCtxCount() const { return m_ctxCount; }
@@ -138,14 +146,14 @@ namespace sylar {
 
     private:
         virtual void pcmd(FCtx* ctx);
-        bool pinit();
+        bool pinit(); // 异步建联 绑定base 设置建联回调
         void delayDelete(redisAsyncContext* c);
 
     private:
         static void ConnectCb(const redisAsyncContext* c, int status);
         static void DisconnectCb(const redisAsyncContext* c, int status);
-        static void CmdCb(redisAsyncContext* c, void* r, void* private);
-        static void TimeCb(int fd, short event, void* d);
+        static void CmdCb(redisAsyncContext* c, void* r, void* pridata);
+        static void TimerCb(int fd, short event, void* d);
 
     private:
         sylar::FoxThread*       m_thread;
@@ -160,5 +168,6 @@ namespace sylar {
     };
 
 };
+
 #endif
 

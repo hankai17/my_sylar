@@ -34,7 +34,7 @@ namespace sylar {
         virtual uint64_t getTotal() = 0;
     };
 
-    class FoxThread : public IFoxThread { // 就是一个 可调对象容器 只要有dispach就会触发回调
+    class FoxThread : public IFoxThread { // 就是一个 可调对象容器 + ev事件系统 只要有dispach就会触发回调 // 就是对ev的包装 + pipe回调系统  pipe相当于给base开了个生产口子
     public:
         typedef std::shared_ptr<FoxThread> ptr;
         typedef IFoxThread::callback callback;

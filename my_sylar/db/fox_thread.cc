@@ -9,6 +9,10 @@ namespace sylar {
     static std::map<uint64_t, std::string> s_thread_names;
     static RWMutex s_thread_mutex;
 
+    FoxThread* FoxThread::GetThis() {
+      return s_thread;
+    }
+
     void FoxThread::setThis() {
         m_name = m_name + "_" + std::to_string(sylar::GetThreadId());
         s_thread = this;
@@ -28,7 +32,7 @@ namespace sylar {
         uint8_t cmd[4096];
         if (recv(sock, cmd, sizeof(cmd), 0) > 0) {
             std::list<callback> callbacks;
-            RWMutex::WriteLock lock(thread->m_mutex); // ? private ???
+            RWMutex::WriteLock lock(thread->m_mutex); // ? private ??? // static成员函数使用 对象的非static成员 而且是私有的
             callbacks.swap(thread->m_callbacks);
             lock.unlock();
 

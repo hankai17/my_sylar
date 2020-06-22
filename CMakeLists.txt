@@ -36,6 +36,7 @@ set(LIBS ${PROJECT_NAME}
         yaml-cpp
         dl
         event
+        hiredis_vip
         ${OPENSSL_LIBRARIES}
         ${MYSQL_LIBRARIES}
         )
@@ -79,6 +80,7 @@ set(LIB_SRC
         my_sylar/ns/ares.cc
         my_sylar/db/mysql.cc
         my_sylar/db/fox_thread.cc
+        my_sylar/db/redis.cc
         my_sylar/socks.cc
         my_sylar/utils/ikcp.c
         )
