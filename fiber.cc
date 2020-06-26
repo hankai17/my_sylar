@@ -200,7 +200,7 @@ namespace sylar {
 
     void Fiber::swapOut() {
         SetThis(Scheduler::GetMainFiber());
-#if FIBER_CONTEXT_TYPE == FIBER_UCONTEXT || FIBER_CONTEXT_TYPE == FIBER_LIBACO
+#if FIBER_CONTEXT_TYPE == FIBER_UCONTEXT
         if (swapcontext(&m_ctx, &Scheduler::GetMainFiber()->m_ctx)) {
                 SYLAR_ASSERT(false);
         }
@@ -215,7 +215,7 @@ namespace sylar {
         SetThis(this);
         SYLAR_ASSERT(m_state != EXEC);
         m_state = EXEC;
-#if FIBER_CONTEXT_TYPE == FIBER_UCONTEXT || FIBER_CONTEXT_TYPE == FIBER_LIBACO
+#if FIBER_CONTEXT_TYPE == FIBER_UCONTEXT
         if (swapcontext(&t_main_thread_fiber->m_ctx, &m_ctx)) {
             SYLAR_ASSERT(false);
         }
@@ -228,7 +228,7 @@ namespace sylar {
 
     void Fiber::back() {
         SetThis(t_main_thread_fiber.get());
-#if FIBER_CONTEXT_TYPE == FIBER_UCONTEXT || FIBER_CONTEXT_TYPE == FIBER_LIBACO
+#if FIBER_CONTEXT_TYPE == FIBER_UCONTEXT
         if (swapcontext(&m_ctx, &t_main_thread_fiber->m_ctx)) {
             SYLAR_ASSERT(false);
         }
@@ -281,7 +281,7 @@ namespace sylar {
                      || m_state == EXCEPT
                      || m_state == INIT);
         m_cb = cb;
-#if FIBER_CONTEXT_TYPE == FIBER_UCONTEXT || FIBER_CONTEXT_TYPE == FIBER_LIBACO
+#if FIBER_CONTEXT_TYPE == FIBER_UCONTEXT
         if (getcontext(&m_ctx)) {
             SYLAR_ASSERT("getcontext");
         }
