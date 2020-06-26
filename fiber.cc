@@ -200,7 +200,7 @@ namespace sylar {
 
     void Fiber::swapOut() {
         SetThis(Scheduler::GetMainFiber());
-#if FIBER_CONTEXT_TYPE == FIBER_UCONTEXT || FIBER_CONTEXT_TYPE == FIBER_LIBACO
+#if FIBER_CONTEXT_TYPE == FIBER_UCONTEXT
         if (swapcontext(&m_ctx, &Scheduler::GetMainFiber()->m_ctx)) {
                 SYLAR_ASSERT(false);
         }
