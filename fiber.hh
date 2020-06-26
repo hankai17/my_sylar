@@ -6,13 +6,16 @@
 
 #define FIBER_UCONTEXT 1
 #define FIBER_FCONTEXT 2
-#define FIBER_CONTEXT_TYPE FIBER_FCONTEXT
+#define FIBER_LIBACO   3
+#define FIBER_CONTEXT_TYPE FIBER_LIBACO
 //#define FIBER_CONTEXT_TYPE FIBER_UCONTEXT
 
 #if FIBER_CONTEXT_TYPE == FIBER_UCONTEXT
 #include "ucontext.h"
 #elif FIBER_CONTEXT_TYPE == FIBER_FCONTEXT
 #include "fcontext/fcontext.hh"
+#elif FIBER_CONTEXT_TYPE == FIBER_LIBACO
+#include "libaco/aco.h"
 #endif
 
 #define FIBER_MEM_NORMAL 1
@@ -56,7 +59,7 @@ namespace sylar {
         static void YeildToHold();
         static uint64_t TotalFibers();
 
-#if FIBER_CONTEXT_TYPE == FIBER_UCONTEXT
+#if FIBER_CONTEXT_TYPE == FIBER_UCONTEXT || FIBER_CONTEXT_TYPE == FIBER_LIBACO
         static void MainFunc();
         static void CallMainFunc();
 #elif FIBER_CONTEXT_TYPE == FIBER_FCONTEXT
@@ -78,6 +81,9 @@ namespace sylar {
         ucontext_t m_ctx;
 #elif FIBER_CONTEXT_TYPE == FIBER_FCONTEXT
         fcontext_t m_ctx = nullptr;
+#elif FIBER_CONTEXT_TYPE == FIBER_LIBACO
+        aco_t* m_ctx = nullptr;
+        aco_share_stack_t m_astack;
 #endif
         std::function<void()> m_cb;
 #if FIBER_MEM_TYPE == FIBER_MEM_POOL
