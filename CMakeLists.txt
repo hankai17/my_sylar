@@ -73,6 +73,8 @@ set(LIB_SRC
         application.cc
         module.cc
         fcontext/fcontext.S
+        libaco/aco.c
+        libaco/acosw.S
         protocol.cc
         utils/crypto_utils.cc
         ns/ns_protocol.cc
