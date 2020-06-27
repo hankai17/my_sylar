@@ -75,6 +75,8 @@ set(LIB_SRC
         fcontext/fcontext.S
         libaco/aco.c
         libaco/acosw.S
+        libco/coctx.cc
+        libco/coctx_swap.S
         protocol.cc
         utils/crypto_utils.cc
         ns/ns_protocol.cc

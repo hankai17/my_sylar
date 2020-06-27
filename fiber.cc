@@ -140,6 +140,8 @@ namespace sylar {
 #elif FIBER_CONTEXT_TYPE == FIBER_LIBACO
         aco_thread_init(nullptr);
         m_ctx = aco_create(nullptr, nullptr, 0, nullptr, nullptr);
+#elif FIBER_CONTEXT_TYPE == FIBER_LIBCO
+        coctx_init(&m_ctx);
 #endif
         ++s_fiber_count;
         SYLAR_LOG_DEBUG(g_logger) << "Fiber::Fiber";
@@ -175,9 +177,14 @@ namespace sylar {
         } else {
             m_ctx = make_fcontext((char*)m_stack + m_stacksize, m_stacksize, &Fiber::CallMainFunc);
         }
-#elif FIBER_CONTEXT_TYPE == FIBER_LIBACO
-        aco_share_stack_init(&m_astack, m_stack, m_stacksize);
-        m_ctx = aco_create(t_main_thread_fiber->m_ctx, &m_astack, 0, &Fiber::MainFunc, nullptr);
+#elif FIBER_CONTEXT_TYPE == FIBER_LIBCO
+        m_ctx.ss_size = m_stacksize;
+        m_ctx.ss_sp = (char*)m_stack;
+        if(!use_caller) {
+            coctx_make(&m_ctx, &Fiber::MainFunc, 0, 0);
+        } else {
+            coctx_make(&m_ctx, &Fiber::CallerMainFunc, 0, 0);
+        }
 #endif
 
         //SYLAR_LOG_DEBUG(g_logger) << "Fiber::Fiber id: " << m_id; // Not use s_fiber_id // Consumer much time!
@@ -195,6 +202,8 @@ namespace sylar {
         jump_fcontext(&Scheduler::GetMainFiber()->m_ctx, m_ctx, 0);
 #elif FIBER_CONTEXT_TYPE == FIBER_LIBACO
         acosw(Scheduler::GetMainFiber()->m_ctx, m_ctx);
+#elif FIBER_CONTEXT_TYPE == FIBER_LIBCO
+        coctx_swap(&Scheduler::GetMainFiber()->m_ctx, &m_ctx);
 #endif
     }
 
@@ -223,6 +232,8 @@ namespace sylar {
         jump_fcontext(&t_main_thread_fiber->m_ctx, m_ctx, 0);
 #elif FIBER_CONTEXT_TYPE == FIBER_LIBACO
         acosw(t_main_thread_fiber->m_ctx, m_ctx);
+#elif FIBER_CONTEXT_TYPE == FIBER_LIBCO
+        coctx_swap(&m_ctx, &Scheduler::GetMainFiber()->m_ctx);
 #endif
     }
 
@@ -236,6 +247,8 @@ namespace sylar {
         jump_fcontext(&m_ctx, t_main_thread_fiber->m_ctx, 0);
 #elif FIBER_CONTEXT_TYPE == FIBER_LIBACO
         acosw(m_ctx, t_main_thread_fiber->m_ctx);
+#elif FIBER_CONTEXT_TYPE == FIBER_LIBCO
+        coctx_swap(&m_ctx, &t_threadFiber->m_ctx);
 #endif
     }
 
@@ -295,6 +308,8 @@ namespace sylar {
         m_ctx = make_fcontext((char*)m_stack + m_stacksize, m_stacksize, &Fiber::MainFunc);
 #elif FIBER_CONTEXT_TYPE == FIBER_LIBACO
         m_ctx = aco_create(t_main_thread_fiber->m_ctx, &m_astack, 0, &Fiber::MainFunc, nullptr);
+#elif FIBER_CONTEXT_TYPE == FIBER_LIBCO
+        coctx_make(&m_ctx, &Fiber::MainFunc, 0, 0);
 #endif
         m_state = INIT;
     }
@@ -307,6 +322,8 @@ namespace sylar {
     void Fiber::MainFunc() {
 #elif FIBER_CONTEXT_TYPE == FIBER_FCONTEXT
     void Fiber::MainFunc(intptr_t vp) {
+#elif FIBER_CONTEXT_TYPE == FIBER_LIBCO
+    void* Fiber::MainFunc(void*, void*) {
 #endif
         Fiber::ptr cur = GetThis();
         SYLAR_ASSERT(cur);
@@ -339,6 +356,8 @@ namespace sylar {
     void Fiber::CallMainFunc() {
 #elif FIBER_CONTEXT_TYPE == FIBER_FCONTEXT
     void Fiber::CallMainFunc(intptr_t vp) {
+#elif FIBER_CONTEXT_TYPE == FIBER_LIBCO
+    void* Fiber::CallMainFunc(void*, void*) {
 #endif
         Fiber::ptr cur = GetThis();
         SYLAR_ASSERT(cur);
