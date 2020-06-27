@@ -70,7 +70,7 @@ namespace sylar {
         static void CallMainFunc(intptr_t vp);
 #elif FIBER_CONTEXT_TYPE == FIBER_LIBCO
         static void* MainFunc(void*, void*);
-        static void* CallerMainFunc(void*, void*);
+        static void* CallMainFunc(void*, void*);
 #endif
         uint64_t getFiberId() const { return m_id; }
         static uint64_t GetFiberId();

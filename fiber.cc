@@ -183,7 +183,7 @@ namespace sylar {
         if(!use_caller) {
             coctx_make(&m_ctx, &Fiber::MainFunc, 0, 0);
         } else {
-            coctx_make(&m_ctx, &Fiber::CallerMainFunc, 0, 0);
+            coctx_make(&m_ctx, &Fiber::CallMainFunc, 0, 0);
         }
 #endif
 
@@ -217,6 +217,8 @@ namespace sylar {
         jump_fcontext(&m_ctx, Scheduler::GetMainFiber()->m_ctx, 0);
 #elif FIBER_CONTEXT_TYPE == FIBER_LIBACO
         acosw(m_ctx, Scheduler::GetMainFiber()->m_ctx);
+#elif FIBER_CONTEXT_TYPE == FIBER_LIBCO
+        coctx_swap(&m_ctx, &Scheduler::GetMainFiber()->m_ctx);
 #endif
     }
 
@@ -233,7 +235,7 @@ namespace sylar {
 #elif FIBER_CONTEXT_TYPE == FIBER_LIBACO
         acosw(t_main_thread_fiber->m_ctx, m_ctx);
 #elif FIBER_CONTEXT_TYPE == FIBER_LIBCO
-        coctx_swap(&m_ctx, &Scheduler::GetMainFiber()->m_ctx);
+        coctx_swap(&t_main_thread_fiber->m_ctx, &m_ctx);
 #endif
     }
 
@@ -248,7 +250,7 @@ namespace sylar {
 #elif FIBER_CONTEXT_TYPE == FIBER_LIBACO
         acosw(m_ctx, t_main_thread_fiber->m_ctx);
 #elif FIBER_CONTEXT_TYPE == FIBER_LIBCO
-        coctx_swap(&m_ctx, &t_threadFiber->m_ctx);
+        coctx_swap(&m_ctx, &t_main_thread_fiber->m_ctx);
 #endif
     }
 
