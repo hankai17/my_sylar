@@ -57,3 +57,10 @@ namespace sylar {
 }
 
 #endif
+
+// 感觉 跟flvProtocol不一样
+// flvProtocol调 onParseFlv(rawBuf, len) 接收底层数据 里面再搞个中间层用以解出来一个完整的flvpacket
+// 这里的execute就像onParseFlv 接触的是最底层 最原生的rawbuf 然后。。。
+// 1 核心问题就是 上层能不能动态的收body? 
+
+
