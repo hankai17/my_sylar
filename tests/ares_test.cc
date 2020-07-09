@@ -22,13 +22,14 @@ void test_domains(sylar::AresChannel::ptr channel, int idx, std::string domain) 
 
 void test_domain(sylar::AresChannel::ptr channel, int idx) {
     int result_num = 0;
+    SYLAR_LOG_DEBUG(g_logger) << "idx: " << idx << " start";
     std::string domain("www.ifeng.com");
     auto ips = channel->aresGethostbyname(domain.c_str());
     for (auto& i : ips) {
         result_num++;
         SYLAR_LOG_DEBUG(g_logger) << idx << " " << i.toString();
     }
-    //SYLAR_LOG_DEBUG(g_logger) << "idx: " << idx << ", domain: " << domain << ", result: " << result_num;
+    SYLAR_LOG_DEBUG(g_logger) << "idx: " << idx << ", domain: " << domain << ", result: " << result_num;
 }
 
 void ares_test() {
@@ -54,9 +55,9 @@ void ares_test() {
                                                             channel, i, real_domain));
         }
     } else {
-        sylar::IOManager::GetThis()->schedule(std::bind(test_domain, channel, 0));
+        //sylar::IOManager::GetThis()->schedule(std::bind(test_domain, channel, 0));
         sleep(5);
-        for (int i = 0; i < 0; i++) {
+        for (int i = 0; i < 10; i++) {
             sylar::IOManager::GetThis()->schedule(std::bind(test_domain,
                     channel, i));
         }
@@ -66,12 +67,14 @@ void ares_test() {
 int main() {
     sylar::IOManager iom(5, false, "io");
     //iom.addTimer(1000 * 10, sylar::MemStatics, true);
-    iom.addTimer(1000 * 10, [&iom](){
-        std::stringstream ss;
-        iom.dump(ss);
-        SYLAR_LOG_DEBUG(g_logger) << ss.str();
-    }, true);
+    //iom.addTimer(1000 * 10, [&iom](){
+    //    std::stringstream ss;
+    //    iom.dump(ss);
+    //    SYLAR_LOG_DEBUG(g_logger) << ss.str();
+    //}, true);
     iom.schedule(ares_test);
     iom.stop();
     return 0;
 }
+
+// iptables -A INPUT -p udp --sport 53 -j DROP
