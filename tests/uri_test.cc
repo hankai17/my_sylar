@@ -5,6 +5,7 @@
 #include "my_sylar/socket.hh"
 #include "my_sylar/util.hh"
 #include "my_sylar/ns/ares.hh"
+#include "my_sylar/http/http_connection.hh"
 
 #include<sys/socket.h>
 #include<string.h>
@@ -36,6 +37,27 @@ void test() {
 
     auto addr = uri->createAddress();
     SYLAR_LOG_DEBUG(g_logger) << addr->toString();
+    return;
+}
+
+void test_req(const std::string& req) {
+    sylar::Uri::ptr uri = sylar::Uri::Create(req.c_str());
+    if (uri == nullptr) {
+        //SYLAR_LOG_DEBUG(g_logger) << "Can not parse req: " << req;
+        return;
+    }
+    //SYLAR_LOG_DEBUG(g_logger) << "req start: " << req;
+
+    sylar::http::HttpResult::ptr resu =  sylar::http::HttpConnection::DoGet(uri, 1000 * 5);
+    //SYLAR_LOG_DEBUG(g_logger) << resu->toString();
+    //SYLAR_LOG_DEBUG(g_logger) << resu->response->getHeader("Content-Length", "null");
+    if (resu == nullptr || resu->response == nullptr) {
+        //SYLAR_LOG_DEBUG(g_logger) << "Cannot get result may be timeout " << req;
+        return;
+    }
+    std::string str_flow = resu->response->getHeader("Content-Length", "null");
+    SYLAR_LOG_DEBUG(g_logger) << "req end: " << str_flow << " " << req;
+
     return;
 }
 
@@ -165,7 +187,8 @@ int main() {
     //iom.schedule(test1);
     //iom.schedule(test2);
     //iom.schedule(ares_test);
-    iom.schedule(test3);
+    iom.schedule(std::bind(test_req, "http://www.ifeng.com/"));
+    iom.schedule(std::bind(test_req, "https://www.baidu.com/"));
     iom.stop();
     return 0;
 }

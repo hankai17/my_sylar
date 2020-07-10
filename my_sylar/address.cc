@@ -177,7 +177,7 @@ namespace sylar {
             g_ares_channel.reset(new AresChannel);
             g_ares_channel->init();
             g_ares_channel->start();
-            sleep(3);
+            //sleep(3);
         }
 
         auto ips = g_ares_channel->aresGethostbyname(host.c_str());
