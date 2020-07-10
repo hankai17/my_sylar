@@ -1,6 +1,7 @@
 #include "address.hh"
 #include "log.hh"
 #include "endian.hh"
+#include "ns/ares.hh"
 
 #include <netdb.h>
 #include <ifaddrs.h>
@@ -162,6 +163,30 @@ namespace sylar {
                 if (addr) {
                     return addr;
                 }
+            }
+        }
+        return nullptr;
+    }
+
+    // global aresChannel
+    AresChannel::ptr g_ares_channel = nullptr;
+    std::shared_ptr<IPAddress> Address::LookupAnyIPAddressAres(const std::string& host,
+                                                         int family, int type, int proto) {
+        // call_once thread safe singal TODO
+        if (g_ares_channel == nullptr) {
+            g_ares_channel.reset(new AresChannel);
+            g_ares_channel->init();
+            g_ares_channel->start();
+            sleep(3);
+        }
+
+        auto ips = g_ares_channel->aresGethostbyname(host.c_str());
+        for (const auto& i : ips) {
+            IPAddress::ptr addr = std::dynamic_pointer_cast<IPAddress>(
+               std::make_shared<IPv4Address>(i)
+            );
+            if (addr) {
+                return addr;
             }
         }
         return nullptr;

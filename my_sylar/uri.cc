@@ -10924,7 +10924,8 @@ std::string Uri::toString() const {
 }
 
 Address::ptr Uri::createAddress() const {
-    auto addr = Address::LookupAnyIPAddress(m_host);
+    //auto addr = Address::LookupAnyIPAddress(m_host);
+    auto addr = Address::LookupAnyIPAddressAres(m_host);
     if(addr) {
         addr->setPort(getPort());
     }

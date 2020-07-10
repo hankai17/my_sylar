@@ -295,7 +295,7 @@ namespace sylar {
     }
 
     void IOManager::idle() {
-        epoll_event* events = new epoll_event[64](); // ?
+        epoll_event* events = new epoll_event[1024](); // ?
         std::shared_ptr<epoll_event> shared_events(events, [](epoll_event* ptr) {
               delete[] ptr;
               });
@@ -316,7 +316,7 @@ namespace sylar {
                     next_timeout = MAX_TIMEOUT;
                 }
 
-                ret = epoll_wait(m_epfd, events, 4, next_timeout);
+                ret = epoll_wait(m_epfd, events, 1024, next_timeout);
                 if (ret < 0 && errno == EINTR) {
                 } else {
                     break;

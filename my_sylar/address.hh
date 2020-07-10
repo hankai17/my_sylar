@@ -37,6 +37,8 @@ namespace sylar {
                 const std::string& iface, int family = AF_UNSPEC);
         static std::shared_ptr<IPAddress> LookupAnyIPAddress(const std::string& host,
                 int family = AF_INET, int type = 0, int proto = 0);
+        static std::shared_ptr<IPAddress> LookupAnyIPAddressAres(const std::string& host,
+                int family = AF_INET, int type = 0, int proto = 0);
     };
 
     class IPAddress : public Address {
