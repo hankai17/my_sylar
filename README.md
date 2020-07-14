@@ -44,6 +44,7 @@
 - [context切换测试](https://github.com/hankai17/context_benchmark) 大概在50ns左右
 - 击鼓传花测试 参考pingpong_bench.cc libevent_bench.c 在花朵少的情况下my_sylar会低于libevent
 - pingpong测试 参考pingpong_qps.cc echo_server.cc 大概14000次/s
+- hook暂不支持poll 不支持getaddrinfo/gethostbyname
 
 ## test
 - kcp简单案例 kcp_test.cc 为kcp客户端  kcp_server_test.cc 为kcp服务端
@@ -52,6 +53,7 @@
 ## TODO
 - hostdb
 - buffer版本3
+- ares测试
 
 ## 联系方式
 - 邮箱：<hankai17@126.com>
