@@ -310,6 +310,81 @@ namespace sylar {
 		>			m_datas; // 主动过期 // ONLY SUPPORT A // SHOULD <domain+type, vector<string>>
 	};
 
+	class DnsItem{
+	public:
+		sockaddr _addr;
+		time_t _create_time;
+	};
+
+	class DnsCache {
+	public:
+		typedef RWMutex RWMutexType;
+
+		static DnsCache &Instance() {
+			static DnsCache instance;
+			return instance;
+		}
+		bool getDomainIP(const char* host, sockaddr &addr, int expireSec = 60) {
+			DnsItem item;
+			auto flag = getCacheDomainIP(host, item, expireSec);
+			if (!flag) { // expires or none
+			    return false;
+				flag = getSystemDomainIP(host, item._addr);
+				if(flag){
+					setCacheDomainIP(host,item);
+				}
+			}
+			if(flag){
+				addr = item._addr;
+			}
+			return flag;
+		}
+
+		void setCacheDomainIP(const char *host,DnsItem &item){
+			RWMutexType::WriteLock lock(m_mutex);
+			item._create_time = time(NULL);
+			_mapDns[host] = item;
+		}
+
+	private:
+		DnsCache(){}
+		~DnsCache(){}
+
+		bool getCacheDomainIP(const char *host,DnsItem &item, int expireSec){
+
+			auto it = _mapDns.find(host);
+			if(it == _mapDns.end()){ //没有记录
+				return false;
+			}
+			if(it->second._create_time + expireSec < time(NULL)){
+				//已过期
+				_mapDns.erase(it);
+				return false;
+			}
+			item = it->second;
+			return true;
+		}
+
+		bool getSystemDomainIP(const char *host , sockaddr &item ){
+			struct addrinfo *answer=nullptr; //阻塞式dns解析，可能被打断
+			int ret = -1;
+			do{
+				ret = getaddrinfo(host, NULL, NULL, &answer);
+			}while(ret == -1 && errno == EINTR) ;
+
+			if (!answer) {
+				//WarnL << "域名解析失败:" << host;
+				return false;
+			}
+			item = *(answer->ai_addr);
+			freeaddrinfo(answer);
+			return true;
+		}
+	private:
+		RWMutexType						m_mutex;
+		std::unordered_map<std::string, DnsItem>   _mapDns;
+	};
+
 	class AresChannel : public UdpServer {
 	public:
 		typedef std::shared_ptr<AresChannel> ptr;

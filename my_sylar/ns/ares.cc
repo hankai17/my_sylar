@@ -383,8 +383,15 @@ namespace sylar {
 
     std::vector<IPv4Address> AresChannel::aresGethostbyname(const std::string &name) {
         std::vector<IPv4Address> ips;
-        std::string db_result;
-        //SYLAR_LOG_ERROR(g_logger) << m_db.getHostDBStatics();
+        sockaddr saddr;
+        bool use_cache = true;
+        if (use_cache &&
+            DnsCache::Instance().getDomainIP(name.c_str(), saddr)) {
+            IPv4Address ip(*((sockaddr_in*)(&saddr)));
+            ips.push_back(ip);
+            return ips;
+        }
+
         Query::ptr query = aresQuery(name);
         if (!query) {
             SYLAR_LOG_ERROR(g_logger) << "aresGethostbyname query is nullptr";
@@ -394,7 +401,7 @@ namespace sylar {
         IOManager* iom = sylar::IOManager::GetThis();
         std::weak_ptr<Query> wquery(query);
         AresChannel::ptr curr = std::dynamic_pointer_cast<AresChannel>(shared_from_this());
-        Timer::ptr timer = iom->addTimer(2000, [wquery, curr]() {
+        Timer::ptr timer = iom->addTimer(1000 * 1, [wquery, curr]() {
             auto t = wquery.lock();
             if (!t) {
                 return;
@@ -412,6 +419,11 @@ namespace sylar {
             for (auto& i : query->result) {
                 IPv4Address ip(ntohl(static_cast<uint32_t>(i.s_addr)));
                 ips.push_back(ip);
+            }
+            if (use_cache) {
+                DnsItem item;
+                item._addr = *ips[0].getAddr();
+                DnsCache::Instance().setCacheDomainIP(name.c_str(), item);
             }
         }
         return ips;
