@@ -51,9 +51,7 @@
 - ss5测试 tunnel_test.cc 包含有p1 p2端
 
 ## TODO
-- hostdb
 - buffer版本3
-- ares测试
 
 ## 联系方式
 - 邮箱：<hankai17@126.com>
