@@ -67,7 +67,7 @@ set(LIB_SRC
         my_sylar/application.cc
         my_sylar/module.cc
         my_sylar/fcontext/fcontext.S
-        my_sylar/utils/crypto_utils.cc
+        #my_sylar/utils/crypto_utils.cc
         my_sylar/dns.cc
         my_sylar/ns/ares.cc
         my_sylar/socks.cc

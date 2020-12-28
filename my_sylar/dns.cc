@@ -81,7 +81,7 @@ namespace sylar {
     }
 
     void Dns::refresh() {
-        if (m_type == DOMAIN) {
+        if (m_type == TYPE_DOMAIN) {
             std::vector<Address::ptr> result;
             if (!sylar::Address::Lookup(result, m_domain, sylar::Socket::IPv4, sylar::Socket::TCP)) {
                 SYLAR_LOG_ERROR(g_logger) << m_domain << " invalid address: " << m_domain;
