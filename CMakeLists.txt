@@ -63,6 +63,10 @@ set(LIB_SRC
         my_sylar/hash.cc
         my_sylar/http/ws_connection.cc
         my_sylar/http/ws_server.cc
+        my_sylar/http2/huffman.cc
+        my_sylar/http2/dynamic_table.cc
+        my_sylar/http2/hpack.cc
+        my_sylar/http2/frame.cc
         my_sylar/worker.cc
         my_sylar/application.cc
         my_sylar/module.cc
