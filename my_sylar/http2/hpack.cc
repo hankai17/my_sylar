@@ -121,6 +121,15 @@ int HPack::WriteString(ByteArray::ptr ba, const std::string& str, bool h) {
     return ba->getPosition() - pos;
 }
 
+HPack::HPack(DynamicTable& table) :
+    m_table(table) {
+}
+
+int HPack::parse(const std::string& data) {
+    ByteArray::ptr ba(new ByteArray(&data[0], data.size(), false));
+    return parse(ba, data.size());
+}
+
 int HPack::parse(ByteArray::ptr ba, int length) {
     int parsed = 0;
     int pos = ba->getPosition();

@@ -30,6 +30,7 @@ namespace sylar {
                 typedef std::shared_ptr<RequestCtx> ptr;
                 http::HttpRequest::ptr request;
                 http::HttpResponse::ptr response;
+                std::string resultStr;
                 virtual bool doSend(AsyncSocketStream::ptr stream) override;
             };
             virtual Ctx::ptr doRecv() override;

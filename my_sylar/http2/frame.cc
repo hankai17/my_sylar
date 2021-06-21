@@ -521,5 +521,15 @@ std::string FrameRToString(FrameR r) {
     }
 }
 
+std::string Frame::toString() const {
+    std::stringstream ss;
+    ss << header.toString();
+    if (data) {
+        ss << ", ";
+        ss << data->toString();
+    }
+    return ss.str();
+}
+
 }
 }

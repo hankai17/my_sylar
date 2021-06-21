@@ -64,6 +64,7 @@ public:
     HPack(DynamicTable& table);
 
     int parse(ByteArray::ptr ba, int length);
+    int parse(const std::string& data);
     int pack(HeaderField* header, ByteArray::ptr ba);
     int pack(const std::vector<std::pair<std::string, std::string> >& headers, ByteArray::ptr ba);
 
