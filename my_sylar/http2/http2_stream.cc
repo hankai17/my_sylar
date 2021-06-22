@@ -98,7 +98,7 @@ namespace sylar {
             }
             Frame::ptr frame = std::make_shared<Frame>();
             frame->header.type = (uint8_t)FrameType::SETTINGS;
-            frame->data = std::make_shared<SettingsFrame>;
+            frame->data = std::make_shared<SettingsFrame>();
             ret = m_codec->serializeTo(shared_from_this(), frame);
             if (ret <= 0) {
                 SYLAR_LOG_ERROR(g_logger) << "handleShakeClient Settings failed, ret = " << ret

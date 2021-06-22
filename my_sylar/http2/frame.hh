@@ -3,7 +3,7 @@
 
 #include "my_sylar/bytearray.hh"
 #include "hpack.hh"
-#include "stream.hh"
+#include "my_sylar/stream.hh"
 
 namespace sylar {
 namespace http2 {
