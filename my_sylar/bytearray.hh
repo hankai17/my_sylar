@@ -24,6 +24,7 @@ namespace sylar {
         };
 
         ByteArray(size_t base_size = 4096);
+        ByteArray(void* data, size_t size, bool owner = false);
         ~ByteArray();
 
         void writeFint8(int8_t value);

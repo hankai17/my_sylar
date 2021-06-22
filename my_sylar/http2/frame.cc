@@ -125,7 +125,7 @@ std::string HeadersFrame::toString() const {
     if (pad) {
         ss << " pad=" << (uint32_t)pad;
     }
-    ss << " data.size=" << data.size();
+    ss << " fields.size=" << fields.size();
     ss << "]";
     return ss.str();
 }
@@ -138,6 +138,11 @@ bool HeadersFrame::writeTo(ByteArray::ptr ba, const FrameHeader& header) {
         if (header.flags & (uint8_t)FrameFlagHeaders::PRIORITY) {
             priority.writeTo(ba, header);
         }
+#if 0
+        for (auto& i : fields) {
+            HPack::Pack(&i, ba);
+        }
+#endif
         ba->write(data.c_str(), data.size());
         if (header.flags & (uint8_t)FrameFlagHeaders::PADDED) {
             ba->write(padding.c_str(), padding.size());
@@ -529,6 +534,144 @@ std::string Frame::toString() const {
         ss << data->toString();
     }
     return ss.str();
+}
+
+Frame::ptr FrameCodec::parseFrom(Stream::ptr stream) {
+    try {
+        Frame::ptr frame = std::make_shared<Frame>();
+        ByteArray::ptr ba(new ByteArray);
+        int ret = stream->readFixSize(ba, FrameHeader::SIZE);
+        if (ret <= 0) {
+            SYLAR_LOG_INFO(g_logger) << "recv frame header failed, ret=" << ret << ", " << strerror(errno);
+            return nullptr;
+        }
+        ba->setPosition(0);
+        if (!frame->header.readFrom(ba)) {
+            SYLAR_LOG_INFO(g_logger) << "parse frame header failed";
+            return nullptr;
+        }
+        if (frame->header.length > 0) {
+            ba->setPosition(0);
+            int ret = stream->readFixSize(ba, frame->header.length);
+            if (ret <= 0) {
+                SYLAR_LOG_INFO(g_logger) << "recv frame body failed, ret=" << ret << ", " << strerror(errno);
+                return nullptr;
+            }
+            ba->setPosition(0);
+        }
+
+        switch ((FrameType)(frame->header.type)) {
+            case FrameType::HEADERS: {
+                frame->data = std::make_shared<HeadersFrame>();
+                if (!frame->data->readFrom(ba, frame->header)) {
+                    SYLAR_LOG_INFO(g_logger) << "parse HeadersFrame failed";
+                    return nullptr;
+                }
+                break;
+            }
+            case FrameType::DATA: {
+                frame->data = std::make_shared<DataFrame>();
+                if (!frame->data->readFrom(ba, frame->header)) {
+                    SYLAR_LOG_INFO(g_logger) << "parse DataFrame failed";
+                    return nullptr;
+                }
+                break;
+            }
+            case FrameType::PRIORITY: {
+                frame->data = std::make_shared<PriorityFrame>();
+                if (!frame->data->readFrom(ba, frame->header)) {
+                    SYLAR_LOG_INFO(g_logger) << "parse PriorityFrame failed";
+                    return nullptr;
+                }
+                break;
+            }
+            case FrameType::RST_STREAM: {
+                frame->data = std::make_shared<RstFrame>();
+                if (!frame->data->readFrom(ba, frame->header)) {
+                    SYLAR_LOG_INFO(g_logger) << "parse RstFrame failed";
+                    return nullptr;
+                }
+                break;
+            }
+            case FrameType::SETTINGS: {
+                frame->data = std::make_shared<SettingsFrame>();
+                if (!frame->data->readFrom(ba, frame->header)) {
+                    SYLAR_LOG_INFO(g_logger) << "parse SettingsFrame failed";
+                    return nullptr;
+                }
+                break;
+            }
+            case FrameType::PUSH_PROMISE: {
+                frame->data = std::make_shared<PushPromisedFrame>();
+                if (!frame->data->readFrom(ba, frame->header)) {
+                    SYLAR_LOG_INFO(g_logger) << "parse PushPromiseFrame failed";
+                    return nullptr;
+                }
+                break;
+            }
+            case FrameType::PING: {
+                frame->data = std::make_shared<PingFrame>();
+                if (!frame->data->readFrom(ba, frame->header)) {
+                    SYLAR_LOG_INFO(g_logger) << "parse PingFrame failed";
+                    return nullptr;
+                }
+                break;
+            }
+            case FrameType::GOAWAY: {
+                frame->data = std::make_shared<GoAwayFrame>();
+                if (!frame->data->readFrom(ba, frame->header)) {
+                    SYLAR_LOG_INFO(g_logger) << "parse GoAwayFrame failed";
+                    return nullptr;
+                }
+                break;
+            }
+            case FrameType::WINDOW_UPDATE: {
+                frame->data = std::make_shared<WindowUpdateFrame>();
+                if (!frame->data->readFrom(ba, frame->header)) {
+                    SYLAR_LOG_INFO(g_logger) << "parse WindowUpdataFrame failed";
+                    return nullptr;
+                }
+                break;
+            }
+            case FrameType::CONTINUATION: {
+                // TODO
+                break;
+            }
+            default: {
+                SYLAR_LOG_WARN(g_logger) << "invaild FrameType: " << (uint32_t)frame->header.type;
+                return nullptr;
+            }
+            break;
+        }
+        return frame;
+    } catch (std::exception& e) {
+        SYLAR_LOG_ERROR(g_logger) << "FrameCodec parseFrome except: " << e.what();
+    } catch (...) {
+        SYLAR_LOG_ERROR(g_logger) << "FrameCodec parseFrome except";
+    }
+    return nullptr;
+}
+
+int32_t FrameCodec::serializeTo(Stream::ptr stream, Frame::ptr frame) {
+    ByteArray::ptr ba(new ByteArray);
+    frame->header.writeTo(ba);
+    if (frame->data) {
+        if (!frame->data->writeTo(ba, frame->header)) {
+            SYLAR_LOG_ERROR(g_logger) << "FrameCodec serializeTo failed, type: " << FrameTypeToString((FrameType)frame->header.type);
+            return -1;
+        }
+        int pos = ba->getPosition();
+        ba->setPosition(0);
+        frame->header.length = pos - FrameHeader::SIZE;
+        frame->header.writeTo(ba);
+    }
+    ba->setPosition(0);
+    int ret = stream->writeFixSize(ba, ba->getReadSize());
+    if (ret <= 0) {
+        SYLAR_LOG_ERROR(g_logger) << "FrameCodec serializeTo failed, ret: " << ret << ", " << strerror(errno);
+        return -2;
+    }
+    return ba->getSize();
 }
 
 }

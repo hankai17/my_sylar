@@ -126,7 +126,7 @@ HPack::HPack(DynamicTable& table) :
 }
 
 int HPack::parse(const std::string& data) {
-    ByteArray::ptr ba(new ByteArray(&data[0], data.size(), false));
+    ByteArray::ptr ba(new ByteArray((void*)&data[0], data.size(), false));
     return parse(ba, data.size());
 }
 
@@ -191,8 +191,8 @@ int HPack::parse(ByteArray::ptr ba, int length) {
 
 }
 
-int HPack::pack(HeaderField* header, ByteArray::ptr ba) {
-    m_headers.push_back(*header);
+int HPack::Pack(HeaderField* header, ByteArray::ptr ba) {
+    //m_headers.push_back(*header);
     int pos = ba->getPosition();
 
     if(header->type == IndexType::INDEXED) {
@@ -220,6 +220,11 @@ int HPack::pack(HeaderField* header, ByteArray::ptr ba) {
         WriteString(ba, header->value, header->h_value);
     }
     return ba->getPosition() - pos;
+}
+
+int HPack::pack(HeaderField* header, ByteArray::ptr ba) {
+    m_headers.push_back(*header);
+    return Pack(header, ba);
 }
 
 int HPack::pack(const std::vector<std::pair<std::string, std::string> >& headers, ByteArray::ptr ba) {
@@ -250,6 +255,24 @@ int HPack::pack(const std::vector<std::pair<std::string, std::string> >& headers
         rt += pack(&h, ba);
     }
     return rt;
+}
+
+int HPack::pack(const std::vector<std::pair<std::string, std::string> >& headers, std::string& out) {
+    ByteArray::ptr ba(new ByteArray);
+    int ret = pack(headers, ba);
+    ba->setPosition(0);
+    ba->toString().swap(out);
+    return ret;
+}
+
+std::string HPack::toString() const {
+    std::stringstream ss;
+    ss << "[HPack size=" << m_headers.size() << "]" << std::endl;
+    for (size_t i = 0; i < m_headers.size(); i++) {
+        ss << "\t" << i << "\t:\t" << m_headers[i].toString() << std::endl;
+    }
+    ss << m_table.toString();
+    return ss.str();
 }
 
 }

@@ -39,6 +39,18 @@ namespace sylar {
     m_cur(m_root) {
     }
 
+    ByteArray::ByteArray(void* data, size_t size, bool owner)
+    : m_position(0),
+    m_baseSize(size),
+    m_size(size),
+    m_capacity(size),
+    m_endian(SYLAR_BIG_ENDIAN) {
+        m_root = new Node();
+        m_root->ptr = (char*)data;
+        m_root->size = size;
+        m_cur = m_root;
+    }
+
     ByteArray::~ByteArray() {
         Node* tmp = m_root;
         while (tmp) {
