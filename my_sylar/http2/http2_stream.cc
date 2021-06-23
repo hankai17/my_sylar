@@ -37,6 +37,11 @@ namespace sylar {
                 return nullptr;
             }
             SYLAR_LOG_DEBUG(g_logger) << frame->toString();
+            if (frame->header.type == (uint8_t)FrameType::HEADERS) {
+                HPack hp(m_recvTable);
+                hp.parse(std::dynamic_pointer_cast<HeadersFrame>(frame->data)->data);
+                SYLAR_LOG_INFO(g_logger) << hp.toString();
+            }
             return nullptr;
         }
 
@@ -58,14 +63,21 @@ namespace sylar {
 
             // init data
             HeadersFrame::ptr data = std::make_shared<HeadersFrame>();
+            auto h2stream = std::dynamic_pointer_cast<Http2Stream>(stream);
+            HPack hp(h2stream->m_sendTable);
+            std::vector<std::pair<std::string, std::string>> hs;
             auto m = request->getHeaders();
             for (const auto& i : m) {
+                /*
                 HeaderField hf;
                 hf.type = IndexType::NERVER_INDEXED_NEW_NAME;
                 hf.name = i.first;
                 hf.value = i.second;
                 data->fields.push_back(hf);
+                */
+                hs.push_back(std::make_pair(i.first, i.second));
             }
+            hp.pack(hs, data->data);
             headers->data = data;
 
             bool ok = std::dynamic_pointer_cast<Http2Stream>(stream)->m_codec->serializeTo(stream, headers) > 0;
