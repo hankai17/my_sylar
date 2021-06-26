@@ -8,15 +8,133 @@ namespace sylar {
     namespace http2 {
         static const std::string CLIENT_PREFACE = "PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n";
         static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
+        static const std::vector<std::string> s_http2error_strings = {
+            "OK",
+            "PROTOCOL_ERROR",
+            "INTERNAL_ERROR",
+            "FLOW_CONTROL_ERROR",
+            "SETTINGS_TIMEOUT_ERROR",
+            "STREAM_CLOSED_ERROR",
+            "FRAME_SIZE_ERROR",
+            "REFUSED_FRAME_ERROR",
+            "CANCEL_ERROR",
+            "COMPRESSION_ERROR",
+            "CONNECT_ERROR",
+            "ENHANCE_YOUR_CLAM_ERROR",
+            "inadequate_SECURITY_ERROR",
+            "HTTP11_REQUIRE_ERROR"
+        };
 
-        Http2Stream::Http2Stream(Socket::ptr sock, uint32_t init_sn) :
+        std::string Http2Settings::toString() const {
+            std::stringstream ss;
+            ss << "[Http2Settings header_table_size: " << header_table_size
+            << " max_header_list_size: " << max_header_list_size
+            << " max_concurrent_streams: " << max_concurrent_streams
+            << " max_frame_size: " << max_frame_size
+            << " initial_window_size: " << initial_window_size
+            << " enable_push: " << enable_push << "]";
+            return ss.str();
+        }
+
+        Http2Stream::Http2Stream(Socket::ptr sock, bool client) :
             AsyncSocketStream(sock, true),
-            m_sn(init_sn) {
+            m_sn(client ? -1 : 0),
+            m_isClient(client),
+            m_ssl(false) {
             m_codec = std::make_shared<FrameCodec>();
         }
 
         Http2Stream::~Http2Stream() {
             SYLAR_LOG_INFO(g_logger) << "Http2Stream::~Http2Stream " << this;
+        }
+
+        void Http2Stream::updateSettings(Http2Settings& sts, SettingsFrame::ptr frame) {
+            DynamicTable& table = &sts == &m_owner ? m_sendTable : m_recvTable;
+            for (const auto& i : frame->items) {
+                switch ((SettingsFrame::Settings)i.identifier) {
+                    case SettingsFrame::Settings::HEADER_TABLE_SIZE : {
+                        sts.header_table_size = i.value;
+                        table.setMaxDataSize(sts.header_table_size);
+                        break;
+                    }
+                    case SettingsFrame::Settings::ENABLE_PUSH : {
+                        if (i.value != 0 && i.value != 1) {
+                            SYLAR_LOG_ERROR(g_logger) << "invaild enable_push: " << i.value;
+                            sendGoAway();
+                        }
+                    }
+                    default: {
+
+                    }
+                }
+            }
+        }
+
+        void Http2Stream::handleRequest(http::HttpRequest::ptr req, http2::Stream::ptr stream) {
+
+        }
+
+        void Http2Stream::handleRecvSetting(Frame::ptr frame) {
+            auto s = std::dynamic_pointer_cast<SettingsFrame>(frame->data);
+            SYLAR_LOG_DEBUG(g_logger) << "handleRecvSetting " << s->toString();
+            updateSettings(m_owner, s);
+        }
+
+        void Http2Stream::handleSendSetting(Frame::ptr frame) {
+
+        }
+
+        int32_t Http2Stream::sendGoAway(uint32_t last_stream_id, uint32_t error, const std::string& debug) {
+            Frame::ptr frame = std::make_shared<Frame>();
+            frame->header.type = (uint8_t)FrameType::GOAWAY;
+            GoAwayFrame::ptr data = std::make_shared<GoAwayFrame>();
+            frame->data = data;
+            data->last_stream_id = last_stream_id;
+            data->error_code = error;
+            data->data = debug;
+            return sendFrame(frame);
+        }
+
+        int32_t Http2Stream::sendSettings(const std::vector<SettingsItem>& items) {
+            Frame::ptr frame = std::make_shared<Frame>();
+            frame->header.type = (uint8_t)FrameType::SETTINGS;
+            SettingsFrame::ptr data = std::make_shared<SettingsFrame>();
+            frame->data = data;
+            data->items = items;
+            return sendFrame(frame);
+        }
+
+        int32_t Http2Stream::sendSettingsAck() {
+            Frame::ptr frame = std::make_shared<Frame>();
+            frame->header.type = (uint8_t)FrameType::SETTINGS;
+            frame->header.flags = (uint8_t)FrameFlagSettings::ACK;
+            return sendFrame(frame);
+        }
+
+        int32_t Http2Stream::sendRstStream(uint32_t stream_id, uint32_t error_code) {
+
+        }
+
+        int32_t Http2Stream::sendPing(bool ack, uint64_t v) {
+            Frame::ptr frame = std::make_shared<Frame>();
+            frame->header.type = (uint8_t)FrameType::PING;
+            if (ack) {
+                frame->header.flags = (uint8_t)FrameFlagPing::ACK;
+            }
+            PingFrame::ptr data = std::make_shared<PingFrame>();
+            frame->data = data;
+            data->uint64 = v;
+            return sendFrame(frame);
+        }
+
+        int32_t Http2Stream::sendWindowUpdate(uint32_t stream_id, uint32_t n) {
+            Frame::ptr frame = std::make_shared<Frame>();
+            frame->header.type = (uint8_t)FrameType::WINDOW_UPDATE;
+            frame->header.identifier = stream_id;
+            WindowUpdateFrame::ptr data = std::make_shared<WindowUpdateFrame>();
+            frame->data = data;
+            data->increment = n;
+            return sendFrame(frame);
         }
 
         int32_t Http2Stream::sendFrame(Frame::ptr frame) {
@@ -51,7 +169,8 @@ namespace sylar {
         }
 
         bool Http2Stream::RequestCtx::doSend(AsyncSocketStream::ptr stream) {
-            SYLAR_LOG_INFO(g_logger) << "do Sending...";
+            auto h2stream = std::dynamic_pointer_cast<Http2Stream>(stream);
+
             Frame::ptr headers = std::make_shared<Frame>();
             // init head
             headers->header.type = (uint8_t)FrameType::HEADERS;
@@ -63,9 +182,9 @@ namespace sylar {
 
             // init data
             HeadersFrame::ptr data = std::make_shared<HeadersFrame>();
-            auto h2stream = std::dynamic_pointer_cast<Http2Stream>(stream);
             HPack hp(h2stream->m_sendTable);
             std::vector<std::pair<std::string, std::string>> hs;
+            hs.push_back(std::make_pair("stream_id", std::to_string(sn)));
             auto m = request->getHeaders();
             for (const auto& i : m) {
                 /*
@@ -75,7 +194,7 @@ namespace sylar {
                 hf.value = i.second;
                 data->fields.push_back(hf);
                 */
-                hs.push_back(std::make_pair(i.first, i.second));
+                hs.push_back(std::make_pair((i.first), i.second));
             }
             hp.pack(hs, data->data);
             headers->data = data;
@@ -149,11 +268,34 @@ namespace sylar {
             return true;
         }
 
+        http2::Stream::ptr Http2Stream::newStream() {
+            http2::Stream::ptr stream = std::make_shared<http2::Stream>(
+                    std::dynamic_pointer_cast<Http2Stream>(shared_from_this()),
+                    sylar::Atomic::addFetch(m_sn, 2)
+                    );
+            return stream;
+        }
+
+        http2::Stream::ptr Http2Stream::newStream(uint32_t id) {
+            if (id <= m_sn) {
+                return nullptr;
+            }
+            m_sn = id;
+            http2::Stream::ptr stream = std::make_shared<http2::Stream>(
+                    std::dynamic_pointer_cast<Http2Stream>(shared_from_this()), id);
+            return stream;
+        }
+
+        http2::Stream::ptr Http2Stream::getStream(uint32_t id) {
+            return nullptr;
+        }
+
         http::HttpResult::ptr Http2Stream::request(http::HttpRequest::ptr req, uint64_t timeout_ms) {
             if (isConnected()) {
                 RequestCtx::ptr ctx = std::make_shared<RequestCtx>();
+                auto stream = newStream();
                 ctx->request = req;
-                ctx->sn = sylar::Atomic::addFetch(m_sn, 2);
+                ctx->sn = stream->getId();
                 ctx->timeout = timeout_ms;
                 ctx->scheduler = sylar::Scheduler::GetThis();
                 ctx->fiber = sylar::Fiber::GetThis();
@@ -162,7 +304,12 @@ namespace sylar {
                         std::bind(&Http2Stream::onTimeOut, shared_from_this(), ctx));
                 enqueue(ctx);
                 sylar::Fiber::YeildToHold();
-                return std::make_shared<http::HttpResult>(ctx->result, ctx->response, ctx->resultStr);
+                auto ret = std::make_shared<http::HttpResult>(ctx->result, ctx->response, ctx->resultStr);
+                if (ret->result == 0 && !ctx->response) {
+                    ret->result = -401;
+                    ret->error = "rst_stream";
+                }
+                return ret;
             } else {
                 return std::make_shared<http::HttpResult>(AsyncSocketStream::NOT_CONNECT, nullptr, "not connect getRemoteAddr");
             }

@@ -16,6 +16,7 @@ public:
     std::pair<std::string, std::string> getPair(uint32_t idx) const;
     std::string getName(uint32_t idx) const;
     std::string toString() const;
+    void setMaxDataSize(int32_t v) { m_maxDataSize = v; }
 
 public:
     static std::pair<std::string, std::string> GetStaticHeaders(uint32_t idx); // 内定的61个idx

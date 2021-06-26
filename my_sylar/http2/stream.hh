@@ -42,6 +42,23 @@ namespace sylar {
           ES: END_STREAM flag
           R:  RST_STREAM frame
 */
+        enum class Http2Error {
+            OK                      = 0x0,
+            PROTOCOL_ERROR          = 0x1,
+            INTERNAL_ERROR          = 0x2,
+            FLOW_CONTROL_ERROR      = 0x3,
+            SETTINGS_TIMEOUT_ERROR  = 0x4,
+            STREAM_CLOSED_ERROR     = 0x5,
+            FRAME_SIZE_ERROR        = 0x6,
+            REFUSED_STREAM_ERROR    = 0x7,
+            CANCEL_ERROR            = 0x8,
+            COMPRESSION_ERROR       = 0x9,
+            CONNECT_ERROR           = 0xa,
+            ENHANCE_YOUR_CLAM_ERROR = 0xb,
+            inadequate_SECURITY_ERROR = 0xc,
+            HTTP11_REQUEIRED_ERROR  = 0xd,
+        };
+
         class Stream {
         public:
             typedef std::shared_ptr<Stream> ptr;
@@ -54,7 +71,10 @@ namespace sylar {
                 HALF_CLOSED_LOCAL   = 0x5,
                 HALF_CLOSED_REMOTE  = 0x6
             };
-            Stream(std::shared_ptr<Http2Stream> h2s);
+            Stream(std::weak_ptr<Http2Stream> h2s, uint32_t id);
+            uint32_t getId() const { return m_id; }
+            //static std::string StateToString(State state);
+            //int32_t handleFrame(Frame::ptr frame, bool is_client);
 
         private:
             std::shared_ptr<Http2Stream>    m_stream;
