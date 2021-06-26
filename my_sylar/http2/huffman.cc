@@ -3,8 +3,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "huffman.hh"
-#include "huffman_table.hh"
+#include "my_sylar/http2/huffman.hh"
+#include "my_sylar/http2/huffman_table.hh"
 
 #include <iostream>
 

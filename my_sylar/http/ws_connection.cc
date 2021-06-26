@@ -1,8 +1,8 @@
-#include "ws_connection.hh"
+#include "my_sylar/http/ws_connection.hh"
 #include "my_sylar/log.hh"
 #include "my_sylar/address.hh"
 #include "my_sylar/hash.hh"
-#include "http_parser.hh"
+#include "my_sylar/http/http_parser.hh"
 #include "my_sylar/buffer.hh"
 #include "my_sylar/endian.hh"
 

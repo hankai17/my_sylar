@@ -2,7 +2,7 @@
 #define __FRAME_HH__
 
 #include "my_sylar/bytearray.hh"
-#include "hpack.hh"
+#include "my_sylar/http2/hpack.hh"
 #include "my_sylar/stream.hh"
 
 namespace sylar {

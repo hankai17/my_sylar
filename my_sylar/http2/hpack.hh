@@ -2,7 +2,7 @@
 #define __HPACK_HH__
 
 #include "my_sylar/bytearray.hh"
-#include "dynamic_table.hh"
+#include "my_sylar/http2/dynamic_table.hh"
 
 namespace sylar {
 namespace http2 {

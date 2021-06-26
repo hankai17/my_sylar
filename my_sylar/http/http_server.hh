@@ -2,7 +2,7 @@
 #define __HTTP_SERVER_HH__
 
 #include "my_sylar/socket.hh"
-#include "http.hh"
+#include "my_sylar/http/http.hh"
 #include "my_sylar/stream.hh"
 #include "my_sylar/tcp_server.hh"
 #include "my_sylar/iomanager.hh"

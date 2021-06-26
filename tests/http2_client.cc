@@ -9,7 +9,7 @@
 sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
 
 void test_client() {
-    sylar::IPAddress::ptr addr = sylar::IPv4Address::Create("123.126.45.205", 443);
+    sylar::IPAddress::ptr addr = sylar::IPv4Address::Create("192.168.1.7", 80);
     auto sock = sylar::Socket::CreateTCP(addr);
     if (!sock->connect(addr)) {
         SYLAR_LOG_ERROR(g_logger) << "connect failed, errno: " << errno << ", strerror: "
@@ -22,17 +22,17 @@ void test_client() {
         return;
     }
     stream->start();
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < 1; i++) {
         sylar::http::HttpRequest::ptr req(new sylar::http::HttpRequest);
         req->setHeader(":method", "GET");
-        req->setHeader(":scheme", "http2");
+        req->setHeader(":scheme", "http");
         req->setHeader(":path", "/");
 
-        req->setHeader(":authority", "xxx");
-        req->setHeader(":content-type", "text/html");
-        req->setHeader(":user-agent", "curl");
-        req->setHeader(":hello", "world");
-        req->setBody("hello world");
+        //req->setHeader(":authority", "xxx");
+        //req->setHeader(":content-type", "text/html");
+        //req->setHeader(":user-agent", "curl");
+        //req->setHeader(":hello", "world");
+        //req->setBody("hello world");
 
         auto ret = stream->request(req, 100);
         SYLAR_LOG_ERROR(g_logger) << ret->toString();

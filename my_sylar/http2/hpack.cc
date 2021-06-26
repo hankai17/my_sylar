@@ -1,6 +1,6 @@
-#include "hpack.hh"
 #include "my_sylar/log.hh"
-#include "huffman.hh"
+#include "my_sylar/http2/hpack.hh"
+#include "my_sylar/http2/huffman.hh"
 
 namespace sylar {
 namespace http2 {

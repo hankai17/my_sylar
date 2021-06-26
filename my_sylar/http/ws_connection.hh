@@ -2,8 +2,8 @@
 #define __WS_CONNECTION_HH__
 
 #include "my_sylar/socket.hh"
-#include "http.hh"
-#include "http_connection.hh"
+#include "my_sylar/http/http.hh"
+#include "my_sylar/http/http_connection.hh"
 #include "my_sylar/uri.hh"
 #include <memory>
 #include <map>

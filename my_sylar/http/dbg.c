@@ -32,7 +32,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "dbg.h"
+#include "my_sylar/http/dbg.h"
 //#include "bstring.h"
 
 FILE *LOG_FILE = NULL;

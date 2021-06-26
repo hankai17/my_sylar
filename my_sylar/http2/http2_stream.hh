@@ -2,9 +2,9 @@
 #define __HTTP2_STREAM_HH__
 
 #include "my_sylar/stream.hh" // MUST FIRST!!!
-#include "frame.hh"
-#include "hpack.hh"
-#include "stream.hh"
+#include "my_sylar/http2/frame.hh"
+#include "my_sylar/http2/hpack.hh"
+#include "my_sylar/http2/stream.hh"
 #include "my_sylar/http/http.hh"
 #include "my_sylar/http/http_connection.hh"
 

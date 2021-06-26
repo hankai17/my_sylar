@@ -1,5 +1,5 @@
-#ifndef __STREAM_HH__
-#define __STREAM_HH__
+#ifndef __H2_STREAM_HH__
+#define __H2_STREAM_HH__
 
 namespace sylar {
     namespace http2 {
