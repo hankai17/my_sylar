@@ -1,6 +1,9 @@
 #ifndef __H2_STREAM_HH__
 #define __H2_STREAM_HH__
 
+#include <unordered_map>
+#include "my_sylar/thread.hh"
+
 namespace sylar {
     namespace http2 {
         class Http2Stream;
@@ -58,6 +61,7 @@ namespace sylar {
             inadequate_SECURITY_ERROR = 0xc,
             HTTP11_REQUEIRED_ERROR  = 0xd,
         };
+        std::string Http2ErrorToString(Http2Error error);
 
         class Stream {
         public:
@@ -77,9 +81,23 @@ namespace sylar {
             //int32_t handleFrame(Frame::ptr frame, bool is_client);
 
         private:
-            std::shared_ptr<Http2Stream>    m_stream;
+            std::weak_ptr<Http2Stream>    m_stream; // why use weak ?
             State   m_state;
             uint32_t m_id;
+        };
+
+        class StreamManager {
+        public:
+            typedef std::shared_ptr<StreamManager> ptr;
+            typedef sylar::RWMutex RWMutexType;
+
+            Stream::ptr get(uint32_t id);
+            void add(Stream::ptr stream);
+            void del(uint32_t id);
+
+        private:
+            RWMutexType m_mutex;
+            std::unordered_map<uint32_t, Stream::ptr> m_streams;
         };
     }
 }

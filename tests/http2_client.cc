@@ -9,14 +9,15 @@
 sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
 
 void test_client() {
-    sylar::IPAddress::ptr addr = sylar::IPv4Address::Create("192.168.1.7", 80);
+    //sylar::IPAddress::ptr addr = sylar::IPv4Address::Create("192.168.1.7", 80);
+    sylar::IPAddress::ptr addr = sylar::IPv4Address::Create("192.168.0.111", 80);
     auto sock = sylar::Socket::CreateTCP(addr);
     if (!sock->connect(addr)) {
         SYLAR_LOG_ERROR(g_logger) << "connect failed, errno: " << errno << ", strerror: "
         << strerror(errno);
         return;
     }
-    sylar::http2::Http2Stream::ptr stream(new sylar::http2::Http2Stream(sock, -1));
+    sylar::http2::Http2Stream::ptr stream(new sylar::http2::Http2Stream(sock, true));
     if (!stream->handleShakeClient()) {
         SYLAR_LOG_ERROR(g_logger) << "handleShakeClient failed";
         return;
@@ -27,8 +28,8 @@ void test_client() {
         req->setHeader(":method", "GET");
         req->setHeader(":scheme", "http");
         req->setHeader(":path", "/");
+        req->setHeader(":authority", "0.0.0.0");
 
-        //req->setHeader(":authority", "xxx");
         //req->setHeader(":content-type", "text/html");
         //req->setHeader(":user-agent", "curl");
         //req->setHeader(":hello", "world");
@@ -36,7 +37,7 @@ void test_client() {
 
         auto ret = stream->request(req, 100);
         SYLAR_LOG_ERROR(g_logger) << ret->toString();
-        sleep(1);
+        sleep(10);
     }
     return;
 }

@@ -246,7 +246,7 @@ namespace sylar {
         }
         std::vector<iovec> iovs;
         ba->getReadBuffers(iovs, length);
-        int ret = m_socket->send(&iovs[0], length);
+        int ret = m_socket->send(&iovs[0], iovs.size());
         if (ret > 0) {
             ba->setPosition(ba->getPosition() + ret);
         }

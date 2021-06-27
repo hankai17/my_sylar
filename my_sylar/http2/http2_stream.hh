@@ -25,7 +25,6 @@ namespace sylar {
             uint32_t max_frame_size = DEFAULT_MAX_FRAME_SIZE;
             uint32_t initial_window_size = DEFAULT_INITIAL_WINDOW_SIZE;
             bool enable_push = 0;
-
             std::string toString() const;
         };
 
@@ -85,8 +84,8 @@ namespace sylar {
             bool m_ssl;
             Http2Settings m_owner;
             Http2Settings m_peer;
+            StreamManager m_streamMgr;
         };
-
     }
 }
 
