@@ -178,10 +178,35 @@ namespace sylar {
                 return nullptr;
             }
             SYLAR_LOG_DEBUG(g_logger) << frame->toString();
-            if (frame->header.type == (uint8_t)FrameType::HEADERS) {
-                HPack hp(m_recvTable);
-                hp.parse(std::dynamic_pointer_cast<HeadersFrame>(frame->data)->data);
-                SYLAR_LOG_INFO(g_logger) << hp.toString();
+            if (frame->header.identifier) {
+                auto stream = getStream(frame->header.identifier);
+                if (!stream) {
+                    if (m_isClient) {
+                        SYLAR_LOG_ERROR(g_logger) << "doRecv streamId: " << frame->header.identifier
+                        << " not exist, " << frame->toString();
+                        return nullptr;
+                    }
+                } else {
+                    //stream = newStream(frame->header.identifier);
+                    //if (!stream) {
+                    //    sendGoAway(m_sn, (uint32_t)Http2Error::PROTOCOL_ERROR, "");
+                    //    return nullptr;
+                    //}
+                }
+
+                //stream->handleFrame(frame, m_isClient);
+            } else { // used for settingsFrame
+                if (frame->header.type == (uint8_t)FrameType::SETTINGS) {
+                    if (!(frame->header.flags & (uint8_t)FrameFlagSettings::ACK)) {
+                        handleRecvSetting(frame);
+                        sendSettingsAck();
+                    } else if (frame->header.type == (uint8_t)FrameType::PING) {
+                        if (!(frame->header.flags & (uint8_t)FrameFlagPing::ACK)) {
+                            auto data = std::dynamic_pointer_cast<PingFrame>(frame->data);
+                            sendPing(true, data->uint64);
+                        }
+                    }
+                }
             }
             return nullptr;
         }
