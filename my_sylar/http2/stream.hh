@@ -3,6 +3,9 @@
 
 #include <unordered_map>
 #include "my_sylar/thread.hh"
+#include "my_sylar/http/http.hh"
+#include "my_sylar/http2/hpack.hh"
+#include "my_sylar/http2/frame.hh"
 
 namespace sylar {
     namespace http2 {
@@ -78,12 +81,27 @@ namespace sylar {
             Stream(std::weak_ptr<Http2Stream> h2s, uint32_t id);
             uint32_t getId() const { return m_id; }
             //static std::string StateToString(State state);
-            //int32_t handleFrame(Frame::ptr frame, bool is_client);
+            std::shared_ptr<Http2Stream> getStream() const { return m_stream.lock(); }
+            State getStat() const { return m_state; }
+            http::HttpRequest::ptr getRequest() const { return m_request; }
+            http::HttpResponse::ptr getResponse() const { return m_response; }
+
+            int32_t handleFrame(Frame::ptr frame, bool is_client);
+            int32_t sendFrame(Frame::ptr frame);
+            int32_t sendResponse(http::HttpResponse::ptr rsp);
+
+        private:
+            int32_t handleHeadersFrame(Frame::ptr frame, bool is_client);
+            int32_t handleDataFrame(Frame::ptr frame, bool is_client);
+            int32_t handleRstStreamFrame(Frame::ptr frame, bool is_client);
 
         private:
             std::weak_ptr<Http2Stream>    m_stream; // why use weak ?
+            http::HttpRequest::ptr m_request;
+            http::HttpResponse::ptr m_response;
             State   m_state;
             uint32_t m_id;
+            HPack::ptr m_recvHPack;
         };
 
         class StreamManager {

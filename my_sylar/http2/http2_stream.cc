@@ -94,6 +94,11 @@ namespace sylar {
         }
 
         void Http2Stream::handleRequest(http::HttpRequest::ptr req, http2::Stream::ptr stream) {
+            http::HttpResponse::ptr rsp = std::make_shared<http::HttpResponse>(req->getVersion(), false);
+            //SYLAR_LOG_DEBUG(g_logger) << *req;
+            //rsp->setHeader("server", "my_sylar");
+            //m_server
+            // TODO
 
         }
 
@@ -183,28 +188,49 @@ namespace sylar {
                 if (!stream) {
                     if (m_isClient) {
                         SYLAR_LOG_ERROR(g_logger) << "doRecv streamId: " << frame->header.identifier
-                        << " not exist, " << frame->toString();
+                                                  << " not exist, " << frame->toString();
                         return nullptr;
+                    } else {
+                        stream = newStream(frame->header.identifier);
+                        if (!stream) {
+                            sendGoAway(m_sn, (uint32_t) Http2Error::PROTOCOL_ERROR, "");
+                            return nullptr;
+                        }
                     }
-                } else {
-                    //stream = newStream(frame->header.identifier);
-                    //if (!stream) {
-                    //    sendGoAway(m_sn, (uint32_t)Http2Error::PROTOCOL_ERROR, "");
-                    //    return nullptr;
-                    //}
                 }
-
-                //stream->handleFrame(frame, m_isClient);
-            } else { // used for settingsFrame
+                stream->handleFrame(frame, m_isClient);
+                if (stream->getStat() == http2::Stream::State::CLOSED) {
+                    if (m_isClient) {
+                        delStream(stream->getId());
+                        RequestCtx::ptr ctx = getAndDelCtx<RequestCtx>(stream->getId());
+                        if (!ctx) {
+                            SYLAR_LOG_WARN(g_logger) << "Http2Stream request timeout response";
+                            return nullptr;
+                        }
+                        ctx->response = stream->getResponse();
+                        return ctx;
+                    } else {
+                        auto req = stream->getRequest();
+                        if (!req) {
+                            SYLAR_LOG_DEBUG(g_logger) << "Http2Stream recv http faild, errno: " << errno
+                                                      << " strerror: " << strerror(errno);
+                            sendGoAway(m_sn, (uint32_t) Http2Error::PROTOCOL_ERROR, "");
+                            delStream(stream->getId());
+                            return nullptr;
+                        }
+                        m_iomanager->schedule(std::bind(&Http2Stream::handleRequest, this, req, stream));
+                    }
+                }
+            } else {
                 if (frame->header.type == (uint8_t)FrameType::SETTINGS) {
                     if (!(frame->header.flags & (uint8_t)FrameFlagSettings::ACK)) {
                         handleRecvSetting(frame);
                         sendSettingsAck();
-                    } else if (frame->header.type == (uint8_t)FrameType::PING) {
-                        if (!(frame->header.flags & (uint8_t)FrameFlagPing::ACK)) {
-                            auto data = std::dynamic_pointer_cast<PingFrame>(frame->data);
-                            sendPing(true, data->uint64);
-                        }
+                    }
+                } else if (frame->header.type == (uint8_t)FrameType::PING) {
+                    if (!(frame->header.flags & (uint8_t)FrameFlagPing::ACK)) {
+                        auto data = std::dynamic_pointer_cast<PingFrame>(frame->data);
+                        sendPing(true, data->uint64);
                     }
                 }
             }
