@@ -33,7 +33,20 @@ int test1(std::shared_ptr<int> addr) {
     return 0;
 }
 
-int main() {
+struct a {
+    typedef std::shared_ptr<a> ptr;
+    a() {};
+    ~a() {std::cout << "free a" << std::endl;}
+    int va;
+};
+
+struct c {
+    typedef std::shared_ptr<c> ptr;
+    int vc;
+    a::ptr a_ptr;
+};
+
+int main2() {
     std::shared_ptr<int> a(new int(9));
     test1(a);
     if (a == nullptr) {
@@ -43,5 +56,13 @@ int main() {
         std::cout << "a.use_count(): " << a.use_count() <<std::endl;
     }
     return 0;
+}
 
+int main()
+{
+    auto t1 = std::make_shared<c>();
+    auto data = std::make_shared<a>();
+    t1->a_ptr = data;
+
+    return 0;
 }
