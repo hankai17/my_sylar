@@ -46,7 +46,9 @@ namespace sylar {
     m_capacity(size),
     m_endian(SYLAR_BIG_ENDIAN) {
         m_root = new Node();
-        m_root->ptr = (char*)data;
+        //m_root->ptr = (char*)data;
+        m_root->ptr = new char[size];
+        memcpy(m_root->ptr, data, size);
         m_root->size = size;
         m_cur = m_root;
     }

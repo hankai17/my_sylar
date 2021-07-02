@@ -98,7 +98,7 @@ struct FrameHeader {
 class IFrame {
 public:
     typedef std::shared_ptr<IFrame> ptr;
-    ~IFrame() {};
+    virtual ~IFrame() {}
 
     virtual std::string toString() const = 0;
     virtual bool writeTo(ByteArray::ptr ba, const FrameHeader& header) = 0;

@@ -125,7 +125,7 @@ std::string HeadersFrame::toString() const {
     if (pad) {
         ss << " pad=" << (uint32_t)pad;
     }
-    ss << " fields.size=" << fields.size();
+    //ss << " fields.size=" << fields.size();
     ss << "]";
     return ss.str();
 }

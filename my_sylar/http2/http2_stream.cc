@@ -182,7 +182,7 @@ namespace sylar {
                 innerClose();
                 return nullptr;
             }
-            SYLAR_LOG_DEBUG(g_logger) << frame->toString();
+            //SYLAR_LOG_DEBUG(g_logger) << frame->toString();
             if (frame->header.identifier) {
                 auto stream = getStream(frame->header.identifier);
                 if (!stream) {

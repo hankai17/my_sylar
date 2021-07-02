@@ -9,8 +9,8 @@
 sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
 
 void test_client() {
-    //sylar::IPAddress::ptr addr = sylar::IPv4Address::Create("192.168.1.7", 80);
-    sylar::IPAddress::ptr addr = sylar::IPv4Address::Create("192.168.0.111", 80);
+    sylar::IPAddress::ptr addr = sylar::IPv4Address::Create("192.168.1.7", 80);
+    //sylar::IPAddress::ptr addr = sylar::IPv4Address::Create("192.168.0.111", 80);
     auto sock = sylar::Socket::CreateTCP(addr);
     if (!sock->connect(addr)) {
         SYLAR_LOG_ERROR(g_logger) << "connect failed, errno: " << errno << ", strerror: "
