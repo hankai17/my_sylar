@@ -92,7 +92,7 @@ void test_req(const std::string& req) {
         return;
     }
     std::string str_flow = resu->response->getHeader("Content-Length", "null");
-    SYLAR_LOG_DEBUG(g_logger) << "req end: " << str_flow << " " << req;
+    SYLAR_LOG_DEBUG(g_logger) << resu->response->toString();
 
     return;
 }
