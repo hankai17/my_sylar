@@ -32,7 +32,7 @@ static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
         }
         m_isConnected = false;
         if (m_sock != -1) {
-            ::close(m_sock);
+            ::Close(m_sock);
             m_sock = -1;
         }
         return false; // ???
@@ -43,7 +43,7 @@ static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
             return true;
         }
         if (m_sock != -1) {
-            ::shutdown(m_sock, how);
+            ::Shutdown(m_sock, how);
         }
         return false;
     }
@@ -121,7 +121,7 @@ static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
     }
 
     bool Socket::getOption(int level, int option, void* result, size_t* len) {
-        int ret = getsockopt(m_sock, level, option, result, (socklen_t*)len);
+        int ret = Getsockopt(m_sock, level, option, result, (socklen_t*)len);
         if (ret) {
             SYLAR_LOG_ERROR(g_logger) << "Socket::getOption(" << m_sock << ", " << level << ", "
             << option << "...) err: " <<  ret
@@ -132,7 +132,7 @@ static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
     }
 
     bool Socket::setOption(int level, int option, const void* result, size_t len) {
-        int ret = setsockopt(m_sock, level, option, result, (socklen_t)len);
+        int ret = Setsockopt(m_sock, level, option, result, (socklen_t)len);
         if (ret) {
             SYLAR_LOG_ERROR(g_logger) << "Socket::setOption(" << m_sock << ", " << level << ", "
                                       << option << "...) err: " <<  ret
@@ -239,7 +239,7 @@ static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
 
     Socket::ptr Socket::accept() {
         Socket::ptr sock(new Socket(m_family, m_type, m_protocol));
-        int newsock = ::accept(m_sock, nullptr, nullptr);
+        int newsock = ::Accept(m_sock, nullptr, nullptr);
         if (newsock == -1) {
             SYLAR_LOG_ERROR(g_logger) << "Socket::accept(" << m_sock
             << " ...) errno: " << errno << " strerrno: " << strerror(errno);
@@ -256,7 +256,7 @@ static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
     }
 
     void Socket::newSock() {
-        m_sock = socket(m_family, m_type, m_protocol);
+        m_sock = ::Socket(m_family, m_type, m_protocol);
         if (SYLAR_UNLICKLY(m_sock != -1)) {
             initSock();
         } else {
@@ -300,7 +300,7 @@ static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
             return false;
         }
         if (timeout_ms == (uint64_t)-1) {
-            if (::connect(m_sock, addr->getAddr(), addr->getAddrLen())) {
+            if (::Connect(m_sock, addr->getAddr(), addr->getAddrLen())) {
                 SYLAR_LOG_ERROR(g_logger) << "Socket::connect " << addr->toString()
                 << " errno: " << errno << " strerrno: " << strerror(errno);
                 close();
@@ -343,7 +343,7 @@ static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
 
     int Socket::send(const void* buffer, size_t length, int flags) {
         if (isConnected()) {
-            return ::send(m_sock, buffer, length, flags);
+            return ::Send(m_sock, buffer, length, flags);
         }
         return -1;
     }
@@ -354,14 +354,14 @@ static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
             memset(&msg, 0, sizeof(msg));
             msg.msg_iov = (iovec*)buffers;
             msg.msg_iovlen = length;
-            return ::sendmsg(m_sock, &msg, flags);
+            return ::Sendmsg(m_sock, &msg, flags);
         }
         return -1;
     }
 
     int Socket::sendTo(const void* buffer, size_t length, const Address::ptr to, int flags) {
         if (isConnected()) {
-            return ::sendto(m_sock, buffer, length, flags, to->getAddr(), to->getAddrLen());
+            return ::Sendto(m_sock, buffer, length, flags, to->getAddr(), to->getAddrLen());
         }
         return -1;
     }
@@ -374,14 +374,14 @@ static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
             msg.msg_iovlen = length;
             msg.msg_name = (void*)to->getAddr();
             msg.msg_namelen = to->getAddrLen();
-            return ::sendmsg(m_sock, &msg, flags); // ???
+            return ::Sendmsg(m_sock, &msg, flags); // ???
         }
         return -1;
     }
 
     int Socket::recv(void* buffer, size_t length, int flags) {
         if (isConnected()) {
-            return ::recv(m_sock, buffer, length, flags);
+            return ::Recv(m_sock, buffer, length, flags);
         }
         return -1;
     }
@@ -392,7 +392,7 @@ static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
             memset(&msg, 0, sizeof(msg));
             msg.msg_iov = (iovec*)buffers;
             msg.msg_iovlen = length;
-            return ::recvmsg(m_sock, &msg, flags);
+            return ::Recvmsg(m_sock, &msg, flags);
         }
         return -1;
     }
@@ -400,7 +400,7 @@ static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
     int Socket::recvFrom(void* buffer, size_t length, Address::ptr from, int flags) {
         if (isConnected()) {
             socklen_t len = from->getAddrLen();
-            return ::recvfrom(m_sock, buffer, length, flags, (sockaddr*)from->getAddr(), &len);
+            return ::Recvfrom(m_sock, buffer, length, flags, (sockaddr*)from->getAddr(), &len);
         }
         return -1;
     }
@@ -413,7 +413,7 @@ static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
             msg.msg_iovlen = length;
             msg.msg_name = (void*)from->getAddr();
             msg.msg_namelen = from->getAddrLen();
-            return ::recvmsg(m_sock, &msg, flags);
+            return ::Recvmsg(m_sock, &msg, flags);
         }
         return -1;
     }
@@ -527,7 +527,7 @@ static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
 
     Socket::ptr SSLSocket::accept() {
         SSLSocket::ptr sock(new SSLSocket(m_family, m_type, m_protocol));
-        int newsock = ::accept(m_sock, nullptr, nullptr);
+        int newsock = ::Accept(m_sock, nullptr, nullptr);
         if (newsock == -1) {
             SYLAR_LOG_ERROR(g_logger) << "SSLSocket::accept(" << m_sock
                                       << " ...) errno: " << errno << " strerrno: " << strerror(errno);

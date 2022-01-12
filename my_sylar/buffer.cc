@@ -185,7 +185,7 @@ namespace sylar {
         vec[1].iov_base = extrabuf;
         vec[1].iov_len = iovcnt == 1 ? sizeof(extrabuf) : sizeof(extrabuf) - 1;
 
-        const ssize_t n = readv(fd, vec, iovcnt);
+        const ssize_t n = Readv(fd, vec, iovcnt);
         if (n < 0) {
             *savedErrno = errno;
         //} else if (implicit_cast<size_t>(n) <= writable) {
@@ -209,7 +209,7 @@ namespace sylar {
         vec[1].iov_len = sizeof(extrabuf);
         const int iovcnt = (writable < sizeof(extrabuf)) ? 2 : 1;
 
-        const ssize_t n = readv(fd, vec, iovcnt);
+        const ssize_t n = Readv(fd, vec, iovcnt);
         if (n < 0) {
             *savedErrno = errno;
             //} else if (implicit_cast<size_t>(n) <= writable) {
@@ -225,7 +225,7 @@ namespace sylar {
     ssize_t Buffer::orireadFd(int fd, size_t length, int* savedErrno) {
         SYLAR_ASSERT(length <= 65535);
         if (length < writableBytes()) {
-            const ssize_t n = read(fd, begin() + m_writeIndex, length);
+            const ssize_t n = Read(fd, begin() + m_writeIndex, length);
             if (n < 0) {
                 *savedErrno = errno;
             } else if (static_cast<size_t>(n) <= writableBytes()) {
@@ -240,7 +240,7 @@ namespace sylar {
             vec[0].iov_len = writable;
             vec[1].iov_base = extrabuf;
             vec[1].iov_len = length - writable;
-            const ssize_t n = readv(fd, vec, 2);
+            const ssize_t n = Readv(fd, vec, 2);
             if (n < 0) {
                 *savedErrno = errno;
                 //} else if (implicit_cast<size_t>(n) <= writable) {
@@ -259,7 +259,7 @@ namespace sylar {
             length = readableBytes();
         }
 
-        int64_t n = write(fd, peek(), length);
+        int64_t n = Write(fd, peek(), length);
         //std::cout << "------------------------>writeFd length: " << length << std::endl;
         if (n < 0) {
             *savedErrno = errno;
