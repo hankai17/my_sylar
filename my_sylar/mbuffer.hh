@@ -58,6 +58,7 @@ namespace sylar {
         private:
             size_t          m_writeIndex;
             SegmentData     m_data;
+            void invariant() const;
         };
 
     public:
