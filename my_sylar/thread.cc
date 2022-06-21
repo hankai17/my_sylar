@@ -5,6 +5,8 @@
 #include "scheduler.hh"
 #include "fiber.hh"
 
+#include <iostream>
+
 namespace sylar {
 
     static thread_local Thread* t_thread = nullptr;
@@ -143,6 +145,27 @@ namespace sylar {
         } else {
             ++m_concurrency;
         }
+    }
+
+    void FiberSemaphore::notifyMore(uint64_t more) {
+        if (more == 0) {
+            return;
+        }
+        MutexType::Lock lock(m_mutex);
+        if (!m_waiters.empty()) {
+            auto next = m_waiters.front();
+            m_waiters.pop_front();
+            next.first->schedule(next.second);
+        } else {
+            m_concurrency += more;
+        }
+    }
+
+    std::string FiberSemaphore::toString() {
+        std::stringstream ss;
+        ss << "concurrency: " << m_concurrency 
+           << ", waiters: " << m_waiters.size();
+        return ss.str(); 
     }
 
     static void parallelDoImpl(std::function<void()> defer, int& completed, size_t totalDefers,

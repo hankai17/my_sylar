@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <functional>
+#include <jemalloc/jemalloc.h>
 
 #define FIBER_UCONTEXT 1
 #define FIBER_FCONTEXT 2

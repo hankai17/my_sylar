@@ -3,6 +3,7 @@
 
 #include <memory>
 #include "my_sylar/bytearray.hh"
+#include "my_sylar/mbuffer.hh"
 #include "socket.hh"
 #include "my_sylar/buffer.hh"
 #include "thread.hh"
@@ -43,6 +44,11 @@ namespace sylar {
         virtual int write(Buffer* buf, size_t length);
         virtual int writeFixSize(Buffer* buf, size_t length);
 
+        virtual int read(MBuffer::ptr buf, size_t length) = 0;
+        virtual int write(MBuffer::ptr buf, size_t length) = 0;
+        virtual int readFixSize(MBuffer::ptr buf, size_t length);
+        virtual int writeFixSize(MBuffer::ptr buf, size_t length);
+
         virtual void close() = 0;
     };
 
@@ -56,11 +62,18 @@ namespace sylar {
         ~SocketStream();
 
         virtual int read(void* buffer, size_t length) override;
-        virtual int read(ByteArray::ptr ba, size_t length) override;
-        virtual int write(const char* buffer, size_t length) override;
-        virtual int write(ByteArray::ptr ba, size_t length) override;
         virtual int read(Buffer::ptr buf, size_t length) override;
+        virtual int read(ByteArray::ptr ba, size_t length) override;
+        virtual int read(MBuffer::ptr buf, size_t length) override;
+
+        virtual int write(const char* buffer, size_t length) override;
         virtual int write(Buffer::ptr buf, size_t length) override;
+        virtual int write(ByteArray::ptr ba, size_t length) override;
+        virtual int write(MBuffer::ptr buf, size_t length) override;
+
+        int sendTo(MBuffer::ptr buf, size_t length, Address::ptr to, int flags = 0);
+        int recvFrom(MBuffer::ptr buf, size_t length, Address::ptr from, int flags = 0);
+
         virtual void close() override;
         void shutdown(int how);
 

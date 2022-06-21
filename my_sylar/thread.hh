@@ -279,8 +279,10 @@ namespace sylar {
         bool tryWait();
         void wait();
         void notify();
+        void notifyMore(uint64_t more);
         size_t getConcurrency() const { return m_concurrency; }
         void reset() { m_concurrency = 0; }
+        std::string toString();
 
     private:
         MutexType       m_mutex;

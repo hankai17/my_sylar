@@ -282,7 +282,7 @@ namespace sylar {
 
     Logger::Logger(const std::string& name)
             : m_name(name),
-              m_level(LogLevel::DEBUG) {
+              m_level(LogLevel::WARN) {
         m_formatter.reset(new LogFormatter("%d{%Y-%m-%d %H:%M:%S}%T%t%T%F%T[%p]%T[%c]%T%f:%l%T%m%n"));
     }
 
@@ -448,7 +448,7 @@ namespace sylar {
         //return nullptr;
         Logger::ptr logger(new Logger(name));
         GetMap()[name] = logger;
-        //logger->addAppender(LogAppender::ptr(new StdoutLogAppender)); // For system debug
+        logger->addAppender(LogAppender::ptr(new StdoutLogAppender)); // For system debug
         return logger;
     }
 

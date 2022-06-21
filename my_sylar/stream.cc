@@ -198,6 +198,30 @@ namespace sylar {
         return writeFixSize(buffer, length);
     }
 
+    int Stream::readFixSize(MBuffer::ptr buf, size_t length) {
+        int64_t left = length;
+        while (left > 0) {
+            int64_t len = read(buf, left);
+            if (len <= 0) {
+                return len;
+            }
+            left -= len;
+        }
+        return length;
+    }
+
+    int Stream::writeFixSize(MBuffer::ptr buf, size_t length) {
+        int64_t left = length;
+        while (left > 0) {
+            int64_t len = write(buf, left);
+            if (len <= 0) {
+                return len;
+            }
+            left -= len;
+        }
+        return length;
+    }
+
     SocketStream::SocketStream(Socket::ptr sock, bool owner)
     : m_socket(sock),
     m_owner(owner) {
@@ -233,6 +257,18 @@ namespace sylar {
         return ret;
     }
 
+    int SocketStream::read(MBuffer::ptr buf, size_t length) {
+        if (!isConnected()) {
+            return -1;
+        }
+        std::vector<iovec> iovs = buf->writeBuffers(length);
+        int ret = m_socket->recv(&iovs[0], iovs.size());
+        if (ret > 0) {
+            buf->product(ret);
+        }
+        return ret;
+    }
+
     int SocketStream::write(const char* buffer, size_t length) {
         if (!isConnected()) {
             return -1;
@@ -253,6 +289,22 @@ namespace sylar {
         if (ret < 0) {
             std::cout<<"errno: " << errno
             << " strerrno: " << strerror(errno) << std::endl;
+        }
+        return ret;
+    }
+
+    int SocketStream::write(MBuffer::ptr buf, size_t length) {
+        if (!isConnected()) {
+            return -1;
+        }
+        std::vector<iovec> iovs = buf->readBuffers(length);
+        int ret = m_socket->send(&iovs[0], iovs.size());
+        if (ret > 0) {
+            buf->consume(ret);
+        }
+        if (ret < 0) {
+            std::cout<<"errno: " << errno
+                     << " strerrno: " << strerror(errno) << std::endl;
         }
         return ret;
     }
@@ -285,6 +337,36 @@ namespace sylar {
         if (m_socket) {
             m_socket->shutdown(how);
         }
+    }
+
+    int SocketStream::sendTo(MBuffer::ptr buf, size_t length, const Address::ptr to, int flags) {
+        if (!isConnected()) {
+            return -1;
+        }
+        std::vector<iovec> iovs = buf->readBuffers(length);
+        int ret = m_socket->sendTo(&iovs[0], iovs.size(), to, flags);
+        if (ret >= 0) {
+            SYLAR_ASSERT((int)length == ret);
+            SYLAR_ASSERT(length < 1500);
+            buf->consume(ret);
+        }
+        if (ret < 0) {
+            std::cout<<"errno: " << errno
+                     << " strerrno: " << strerror(errno) << std::endl;
+        }
+        return ret;
+    }
+
+    int SocketStream::recvFrom(MBuffer::ptr buf, size_t length, const Address::ptr from, int flags) {
+        if (!isConnected()) {
+            return -1;
+        }
+        std::vector<iovec> iovs = buf->writeBuffers(length);
+        int ret = m_socket->recvFrom(&iovs[0], iovs.size(), from, flags);
+        if (ret > 0) {
+            buf->product(ret);
+        }
+        return ret;
     }
 
     FileStream::FileStream(int fd)
@@ -499,7 +581,7 @@ namespace sylar {
     }
 
     bool AsyncSocketStream::enqueue(AsyncSocketStream::Ctx::ptr ctx) {
-        RWMutexType::WriteLock lock(m_mutex);
+        RWMutexType::WriteLock lock(m_queueMutex);
         bool empty = m_queue.empty();
         m_queue.push_back(ctx);
         lock.unlock();

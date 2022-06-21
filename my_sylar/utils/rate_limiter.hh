@@ -43,7 +43,7 @@ namespace sylar {
             Bucket& bucket = m_buckets[key];
 
             trim(bucket, now, m_countLimit, m_timeLimit); // 裁剪桶里过期元素 // 置空Bucket's timer
-            if (bucket.m_count >= m_countLimit) {
+            if (bucket.m_count >= m_countLimit) { // 生产过快返回false
                 startTimer(key, bucket, now, m_timeLimit);
                 return false;
             }
@@ -68,7 +68,7 @@ namespace sylar {
                 uint64_t timeLimit) {
             SYLAR_ASSERT(bucket.m_count == bucket.m_timestamps.size());
             while (!bucket.m_timestamps.empty() &&
-                (bucket.m_timestamps.front() < now - timeLimit || bucket.m_count > countLimit)) { // 一般情况是桶里个数多 桶里的时间小于当前时间
+                (bucket.m_timestamps.front() < now - timeLimit || bucket.m_count > countLimit)) {
                 drop(bucket);
             }
             SYLAR_ASSERT(bucket.m_count == bucket.m_timestamps.size());
