@@ -51,7 +51,8 @@
 - ss5测试 tunnel_test.cc 包含有p1 p2端
 
 ## TODO
-- buffer版本3
+- 协程线程绑定
+- tls1.3
 
 ## 联系方式
 - 邮箱：<hankai17@126.com>
